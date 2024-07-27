@@ -3,3 +3,8 @@
 ----
 #### Тех.задание.
 https://zhukovsd.github.io/java-backend-learning-course/projects/cloud-file-storage/
+
+###  Checkstyle
+```sh
+make checkstyle
+```
