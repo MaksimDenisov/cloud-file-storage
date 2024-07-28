@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common.html}">
+<section layout:fragment="content">
+    <div class="card col-8 offset-2">
+        <div class="card-body">
+            <h5 class="card-title text-center">Sign in</h5>
+            <span th:text="${error} ?: _"></span>
+            <form action="/sign-in" method="post">
+                <!-- Login input -->
+                <div data-mdb-input-init class="form-outline mb-4">
+                    <input type="text" id="username" name="username"  class="form-control"/>
+                    <label class="form-label" for="username">Username</label>
+                </div>
+                <!-- Password input -->
+                <div data-mdb-input-init class="form-outline mb-4">
+                    <input type="password" id="password" name="password" class="form-control"/>
+                    <label class="form-label" for="password">Password</label>
+                </div>
+                <!-- Submit button -->
+                <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-block mb-4">
+                    Sign in
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
+</html>

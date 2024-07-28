@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: cloud-file-storage
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+    hibernate:
+      ddl-auto: create
+
+server:
+  port: ${PORT:8080}
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+logging:
+  level:
+    org:
+      springframework:
+        web: INFO
+    ROOT: INFO
