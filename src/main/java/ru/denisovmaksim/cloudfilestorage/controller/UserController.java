@@ -21,8 +21,7 @@ import ru.denisovmaksim.cloudfilestorage.service.UserService;
 
 import org.springframework.security.authentication.AuthenticationManager;
 
-@Controller("/")
-
+@Controller()
 @Slf4j
 public class UserController {
     public static final String SIGN_IN = "/sign-in";

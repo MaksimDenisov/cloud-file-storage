@@ -5,3 +5,5 @@ checkstyle:
 	./gradlew checkstyleMain checkstyleTest
 up:
 	docker-compose -f docker-compose.yml up -d
+report:
+	./gradlew jacocoTestReport

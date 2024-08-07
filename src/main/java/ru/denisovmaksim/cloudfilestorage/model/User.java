@@ -44,4 +44,10 @@ public class User {
     @CreationTimestamp
     @Temporal(TIMESTAMP)
     private Instant createdAt;
+
+    public User(Long id, String name, String password) {
+        this.id = id;
+        this.name = name;
+        this.password = password;
+    }
 }

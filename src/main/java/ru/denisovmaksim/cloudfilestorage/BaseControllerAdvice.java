@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ru.denisovmaksim.cloudfilestorage.controller.UserController;
 import ru.denisovmaksim.cloudfilestorage.service.exceptions.UserAlreadyExistException;
 
 import java.util.stream.Collectors;
@@ -16,7 +17,7 @@ public class BaseControllerAdvice {
     public String handleUserAlreadyExist(UserAlreadyExistException e, RedirectAttributes attributes) {
         attributes.addFlashAttribute("flashType", "danger");
         attributes.addFlashAttribute("flashMsg", e.getMessage());
-        return "redirect:sign-up";
+        return "redirect:" + UserController.SIGN_UP;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -28,7 +29,7 @@ public class BaseControllerAdvice {
                 .collect(Collectors.joining(". "));
         attributes.addFlashAttribute("flashType", "danger");
         attributes.addFlashAttribute("flashMsg", errors);
-        return "redirect:sign-up";
+        return "redirect:" + UserController.SIGN_UP;
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
