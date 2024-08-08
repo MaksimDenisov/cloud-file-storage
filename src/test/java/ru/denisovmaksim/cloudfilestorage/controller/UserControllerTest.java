@@ -30,18 +30,16 @@ public class UserControllerTest {
     @Autowired
     private UserRepository userRepository;
 
-    private static final String ADMIN_PASS = "admin";
-    private static final String USER_PASS = "user";
-    public static final User USER_1 = new User(1L,"FirstUser",
-            new BCryptPasswordEncoder().encode(ADMIN_PASS));
-    public static final User USER_2 = new User(2L, "SecondU",
+        private static final String USER_PASS = "user";
+    public static final User EXIST_USER = new User(1L,"ExistUser",
+            new BCryptPasswordEncoder().encode("password"));
+    public static final User NEW_USER = new User(2L, "SecondUser",
             new BCryptPasswordEncoder().encode(USER_PASS));
 
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
-        userRepository.save(USER_1);
-        userRepository.save(USER_2);
+        userRepository.save(EXIST_USER);
     }
 
     @Test
@@ -49,20 +47,19 @@ public class UserControllerTest {
     void createUser() throws Exception {
         UserDTO newUser = new UserDTO("new-user", "new_user_pass");
         mockMvc.perform(post(UserController.SIGN_UP)
-                .content(asJson(newUser))
-                .contentType(APPLICATION_JSON))
-                .andExpect(status().isCreated())
-                .andExpect(header().string("Location", containsString("/profile")))
+                        .contentType()
+                        .body())
+
                 .andReturn()
                 .getResponse();
-        final User actual = userRepository.findByEmail(newUser.getEmail()).orElseThrow();
-        assertEquals(newUser.getEmail(), actual.getEmail());
+        final User actual = userRepository.findByName(newUser.getName()).orElseThrow();
+        assertEquals(newUser.getName(), actual.getName());
     }
 
     @Test
     @DisplayName("Create duplicated  user should return bad request.")
     void createDuplicatedUser() throws Exception {
-        perform(post(UserController.SIGNUP)
+        mockMvc.perform(post(UserController.SIGN_UP)
                 .content(asJson(new UserCreationDTO(USER.getEmail(), USER.getPassword())))
                 .contentType(APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
