@@ -1,6 +1,10 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common.html}">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/decoration-layout.html}">
 <section layout:fragment="content">
+    <div th:insert="~{fragments/header::anonymous}"></div>
+
+    <div th:insert="fragments/flash-message::flash-message (type=${flashType}, message=${flashMsg})"></div>
+
     <div class="card col-8 offset-2">
         <div class="card-body">
             <h5 class="card-title text-center">Sign up</h5>
@@ -15,12 +19,6 @@
                     <input type="password" id="password" name="password" class="form-control"/>
                     <label class="form-label" for="password">Password</label>
                 </div>
-                <!--                &lt;!&ndash; Password input &ndash;&gt;
-                                <div data-mdb-input-init class="form-outline mb-4">
-                                    <input type="password" id="confirm" class="form-control"/>
-                                    <label class="form-label" for="password">Repeat Password</label>
-                                </div>-->
-                <!-- Submit button -->
                 <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-block mb-4">
                     Sign up
                 </button>

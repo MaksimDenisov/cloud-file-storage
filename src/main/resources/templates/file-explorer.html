@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/decoration-layout.html}">
+<!-- https://frontbackend.com/thymeleaf/spring-boot-bootstrap-thymeleaf-table -->
+<section layout:fragment="content">
+
+    <div th:insert="~{fragments/header::authenticated(${username})}"></div>
+
+    <div th:insert="~{fragments/flash-message::flash-message (type=${flashType}, message=${flashMsg})}"></div>
+
+    <div class="row">
+        <div class="col-2 text-center">
+            <div th:insert="~{fragments/side-bar}"></div>
+        </div>
+
+        <main class="col-10 overflow-auto h-100">
+
+            <div th:insert="~{fragments/breadcrumbs-path :: breadcrumbs-path (${content.getUpperDirs()})}"></div>
+
+            <div th:insert="~{fragments/dialog-create-folder}"></div>
+
+            <div th:insert="~{fragments/files::files(content = ${content})}"></div>
+
+        </main>
+    </div>
+</section>
+</html>

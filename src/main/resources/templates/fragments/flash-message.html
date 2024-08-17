@@ -1,0 +1,7 @@
+<div th:fragment="flash-message (type, message)">
+    <div th:if="${message}"
+         role="alert"
+         th:text="${message}"
+         th:class="'alert alert-' + ${type}">
+    </div>
+</div>

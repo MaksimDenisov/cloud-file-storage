@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+<div th:fragment="files (content)">
+    <table id="example" class="table table-bordered table-striped" style="width: 100%">
+        <thead>
+        <tr>
+            <th class="col-1">Icon</th>
+            <th class="col-8">Name</th>
+            <th class="col-1">Size</th>
+            <th class="col-1">Rename</th>
+            <th class="col-1">Delete</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${content.getFolders()}">
+            <td>
+                <i class="bi bi-folder-fill text-info  h4"></i>
+            </td>
+            <td>
+                <a th:href="@{/(path=${item.getPath()})}" th:text="${item.getName()}">Папка</a>
+            </td>
+            <td>
+                <i th:text="${item.getSize()}"></i>
+            </td>
+            <td>
+                <button type="button" class="btn btn-secondary">Rename</button>
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger">Delete</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

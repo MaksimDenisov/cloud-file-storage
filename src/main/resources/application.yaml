@@ -2,13 +2,6 @@ spring:
   application:
     name: cloud-file-storage
 
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
-    hibernate:
-      ddl-auto: create
-
 server:
   port: ${PORT:8080}
   servlet:
@@ -21,3 +14,11 @@ logging:
       springframework:
         web: INFO
     ROOT: INFO
+
+minio:
+    endpoint: ${MINIO_URL:http://127.0.0.1:9000}
+    user: ${MINIO_USER:minio-user}
+    password: ${MINIO_PASSWORD:password}
+
+app:
+  bucket: "user-files"
