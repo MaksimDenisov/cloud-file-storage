@@ -20,9 +20,11 @@ services:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - minio:/data
+      - /home/minio:/data
     command: server /data --console-address ":9001"
 
 volumes:
   mysql_volume:
+    driver: local
   minio:
+    driver: local

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+<div th:fragment="breadcrumbs-path (upperDirs)">
+    <div class="row">
+        <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '>';">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li th:each="item, iStat: ${upperDirs}" th:class="breadcrumb-item">
+                    <a th:if="!${iStat.last}" th:href="@{/(path=${item.getPath()})}" th:text="${item.getName()}"></a>
+                    <span class="breadcrumb-item active" th:if="${iStat.last}" th:text="${item.getName()}"></span>
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+</body>
+</html>

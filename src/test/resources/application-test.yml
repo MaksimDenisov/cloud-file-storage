@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: cloud-file-storage
+  jpa:
+    hibernate:
+      ddl-auto: create
+logging:
+  level:
+    org:
+      springframework:
+        web: debug
+    ROOT: debug

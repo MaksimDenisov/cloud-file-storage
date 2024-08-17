@@ -1,7 +1,7 @@
 package ru.denisovmaksim.cloudfilestorage.service;
 
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,12 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.denisovmaksim.cloudfilestorage.model.User;
 import ru.denisovmaksim.cloudfilestorage.repository.UserRepository;
-import ru.denisovmaksim.cloudfilestorage.service.exceptions.UserAlreadyExistException;
+import ru.denisovmaksim.cloudfilestorage.exceptions.UserAlreadyExistException;
 
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -28,6 +28,11 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Not found user with 'username': " + username));
     }
 
+    public User getUserByName(String userName) {
+        return userRepository.findByName(userName)
+                .orElseThrow();
+    }
+
     private UserDetails buildSpringUser(final User user) {
         return new org.springframework.security.core.userdetails.User(
                 user.getName(),
@@ -37,11 +42,11 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void signUp(String username, String password) {
+    public User signUp(String username, String password) {
         if (userRepository.findByName(username).isPresent()) {
             throw new UserAlreadyExistException(String.format("User with name %s already exist", username));
         }
-        userRepository.save(User.builder()
+        return userRepository.save(User.builder()
                 .name(username)
                 .password(new BCryptPasswordEncoder().encode(password))
                 .build());

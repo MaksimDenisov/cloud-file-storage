@@ -7,12 +7,12 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.controller.UserController;
-import ru.denisovmaksim.cloudfilestorage.service.exceptions.UserAlreadyExistException;
+import ru.denisovmaksim.cloudfilestorage.exceptions.UserAlreadyExistException;
 
 import java.util.stream.Collectors;
 
 @ControllerAdvice
-public class BaseControllerAdvice {
+public class GlobalControllerAdvice {
     @ExceptionHandler(UserAlreadyExistException.class)
     public String handleUserAlreadyExist(UserAlreadyExistException e, RedirectAttributes attributes) {
         attributes.addFlashAttribute("flashType", "danger");

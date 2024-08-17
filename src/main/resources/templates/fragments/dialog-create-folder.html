@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+<div th:fragment="dialog-create-folder">
+    <div class="modal fade" id="add-folder" tabindex="-1" role="dialog" aria-labelledby="add-folder-label"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="add-folder-label">Create folder</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="add-folder-form" action="/add-folder" method="post">
+                        <!-- Login input -->
+                        <div data-mdb-input-init class="form-outline mb-4">
+                            <input type="text" id="folder-name" name="folder-name" class="form-control"/>
+                            <input type="hidden" name="path" th:value="${content.getPath()}">
+                            <label class="form-label" for="folder-name">Name of folder</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary"
+                            onclick="$('#add-folder-form').submit();">Add folder
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

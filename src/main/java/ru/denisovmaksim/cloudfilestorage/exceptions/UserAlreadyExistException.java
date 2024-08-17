@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.service.exceptions;
+package ru.denisovmaksim.cloudfilestorage.exceptions;
 
 public class UserAlreadyExistException extends RuntimeException {
     public UserAlreadyExistException(String message) {
