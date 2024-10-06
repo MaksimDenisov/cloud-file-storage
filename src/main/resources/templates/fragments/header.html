@@ -4,37 +4,26 @@
 </head>
 <body>
 <div th:fragment="authenticated (user)">
-    <nav class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
-        <p class="h3">Cloud file storage</p>
-        <div class="col-md-3 mb-2 mb-md-0">
-            <a href="/" class="d-inline-flex link-body-emphasis text-decoration-none">
-                <svg class="bi" width="40" height="32" role="img" aria-label="Bootstrap">
-                    <use xlink:href="#bootstrap"></use>
-                </svg>
-            </a>
+    <div class="navbar navbar-dark bg-dark shadow-sm mb-3">
+        <div class="container-fluid d-flex justify-content-between">
+            <p class="h3 text-start text-white px-5" th:text="${user} + '\'s files.'"></p>
+            <div class="col-md-3 text-end">
+                <a href="/sign-out" class="btn btn-outline-danger" th:text="'Sign out    ' + ${user}"></a>
+            </div>
         </div>
-        <div class="col-md-3 text-end">
-            <a href="/sign-out" class="btn btn-outline-primary" th:text="'Sign out    ' + ${user}"></a>
-        </div>
-    </nav>
+    </div>
 </div>
 
 <div th:fragment="anonymous">
-    <nav class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
-        <p class="h3">Cloud file storage</p>
-        <div class="col-md-3 mb-2 mb-md-0">
-            <a href="/" class="d-inline-flex link-body-emphasis text-decoration-none">
-                <svg class="bi" width="40" height="32" role="img" aria-label="Bootstrap">
-                    <use xlink:href="#bootstrap"></use>
-                </svg>
-            </a>
+    <div class="navbar navbar-dark bg-dark shadow-sm mb-3">
+        <div class="container-fluid d-flex justify-content-between">
+            <p class="h3 text-start text-white px-5">Cloud file storage</p>
+            <div class="col-md-3 text-end">
+                <a href="/sign-in`" class="btn btn-outline-primary me-2">Sign in</a>
+                <a href="/sign-up" class="btn btn-primary">Sign up</a>
+            </div>
         </div>
-        <div class="col-md-3 text-end">
-            <a href="/sign-in`" class="btn btn-outline-primary me-2">Sign in</a>
-            <a href="/sign-up" class="btn btn-primary">Sign up</a>
-        </div>
-    </nav>
+    </div>
 </div>
-
 </body>
 </html>

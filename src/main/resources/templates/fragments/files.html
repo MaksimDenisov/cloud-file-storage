@@ -4,11 +4,11 @@
 </head>
 <body>
 <div th:fragment="files (content)">
-    <table id="example" class="table table-bordered table-striped" style="width: 100%">
+    <table id="example" class="table table-bordered table-striped text-center">
         <thead>
         <tr>
             <th class="col-1">Icon</th>
-            <th class="col-8">Name</th>
+            <th class="col-8 text-start">Name</th>
             <th class="col-1">Size</th>
             <th class="col-1">Rename</th>
             <th class="col-1">Delete</th>
@@ -17,19 +17,24 @@
         <tbody>
         <tr th:each="item : ${content.getFolders()}">
             <td>
-                <i class="bi bi-folder-fill text-info  h4"></i>
+                <i class="bi bi-folder h5 text-secondary"></i>
             </td>
-            <td>
+            <td class="text-start">
                 <a th:href="@{/(path=${item.getPath()})}" th:text="${item.getName()}">Папка</a>
             </td>
             <td>
                 <i th:text="${item.getSize()}"></i>
             </td>
             <td>
-                <button type="button" class="btn btn-secondary">Rename</button>
+                <button type="button" class="btn btn-light"><i class="bi bi-pencil-square text-primary"></i></button>
             </td>
             <td>
-                <button type="button" class="btn btn-danger">Delete</button>
+                <!--<button type="button" class="btn btn-danger">Delete</button>-->
+                <form action="/delete" method="POST">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <input type="hidden" name="id" th:value="${item.getPath()}">
+                    <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i></button>
+                </form>
             </td>
         </tr>
         </tbody>
