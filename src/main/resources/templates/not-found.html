@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/decoration-layout.html}">
+<!-- https://frontbackend.com/thymeleaf/spring-boot-bootstrap-thymeleaf-table -->
+<section layout:fragment="content">
+
+    <div th:insert="~{fragments/header::authenticated(${username})}"></div>
+
+    <div class="row text-center">
+        <main class="col-10 overflow-auto h-100 offset-1">
+            <div class="p-5 mb-4 bg-body-tertiary rounded-3 bg-primary-subtle text-center">
+                <div class="container-fluid py-5 text-center">
+                    <h1 class="display-5 fw-bold">Error 404.</h1>
+                    <p class="col-md-8 fs-4 text-center" th:text="'Unable to found ' +  ${path}"></p>
+                    <a class="btn btn-primary btn-lg" type="button" href="/">Go to root folder</a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+</section>
+</html>

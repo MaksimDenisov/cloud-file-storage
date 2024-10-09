@@ -29,10 +29,9 @@
                 <button type="button" class="btn btn-light"><i class="bi bi-pencil-square text-primary"></i></button>
             </td>
             <td>
-                <!--<button type="button" class="btn btn-danger">Delete</button>-->
-                <form action="/delete" method="POST">
-                    <input type="hidden" name="_method" value="DELETE">
-                    <input type="hidden" name="id" th:value="${item.getPath()}">
+                <form action="/delete-folder" method="POST">
+                    <input type="hidden" name="path" th:value="${item.getPath()}">
+                    <input type="hidden" name="name" th:value="${item.getName()}">
                     <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i></button>
                 </form>
             </td>
