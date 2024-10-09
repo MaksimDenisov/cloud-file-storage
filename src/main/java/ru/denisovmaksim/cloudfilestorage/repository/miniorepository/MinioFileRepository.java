@@ -4,6 +4,8 @@ import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.Result;
+import io.minio.StatObjectArgs;
+import io.minio.errors.ErrorResponseException;
 import io.minio.errors.MinioException;
 import io.minio.messages.Item;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import ru.denisovmaksim.cloudfilestorage.exceptions.FileStorageException;
+import ru.denisovmaksim.cloudfilestorage.exceptions.StorageObjectNotFoundException;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
 import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 
@@ -60,6 +63,7 @@ public class MinioFileRepository implements FileRepository {
 
     public List<StorageObject> getStorageObjects(Long userId, String path) {
         MinioPath minioPath = new MinioPath(userId, path);
+        throwNotFoundExceptionIfObjectNotExist(minioPath);
         Iterable<Result<Item>> minioItems = minioClient.listObjects(
                 ListObjectsArgs.builder()
                         .bucket(bucket)
@@ -67,6 +71,18 @@ public class MinioFileRepository implements FileRepository {
                         .recursive(true)
                         .build());
         return toStorageObjects(minioPath, minioItems);
+    }
+
+    private void throwNotFoundExceptionIfObjectNotExist(MinioPath minioPath) {
+        try {
+            minioClient.statObject(StatObjectArgs.builder().bucket(bucket)
+                    .object(minioPath.getFullMinioPath())
+                    .build());
+        } catch (ErrorResponseException e) {
+            throw new StorageObjectNotFoundException(minioPath.getPath());
+        } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new FileStorageException(e);
+        }
     }
 
     private List<StorageObject> toStorageObjects(MinioPath minioPath, Iterable<Result<Item>> resultItems) {
