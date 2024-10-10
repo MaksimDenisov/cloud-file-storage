@@ -8,4 +8,6 @@ public interface FileRepository {
     void createFolder(Long userId, String pathOfCurrentUser, String folderName);
 
     List<StorageObject> getStorageObjects(Long authUserId, String path);
+
+    void deleteFolder(Long authUserId, String folderName);
 }
