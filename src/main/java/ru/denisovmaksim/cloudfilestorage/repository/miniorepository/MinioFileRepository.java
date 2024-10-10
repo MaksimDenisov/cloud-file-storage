@@ -3,6 +3,7 @@ package ru.denisovmaksim.cloudfilestorage.repository.miniorepository;
 import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import io.minio.Result;
 import io.minio.StatObjectArgs;
 import io.minio.errors.ErrorResponseException;
@@ -71,6 +72,20 @@ public class MinioFileRepository implements FileRepository {
                         .recursive(true)
                         .build());
         return toStorageObjects(minioPath, minioItems);
+    }
+
+    @Override
+    public void deleteFolder(Long userId, String path) {
+        MinioPath minioPath = new MinioPath(userId, path);
+        throwNotFoundExceptionIfObjectNotExist(minioPath);
+        try {
+            minioClient.removeObject(
+                    RemoveObjectArgs.builder().bucket(bucket)
+                            .object(minioPath.getFullMinioPath())
+                            .build());
+        } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
+            throw new FileStorageException(e);
+        }
     }
 
     private void throwNotFoundExceptionIfObjectNotExist(MinioPath minioPath) {

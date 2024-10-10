@@ -31,7 +31,9 @@ public class FileExplorerController {
                             RedirectAttributes redirectAttributes) {
         log.info("Add folder with name {}", folderName);
         fileService.createFolder(path, folderName);
-        redirectAttributes.addAttribute("path", path);
+        if (!path.isEmpty()) {
+            redirectAttributes.addAttribute("path", path);
+        }
         return "redirect:/";
     }
 
@@ -45,12 +47,14 @@ public class FileExplorerController {
     }
 
     @PostMapping("/delete-folder")
-    public String deleteFolder(@ModelAttribute("folder-name") String folderName,
+    public String deleteFolder(@ModelAttribute("name") String folderName,
                                @ModelAttribute("path") String path,
                                RedirectAttributes redirectAttributes) {
         log.info("Delete folder with name {}", folderName);
-        fileService.createFolder(path, folderName);
-        redirectAttributes.addAttribute("path", path);
+        fileService.deleteFolder(path + folderName);
+        if (!path.isEmpty()) {
+            redirectAttributes.addAttribute("path", path);
+        }
         return "redirect:/";
     }
 }

@@ -30,7 +30,7 @@
             </td>
             <td>
                 <form action="/delete-folder" method="POST">
-                    <input type="hidden" name="path" th:value="${item.getPath()}">
+                    <input type="hidden" name="path" th:value="${content.getPath()}">
                     <input type="hidden" name="name" th:value="${item.getName()}">
                     <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i></button>
                 </form>
