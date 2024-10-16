@@ -106,7 +106,6 @@ public class MinioFileRepository implements FileRepository {
 
         for (Result<Item> resultItem : resultItems) {
             MinioItemDescription itemDescription = MinioItemDescription.create(minioPath, resultItem);
-
             String storagePath = itemDescription.getStoragePath();
             String directElementName = itemDescription.getDirectElementName();
             if (itemDescription.isRootFolder()) {

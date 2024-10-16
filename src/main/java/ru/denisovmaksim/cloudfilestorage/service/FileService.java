@@ -42,7 +42,7 @@ public class FileService {
     }
 
     public void deleteFolder(String path) {
-        fileRepository.deleteFolder(getAuthUserId(), path);
+        fileRepository.deleteFolder(getAuthUserId(), path + (path.endsWith("/") ? "" : "/"));
     }
 
     private Long getAuthUserId() {

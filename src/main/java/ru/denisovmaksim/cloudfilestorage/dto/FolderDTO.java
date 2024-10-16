@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
+@Deprecated
 public class FolderDTO {
     private final String path;
     private final String name;

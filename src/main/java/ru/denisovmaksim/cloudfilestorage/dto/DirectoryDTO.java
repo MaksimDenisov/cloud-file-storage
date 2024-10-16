@@ -13,7 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 public class DirectoryDTO {
     private String path = "";
+    @Deprecated
     private final List<FolderDTO> upperDirs = new ArrayList<>();
-    private final List<FolderDTO> folders = new ArrayList<>();
+    private final List<StorageObject> folders = new ArrayList<>();
     private final List<StorageObject> files = new ArrayList<>();
 }
