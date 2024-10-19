@@ -5,23 +5,21 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.Result;
-import io.minio.errors.MinioException;
 import io.minio.messages.Item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import ru.denisovmaksim.cloudfilestorage.exceptions.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
 import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioExceptionHandler.executeWithHandling;
+import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioExceptionHandler.getWithHandling;
 
 @Component
 @Slf4j
@@ -43,17 +41,16 @@ public class MinioFileRepository implements FileRepository {
 
     public void createFolder(Long userId, String path, String folderName) {
         MinioPath minioPath = new MinioPath(userId, path);
-        try {
-            String newFolderName = minioPath.getUserFolder() + minioPath.getPath() + folderName + "/";
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucket)
-                            .object(newFolderName)
-                            .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
-                            .build());
-        } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new FileStorageException(e);
-        }
+        executeWithHandling(() -> {
+                    String newFolderName = minioPath.getUserFolder() + minioPath.getPath() + folderName + "/";
+                    minioClient.putObject(
+                            PutObjectArgs.builder()
+                                    .bucket(bucket)
+                                    .object(newFolderName)
+                                    .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
+                                    .build());
+                }
+        );
     }
 
 
@@ -71,22 +68,19 @@ public class MinioFileRepository implements FileRepository {
     @Override
     public void deleteFolder(Long userId, String path) {
         MinioPath minioPath = new MinioPath(userId, path);
-        try {
-            //TODO delete all by prefix
-            minioClient.removeObject(
-                    RemoveObjectArgs.builder().bucket(bucket)
-                            .object(minioPath.getFullMinioPath())
-                            .build());
-        } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new FileStorageException(e);
-        }
+        executeWithHandling(() ->
+                minioClient.removeObject(
+                        RemoveObjectArgs.builder().bucket(bucket)
+                                .object(minioPath.getFullMinioPath())
+                                .build())
+        );
     }
-
 
     private List<StorageObject> toStorageObjects(MinioPath minioPath, Iterable<Result<Item>> resultItems) {
         Map<String, StorageObject> stringStorageObjectMap = new ConcurrentHashMap<>();
         for (Result<Item> resultItem : resultItems) {
-            MinioItemDescription itemDescription = MinioItemDescription.create(minioPath, resultItem);
+            MinioItemDescription itemDescription =
+                    getWithHandling(() -> new MinioItemDescription(minioPath, resultItem.get()));
             if (itemDescription.isRootFolder()) {
                 continue;
             }
