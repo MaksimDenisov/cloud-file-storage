@@ -47,13 +47,13 @@ public class FileExplorerController {
     }
 
     @PostMapping("/delete-folder")
-    public String deleteFolder(@ModelAttribute("name") String folderName,
-                               @ModelAttribute("path") String path,
+    public String deleteFolder(@ModelAttribute("redirect-path") String redirectPath,
+                               @ModelAttribute("folder-path") String folderPath,
                                RedirectAttributes redirectAttributes) {
-        log.info("Delete folder with name {}", folderName);
-        fileService.deleteFolder(path + folderName);
-        if (!path.isEmpty()) {
-            redirectAttributes.addAttribute("path", path);
+        log.info("Delete folder with path {}", folderPath);
+        fileService.deleteFolder(folderPath);
+        if (!redirectPath.isEmpty()) {
+            redirectAttributes.addAttribute("path", redirectPath);
         }
         return "redirect:/";
     }

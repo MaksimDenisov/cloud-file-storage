@@ -38,6 +38,7 @@ public class MinioFileRepository implements FileRepository {
     }
 
     public void createFolder(Long userId, String path, String folderName) {
+        log.info("Create folder path = {} name = {} for user with id = {}", path, folderName, userId);
         MinioPath minioPath = new MinioPath(userId, path);
         executeWithHandling(() -> {
                     String newFolderName = minioPath.getUserFolder() + minioPath.getPath() + folderName + "/";
@@ -52,6 +53,7 @@ public class MinioFileRepository implements FileRepository {
     }
 
     public List<StorageObject> getStorageObjects(Long userId, String path) {
+        log.info("Get objects from path = {} for user with id = {}", path, userId);
         MinioPath minioPath = new MinioPath(userId, path);
         Iterable<Result<Item>> minioItems = minioClient.listObjects(
                 ListObjectsArgs.builder()
@@ -64,12 +66,22 @@ public class MinioFileRepository implements FileRepository {
 
     @Override
     public void deleteFolder(Long userId, String path) {
+        log.info("Delete folder {} for user with id = {}", path, userId);
         MinioPath minioPath = new MinioPath(userId, path);
-        executeWithHandling(() ->
+        executeWithHandling(() -> {
+            Iterable<Result<Item>> minioItems = minioClient.listObjects(
+                    ListObjectsArgs.builder()
+                            .bucket(bucket)
+                            .prefix(minioPath.getFullMinioPath())
+                            .recursive(true)
+                            .build()
+            );
+            for (Result<Item> resultItem : minioItems) {
                 minioClient.removeObject(
                         RemoveObjectArgs.builder().bucket(bucket)
-                                .object(minioPath.getFullMinioPath())
-                                .build())
-        );
+                                .object(resultItem.get().objectName())
+                                .build());
+            }
+        });
     }
 }
