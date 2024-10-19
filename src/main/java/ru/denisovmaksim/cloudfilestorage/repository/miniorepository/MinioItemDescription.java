@@ -7,17 +7,16 @@ import lombok.Getter;
 import ru.denisovmaksim.cloudfilestorage.exceptions.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObjectType;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.time.ZonedDateTime;
 
+
 final class MinioItemDescription {
     public static MinioItemDescription create(MinioPath minioPath, Result<Item> result) {
         try {
-            Item item = result.get();
-            return new MinioItemDescription(minioPath, item);
+            return new MinioItemDescription(minioPath, result.get());
         } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
             throw new FileStorageException(e);
         }
@@ -36,36 +35,17 @@ final class MinioItemDescription {
         this.minioPath = minioPath;
         minioName = result.objectName();
         lastModified = result.lastModified();
-        size  = result.size();
+        size = result.size();
         elements = minioName.replace(minioPath.getFullMinioPath(), "").split("/");
     }
 
-    /**
-     * Возвращает путь в папке, как его видит пользователь.
-     *
-     * @return Строка
-     */
-    public String getStoragePath() {
-        return minioName.replace(minioPath.getUserFolder(), "");
-    }
-
-    /**
-     * Возвращает имя объекта находящегося непосредственно в папке.*
-     *
-     * @return Строка
-     */
     public String getDirectElementName() {
         return elements[0];
     }
 
-    /**
-     * Имя дочернего элемента.
-     *
-     * @return Null если отсутствует
-     */
-    @Nullable
-    public String getChildElementName() {
-        return (elements.length < 2) ? null : elements[1];
+    public String getDirectElementPath() {
+        return minioPath.getPath() + elements[0]
+                + ((getType() == StorageObjectType.FOLDER) ? "/" : "");
     }
 
     public boolean isRootFolder() {
@@ -74,5 +54,9 @@ final class MinioItemDescription {
 
     public StorageObjectType getType() {
         return (minioName.endsWith("/")) ? StorageObjectType.FOLDER : StorageObjectType.UNKNOWN_FILE;
+    }
+
+    public boolean hasOnlyOneChild() {
+        return elements.length == 2;
     }
 }

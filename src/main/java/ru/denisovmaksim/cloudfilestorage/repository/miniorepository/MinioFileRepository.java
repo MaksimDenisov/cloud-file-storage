@@ -5,8 +5,6 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.Result;
-import io.minio.StatObjectArgs;
-import io.minio.errors.ErrorResponseException;
 import io.minio.errors.MinioException;
 import io.minio.messages.Item;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import ru.denisovmaksim.cloudfilestorage.exceptions.FileStorageException;
-import ru.denisovmaksim.cloudfilestorage.exceptions.StorageObjectNotFoundException;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
 import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 
@@ -22,11 +19,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -62,9 +56,9 @@ public class MinioFileRepository implements FileRepository {
         }
     }
 
+
     public List<StorageObject> getStorageObjects(Long userId, String path) {
         MinioPath minioPath = new MinioPath(userId, path);
-        throwNotFoundExceptionIfObjectNotExist(minioPath);
         Iterable<Result<Item>> minioItems = minioClient.listObjects(
                 ListObjectsArgs.builder()
                         .bucket(bucket)
@@ -77,8 +71,8 @@ public class MinioFileRepository implements FileRepository {
     @Override
     public void deleteFolder(Long userId, String path) {
         MinioPath minioPath = new MinioPath(userId, path);
-        throwNotFoundExceptionIfObjectNotExist(minioPath);
         try {
+            //TODO delete all by prefix
             minioClient.removeObject(
                     RemoveObjectArgs.builder().bucket(bucket)
                             .object(minioPath.getFullMinioPath())
@@ -88,46 +82,32 @@ public class MinioFileRepository implements FileRepository {
         }
     }
 
-    private void throwNotFoundExceptionIfObjectNotExist(MinioPath minioPath) {
-        try {
-            minioClient.statObject(StatObjectArgs.builder().bucket(bucket)
-                    .object(minioPath.getFullMinioPath())
-                    .build());
-        } catch (ErrorResponseException e) {
-            throw new StorageObjectNotFoundException(minioPath.getPath());
-        } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
-            throw new FileStorageException(e);
-        }
-    }
 
     private List<StorageObject> toStorageObjects(MinioPath minioPath, Iterable<Result<Item>> resultItems) {
-        List<StorageObject> storageObjects = new ArrayList<>();
-        Map<String, Set<String>> subElementsMap = new ConcurrentHashMap<>();
-
+        Map<String, StorageObject> stringStorageObjectMap = new ConcurrentHashMap<>();
         for (Result<Item> resultItem : resultItems) {
             MinioItemDescription itemDescription = MinioItemDescription.create(minioPath, resultItem);
-
-            String storagePath = itemDescription.getStoragePath();
-            String directElementName = itemDescription.getDirectElementName();
             if (itemDescription.isRootFolder()) {
                 continue;
             }
-            String childElementName = itemDescription.getChildElementName();
-            if (childElementName == null) {
-                storageObjects.add(new StorageObject(storagePath, directElementName,
-                        itemDescription.getType(), itemDescription.getSize(), itemDescription.getLastModified()));
-            } else {
-                subElementsMap.putIfAbsent(directElementName, new HashSet<>());
-                subElementsMap.get(directElementName).add(childElementName);
-            }
+            stringStorageObjectMap.computeIfPresent(itemDescription.getDirectElementName(),
+                    (name, object) -> {
+                        if (itemDescription.hasOnlyOneChild()) {
+                            object.setSize(object.getSize() + 1);
+                        }
+                        return object;
+                    });
+            stringStorageObjectMap.putIfAbsent(itemDescription.getDirectElementName(),
+                    StorageObject.builder().name(itemDescription.getDirectElementName())
+                            .path(itemDescription.getDirectElementPath())
+                            .type(itemDescription.getType())
+                            .lastModified(itemDescription.getLastModified())
+                            .size(itemDescription.hasOnlyOneChild() ? 1L : 0L)
+                            .build()
+            );
         }
-
-        for (StorageObject object : storageObjects) {
-            Set<String> subFolders = subElementsMap.get(object.getName());
-            if (subFolders != null) {
-                object.setSize((long) subFolders.size());
-            }
-        }
-        return storageObjects;
+        return stringStorageObjectMap.values()
+                .stream()
+                .toList();
     }
 }
