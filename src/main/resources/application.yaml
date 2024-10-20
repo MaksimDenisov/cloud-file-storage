@@ -1,7 +1,10 @@
 spring:
   application:
     name: cloud-file-storage
-
+  servlet:
+    multipart:
+      max-file-size: ${MAX_FILE_SIZE:10MB}
+      max-request-size: ${MAX_FILE_SIZE:10MB}
 server:
   port: ${PORT:8080}
   servlet:
@@ -16,9 +19,9 @@ logging:
     ROOT: INFO
 
 minio:
-    endpoint: ${MINIO_URL:http://127.0.0.1:9000}
-    user: ${MINIO_USER:minio-user}
-    password: ${MINIO_PASSWORD:password}
+  endpoint: ${MINIO_URL:http://127.0.0.1:9000}
+  user: ${MINIO_USER:minio-user}
+  password: ${MINIO_PASSWORD:password}
 
 app:
   bucket: "user-files"

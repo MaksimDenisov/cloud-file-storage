@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static ru.denisovmaksim.cloudfilestorage.model.StorageObjectType.FOLDER;
 import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioExceptionHandler.getWithHandling;
 
 class MinioItemToStorageObjectMapper {
@@ -21,17 +22,23 @@ class MinioItemToStorageObjectMapper {
             }
             stringStorageObjectMap.computeIfPresent(itemDescription.getDirectElementName(),
                     (name, object) -> {
-                        if (itemDescription.hasOnlyOneChild()) {
+                        if (itemDescription.getType() == FOLDER && itemDescription.hasOnlyOneChild()) {
                             object.setSize(object.getSize() + 1);
                         }
                         return object;
                     });
+            long initSize = 0L;
+            if (itemDescription.getType() == FOLDER) {
+                initSize = itemDescription.hasOnlyOneChild() ? 1L : 0L;
+            } else {
+                initSize = itemDescription.getSize();
+            }
             stringStorageObjectMap.putIfAbsent(itemDescription.getDirectElementName(),
                     StorageObject.builder().name(itemDescription.getDirectElementName())
                             .path(itemDescription.getDirectElementPath())
                             .type(itemDescription.getType())
                             .lastModified(itemDescription.getLastModified())
-                            .size(itemDescription.hasOnlyOneChild() ? 1L : 0L)
+                            .size(initSize)
                             .build()
             );
         }

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.dto.DirectoryDTO;
 import ru.denisovmaksim.cloudfilestorage.service.FileService;
@@ -55,6 +56,23 @@ public class FileExplorerController {
         if (!redirectPath.isEmpty()) {
             redirectAttributes.addAttribute("path", redirectPath);
         }
+        return "redirect:/";
+    }
+
+    @PostMapping("/upload")
+    public String uploadFile(@ModelAttribute("path") String path,
+                             @RequestParam("file") MultipartFile file,
+                             RedirectAttributes attributes) {
+        if (!path.isEmpty()) {
+            attributes.addAttribute("path", path);
+        }
+        if (file.isEmpty()) {
+            attributes.addFlashAttribute("flashType", "danger");
+            attributes.addFlashAttribute("flashMsg", "Please select a file to upload.");
+            return "redirect:/";
+        }
+        log.info("Upload file with name {}", file.getOriginalFilename());
+        fileService.uploadFile(path, file);
         return "redirect:/";
     }
 }

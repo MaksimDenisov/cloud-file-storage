@@ -36,6 +36,27 @@
                 </form>
             </td>
         </tr>
+        <tr th:each="item : ${content.getFiles()}">
+            <td>
+                <i class="bi bi-folder h5 text-secondary"></i>
+            </td>
+            <td class="text-start">
+                <b th:text="${item.getName()}"></b>
+            </td>
+            <td>
+                <i th:text="${item.getSize() / 1024}  + ' KB'"></i>
+            </td>
+            <td>
+                <button type="button" class="btn btn-light"><i class="bi bi-pencil-square text-primary"></i></button>
+            </td>
+            <td>
+                <form action="/delete-folder" method="POST">
+                    <input type="hidden" name="redirect-path" th:value="${content.getPath()}">
+                    <input type="hidden" name="folder-path" th:value="${item.getPath()}">
+                    <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i></button>
+                </form>
+            </td>
+        </tr>
         </tbody>
     </table>
 </div>
