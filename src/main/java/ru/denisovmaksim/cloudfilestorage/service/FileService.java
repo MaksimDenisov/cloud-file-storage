@@ -3,6 +3,7 @@ package ru.denisovmaksim.cloudfilestorage.service;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.dto.DirectoryDTO;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectsToDirectoryDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
@@ -37,6 +38,10 @@ public class FileService {
         return mapper.toDto(path, objects);
     }
 
+    public void uploadFile(String path, MultipartFile file) {
+        fileRepository.uploadFile(getAuthUserId(), path, file);
+    }
+
     public void renameFolder(String oldFolderName, String newFolderName) {
 
     }
@@ -51,4 +56,5 @@ public class FileService {
                 .orElseThrow();
         return user.getId();
     }
+
 }

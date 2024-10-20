@@ -23,6 +23,8 @@ public class StorageObjectsToDirectoryDTOMapper {
         for (StorageObject object : objects) {
             if (object.getType().equals(StorageObjectType.FOLDER)) {
                 dto.getFolders().add(new FolderDTO(object.getPath(), object.getName(), object.getSize()));
+            } else {
+                dto.getFiles().add(object);
             }
         }
         return dto;

@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
 import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 
@@ -82,6 +83,21 @@ public class MinioFileRepository implements FileRepository {
                                 .object(resultItem.get().objectName())
                                 .build());
             }
+        });
+    }
+
+    @Override
+    public void uploadFile(Long userId, String path, MultipartFile file) {
+        MinioPath minioPath = new MinioPath(userId, path);
+        executeWithHandling(() -> {
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(minioPath.getFullMinioPath() + file.getOriginalFilename())
+                            .stream(file.getInputStream(), file.getSize(), -1)
+                            .contentType(file.getContentType())
+                            .build()
+            );
         });
     }
 }

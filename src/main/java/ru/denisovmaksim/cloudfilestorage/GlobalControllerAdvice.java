@@ -6,6 +6,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.controller.UserController;
@@ -49,6 +50,14 @@ public class GlobalControllerAdvice {
     public String handleDBValidationException(ConstraintViolationException e, RedirectAttributes attributes) {
         attributes.addFlashAttribute("flashType", "danger");
         attributes.addFlashAttribute("flashMsg", "Error");
+        return "redirect:/";
+    }
+
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public String handleMaxSizeException(MaxUploadSizeExceededException e, RedirectAttributes attributes) {
+        attributes.addFlashAttribute("flashType", "danger");
+        attributes.addFlashAttribute("flashMsg", "File size exceeds limit!");
         return "redirect:/";
     }
 }
