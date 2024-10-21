@@ -4,58 +4,75 @@
 </head>
 <body>
 <div th:fragment="files (content)">
-    <table id="example" class="table table-bordered table-striped text-center">
+    <table id="example" class="table table-bordered table-striped text-center px-2">
         <thead>
         <tr>
             <th class="col-1">Icon</th>
             <th class="col-8 text-start">Name</th>
             <th class="col-1">Size</th>
+            <th class="col-1">Download</th>
             <th class="col-1">Rename</th>
             <th class="col-1">Delete</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="item : ${content.getFolders()}">
-            <td>
-                <i class="bi bi-folder h5 text-secondary"></i>
-            </td>
-            <td class="text-start">
-                <a th:href="@{/(path=${item.getPath()})}" th:text="${item.getName()}">Папка</a>
-            </td>
-            <td>
-                <i th:text="${item.getSize()}"></i>
-            </td>
-            <td>
-                <button type="button" class="btn btn-light"><i class="bi bi-pencil-square text-primary"></i></button>
-            </td>
-            <td>
-                <form action="/delete-folder" method="POST">
-                    <input type="hidden" name="redirect-path" th:value="${content.getPath()}">
-                    <input type="hidden" name="folder-path" th:value="${item.getPath()}">
-                    <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i></button>
-                </form>
-            </td>
-        </tr>
-        <tr th:each="item : ${content.getFiles()}">
-            <td>
-                <i class="bi bi-folder h5 text-secondary"></i>
-            </td>
-            <td class="text-start">
-                <b th:text="${item.getName()}"></b>
-            </td>
-            <td>
-                <i th:text="${item.getSize() / 1024}  + ' KB'"></i>
-            </td>
-            <td>
-                <button type="button" class="btn btn-light"><i class="bi bi-pencil-square text-primary"></i></button>
-            </td>
-            <td>
-                <form action="/delete-folder" method="POST">
-                    <input type="hidden" name="redirect-path" th:value="${content.getPath()}">
-                    <input type="hidden" name="folder-path" th:value="${item.getPath()}">
-                    <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i></button>
-                </form>
-            </td>
+        <tr th:each="item : ${content.getObjects()}">
+            <th:block th:switch="${#strings.toString(item.getType())}">
+                <div th:case="'FOLDER'">
+                    <td>
+                        <i class="bi bi-folder h5 text-secondary"></i>
+                    </td>
+                    <td class="text-start">
+                        <a th:href="@{/(path=${item.getPath()})}" th:text="${item.getName()}"></a>
+                    </td>
+                    <td>
+                        <i th:text="${item.getSize()}"></i>
+                    </td>
+                    <td></td>
+                    <td>
+                        <button type="button" class="btn btn-light"><i class="bi bi-pencil-square text-primary"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <form action="/delete-folder" method="POST">
+                            <input type="hidden" name="redirect-path" th:value="${content.getPath()}">
+                            <input type="hidden" name="folder-path" th:value="${item.getPath()}">
+                            <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i>
+                            </button>
+                        </form>
+                    </td>
+                </div>
+                <div th:case="*">
+                    <td>
+                        <!--<th:block th:switch="${#strings.toString(item.getType())}">-->
+                        <i class="bi bi-file-binary h5 text-secondary"></i>
+                    </td>
+                    <td class="text-start">
+                        <b th:text="${item.getName()}"></b>
+                    </td>
+                    <td>
+                        <i th:text="${item.getSize() / 1024}  + ' KB'"></i>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-light text-success">
+                            <i class="bi bi-cloud-download-fill"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-light"><i class="bi bi-pencil-square text-primary"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <form action="/delete-file" method="POST">
+                            <!--<input type="hidden" name="redirect-path" th:value="${content.getPath()}">
+                            <input type="hidden" name="folder-path" th:value="${item.getPath()}">-->
+                            <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i>
+                            </button>
+                        </form>
+                    </td>
+                </div>
+
+            </th:block>
         </tr>
         </tbody>
     </table>
