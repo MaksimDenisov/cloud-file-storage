@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ru.denisovmaksim.cloudfilestorage.dto.DirectoryDTO;
 import ru.denisovmaksim.cloudfilestorage.service.FileService;
 
 
@@ -41,9 +40,10 @@ public class FileExplorerController {
     @GetMapping("/")
     public String getFiles(Model model, Authentication authentication,
                            @RequestParam(required = false, defaultValue = "") String path) {
-        DirectoryDTO content = fileService.getContentOfDirectory(path);
         model.addAttribute("username", authentication.getName());
-        model.addAttribute("content", content);
+        model.addAttribute("breadcrumbs", fileService.getChainLinksFromPath(path));
+        model.addAttribute("storageObjects",  fileService.getContentOfDirectory(path));
+        model.addAttribute("currentPath", path);
         return "file-explorer";
     }
 

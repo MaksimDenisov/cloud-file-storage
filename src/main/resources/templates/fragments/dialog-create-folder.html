@@ -3,7 +3,7 @@
 <head>
 </head>
 <body>
-<div th:fragment="dialog-create-folder">
+<div th:fragment="dialog-create-folder (currentpath)">
     <div class="modal fade" id="add-folder" tabindex="-1" role="dialog" aria-labelledby="add-folder-label"
          aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -19,7 +19,7 @@
                         <!-- Login input -->
                         <div data-mdb-input-init class="form-outline mb-4">
                             <input type="text" id="folder-name" name="folder-name" class="form-control"/>
-                            <input type="hidden" name="path" th:value="${content.getPath()}">
+                            <input type="hidden" name="path" th:value="${currentpath}">
                             <label class="form-label" for="folder-name">Name of folder</label>
                         </div>
                     </form>

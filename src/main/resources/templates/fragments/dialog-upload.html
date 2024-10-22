@@ -3,7 +3,7 @@
 <head>
 </head>
 <body>
-<div th:fragment="dialog-upload">
+<div th:fragment="dialog-upload (currentpath)">
     <div class="modal fade" id="dialog-upload" tabindex="-1" role="dialog" aria-labelledby="dialog-upload-label"
          aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -18,7 +18,7 @@
                     <form id="upload-form" action="/upload" enctype="multipart/form-data" method="post">
                         <div data-mdb-input-init class="form-outline mb-4">
                             <label for="formFile" class="form-label">Upload file.</label>
-                            <input type="hidden" name="path" th:value="${content.getPath()}">
+                            <input type="hidden" name="path" th:value="${currentpath}">
                             <input class="form-control" type="file" id="formFile" name="file">
                         </div>
                     </form>

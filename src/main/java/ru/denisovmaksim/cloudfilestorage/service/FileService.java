@@ -4,38 +4,49 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import ru.denisovmaksim.cloudfilestorage.dto.DirectoryDTO;
-import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectsToDirectoryDTOMapper;
+import ru.denisovmaksim.cloudfilestorage.dto.LinkDTO;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
 import ru.denisovmaksim.cloudfilestorage.model.User;
 import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 import ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioFileRepository;
 import ru.denisovmaksim.cloudfilestorage.repository.UserRepository;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Profile({"dev", "prod"})
 public class FileService {
     private final FileRepository fileRepository;
     private final UserRepository userRepository;
-    private final StorageObjectsToDirectoryDTOMapper mapper;
 
     public FileService(MinioFileRepository fileRepository,
-                       UserRepository userRepository,
-                       StorageObjectsToDirectoryDTOMapper mapper) {
+                       UserRepository userRepository) {
         this.fileRepository = fileRepository;
         this.userRepository = userRepository;
-        this.mapper = mapper;
+    }
+
+    public List<LinkDTO> getChainLinksFromPath(String path) {
+        List<LinkDTO> links = new ArrayList<>();
+        String currentItemPath = "";
+        for (String dir : path.split("/")) {
+            currentItemPath = currentItemPath + dir + "/";
+            links.add(new LinkDTO(currentItemPath, dir));
+        }
+        return links;
     }
 
     public void createFolder(String path, String folderName) {
         fileRepository.createFolder(getAuthUserId(), path, folderName);
     }
 
-    public DirectoryDTO getContentOfDirectory(String path) {
-        List<StorageObject> objects = fileRepository.getStorageObjects(getAuthUserId(), path);
-        return mapper.toDto(path, objects);
+    public List<StorageObject> getContentOfDirectory(String path) {
+        return fileRepository.getStorageObjects(getAuthUserId(), path)
+                .stream()
+                .sorted(Comparator.comparing(StorageObject::getType).thenComparing(StorageObject::getName))
+                .collect(Collectors.toList());
     }
 
     public void uploadFile(String path, MultipartFile file) {
