@@ -3,7 +3,7 @@
 <head>
 </head>
 <body>
-<div th:fragment="files (content)">
+<div th:fragment="files (storageObjects)">
     <table id="example" class="table table-bordered table-striped text-center px-2">
         <thead>
         <tr>
@@ -16,7 +16,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr th:each="item : ${content.getObjects()}">
+        <tr th:each="item : ${storageObjects}">
             <th:block th:switch="${#strings.toString(item.getType())}">
                 <div th:case="'FOLDER'">
                     <td>
@@ -35,7 +35,7 @@
                     </td>
                     <td>
                         <form action="/delete-folder" method="POST">
-                            <input type="hidden" name="redirect-path" th:value="${content.getPath()}">
+                            <input type="hidden" name="redirect-path" th:value="${currentPath}">
                             <input type="hidden" name="folder-path" th:value="${item.getPath()}">
                             <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i>
                             </button>

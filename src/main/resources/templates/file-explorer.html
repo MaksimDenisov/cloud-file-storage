@@ -14,12 +14,12 @@
 
         <main class="col-10 overflow-auto pe-4">
 
-            <div th:insert="~{fragments/breadcrumbs-path :: breadcrumbs-path (${content.getUpperDirs()})}"></div>
+            <div th:insert="~{fragments/breadcrumbs-path :: breadcrumbs-path (${breadcrumbs})}"></div>
 
-            <div th:insert="~{fragments/dialog-create-folder}"></div>
-            <div th:insert="~{fragments/dialog-upload}"></div>
+            <div th:insert="~{fragments/dialog-create-folder :: dialog-create-folder (${currentPath})}"></div>
+            <div th:insert="~{fragments/dialog-upload :: dialog-upload (${currentPath})}"></div>
 
-            <div th:insert="~{fragments/files::files(content = ${content})}"></div>
+            <div th:insert="~{fragments/files::files(${storageObjects})}"></div>
 
         </main>
     </div>
