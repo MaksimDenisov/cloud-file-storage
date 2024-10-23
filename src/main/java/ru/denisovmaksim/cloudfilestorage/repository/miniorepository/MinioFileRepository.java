@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import ru.denisovmaksim.cloudfilestorage.exceptions.StorageObjectNotFoundException;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
 import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 
@@ -56,27 +57,15 @@ public class MinioFileRepository implements FileRepository {
     public List<StorageObject> getStorageObjects(Long userId, String path) {
         log.info("Get objects from path = {} for user with id = {}", path, userId);
         MinioPath minioPath = new MinioPath(userId, path);
-        Iterable<Result<Item>> minioItems = minioClient.listObjects(
-                ListObjectsArgs.builder()
-                        .bucket(bucket)
-                        .prefix(minioPath.getFullMinioPath())
-                        .recursive(true)
-                        .build());
+        Iterable<Result<Item>> minioItems = getMinioItems(minioPath);
         return toStorageObjects(minioPath, minioItems);
     }
 
     @Override
     public void deleteFolder(Long userId, String path) {
         log.info("Delete folder {} for user with id = {}", path, userId);
-        MinioPath minioPath = new MinioPath(userId, path);
         executeWithHandling(() -> {
-            Iterable<Result<Item>> minioItems = minioClient.listObjects(
-                    ListObjectsArgs.builder()
-                            .bucket(bucket)
-                            .prefix(minioPath.getFullMinioPath())
-                            .recursive(true)
-                            .build()
-            );
+            Iterable<Result<Item>> minioItems = getMinioItems(new MinioPath(userId, path));
             for (Result<Item> resultItem : minioItems) {
                 minioClient.removeObject(
                         RemoveObjectArgs.builder().bucket(bucket)
@@ -99,5 +88,18 @@ public class MinioFileRepository implements FileRepository {
                             .build()
             );
         });
+    }
+
+    private Iterable<Result<Item>> getMinioItems(MinioPath minioPath) {
+        Iterable<Result<Item>> minioItems = minioClient.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket(bucket)
+                        .prefix(minioPath.getFullMinioPath())
+                        .recursive(true)
+                        .build());
+        if (!minioItems.iterator().hasNext()) {
+            throw new StorageObjectNotFoundException(String.format("%s not exist", minioPath.getPath()));
+        }
+        return minioItems;
     }
 }
