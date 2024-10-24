@@ -1,5 +1,6 @@
 package ru.denisovmaksim.cloudfilestorage.repository.miniorepository;
 
+import io.minio.GetObjectArgs;
 import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -16,9 +17,11 @@ import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
 import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.List;
 
 import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioExceptionHandler.executeWithHandling;
+import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioExceptionHandler.getWithHandling;
 import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioItemToStorageObjectMapper.toStorageObjects;
 
 @Component
@@ -88,6 +91,15 @@ public class MinioFileRepository implements FileRepository {
                             .build()
             );
         });
+    }
+
+    @Override
+    public InputStream downloadFile(Long userId, String path) {
+        MinioPath minioPath = new MinioPath(userId, path);
+        return getWithHandling(() -> minioClient.getObject(GetObjectArgs.builder()
+                .bucket(bucket)
+                .object(minioPath.getFullMinioPath())
+                .build()));
     }
 
     private Iterable<Result<Item>> getMinioItems(MinioPath minioPath) {

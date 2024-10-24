@@ -42,13 +42,14 @@
                         </form>
                     </td>
                 </div>
+
                 <div th:case="*">
                     <td>
                         <!--<th:block th:switch="${#strings.toString(item.getType())}">-->
                         <i class="bi bi-file-binary h5 text-secondary"></i>
                     </td>
                     <td class="text-start">
-                        <b th:text="${item.getName()}"></b>
+                        <a th:href="@{download(path=${item.getPath()})}" th:text="${item.getName()}"></a>
                     </td>
                     <td>
                         <i th:text="${item.getSize() / 1024}  + ' KB'"></i>

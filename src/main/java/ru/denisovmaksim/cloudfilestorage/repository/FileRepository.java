@@ -3,6 +3,7 @@ package ru.denisovmaksim.cloudfilestorage.repository;
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
 
+import java.io.InputStream;
 import java.util.List;
 
 public interface FileRepository {
@@ -13,4 +14,6 @@ public interface FileRepository {
     void deleteFolder(Long authUserId, String folderName);
 
     void uploadFile(Long authUserId, String path, MultipartFile file);
+
+    InputStream downloadFile(Long userId, String path);
 }
