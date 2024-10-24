@@ -11,6 +11,7 @@ import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 import ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioFileRepository;
 import ru.denisovmaksim.cloudfilestorage.repository.UserRepository;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -68,4 +69,7 @@ public class FileService {
         return user.getId();
     }
 
+    public InputStream downloadFile(String path) {
+        return fileRepository.downloadFile(getAuthUserId(), path);
+    }
 }
