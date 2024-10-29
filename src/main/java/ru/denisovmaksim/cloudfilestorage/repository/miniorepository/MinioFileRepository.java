@@ -14,15 +14,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.exceptions.StorageObjectNotFoundException;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
+import ru.denisovmaksim.cloudfilestorage.model.StorageObjectType;
 import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
+import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.ItemToStorageObjectMapper.toStorageObjects;
 import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioExceptionHandler.executeWithHandling;
 import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioExceptionHandler.getWithHandling;
-import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioItemToStorageObjectMapper.toStorageObjects;
 
 @Component
 @Slf4j
@@ -60,15 +62,27 @@ public class MinioFileRepository implements FileRepository {
     public List<StorageObject> getStorageObjects(Long userId, String path) {
         log.info("Get objects from path = {} for user with id = {}", path, userId);
         MinioPath minioPath = new MinioPath(userId, path);
-        Iterable<Result<Item>> minioItems = getMinioItems(minioPath);
-        return toStorageObjects(minioPath, minioItems);
+        Iterable<Result<Item>> resultItems = getMinioItems(minioPath);
+        List<StorageObject> objects = new ArrayList<>();
+        for (Result<Item> resultItem : resultItems) {
+            Item item = getWithHandling(resultItem::get);
+            String minioName = item.objectName();
+            if (!minioName.equals(minioPath.getFullMinioPath())) {
+                StorageObject object = toStorageObjects(minioPath, item);
+                if (object.getType() == StorageObjectType.FOLDER) {
+                    object.setSize(getChildCount(new MinioPath(userId, object.getPath())));
+                }
+                objects.add(object);
+            }
+        }
+        return objects;
     }
 
     @Override
     public void deleteFolder(Long userId, String path) {
         log.info("Delete folder {} for user with id = {}", path, userId);
         executeWithHandling(() -> {
-            Iterable<Result<Item>> minioItems = getMinioItems(new MinioPath(userId, path));
+            Iterable<Result<Item>> minioItems = getMinioItemsRecursive(new MinioPath(userId, path));
             for (Result<Item> resultItem : minioItems) {
                 minioClient.removeObject(
                         RemoveObjectArgs.builder().bucket(bucket)
@@ -103,6 +117,34 @@ public class MinioFileRepository implements FileRepository {
     }
 
     private Iterable<Result<Item>> getMinioItems(MinioPath minioPath) {
+        Iterable<Result<Item>> minioItems = minioClient.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket(bucket)
+                        .prefix(minioPath.getFullMinioPath())
+                        .build());
+        if (!minioItems.iterator().hasNext()) {
+            throw new StorageObjectNotFoundException(String.format("%s not exist", minioPath.getPath()));
+        }
+        return minioItems;
+    }
+
+    private long getChildCount(MinioPath minioPath) {
+        Iterable<Result<Item>> minioItems = minioClient.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket(bucket)
+                        .prefix(minioPath.getFullMinioPath())
+                        .build());
+        long count = 0;
+        for (Result<Item> minioItem : minioItems) {
+            Item item = getWithHandling(minioItem::get);
+            if (!item.objectName().equals(minioPath.getFullMinioPath())) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private Iterable<Result<Item>> getMinioItemsRecursive(MinioPath minioPath) {
         Iterable<Result<Item>> minioItems = minioClient.listObjects(
                 ListObjectsArgs.builder()
                         .bucket(bucket)
