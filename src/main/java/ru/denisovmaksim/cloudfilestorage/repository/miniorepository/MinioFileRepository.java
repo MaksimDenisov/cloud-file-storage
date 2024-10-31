@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.exceptions.StorageObjectNotFoundException;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
-import ru.denisovmaksim.cloudfilestorage.model.StorageObjectType;
 import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 
 import java.io.ByteArrayInputStream;
@@ -22,7 +21,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.ItemToStorageObjectMapper.toStorageObjects;
 import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioExceptionHandler.executeWithHandling;
 import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioExceptionHandler.getWithHandling;
 
@@ -48,7 +46,7 @@ public class MinioFileRepository implements FileRepository {
         log.info("Create folder path = {} name = {} for user with id = {}", path, folderName, userId);
         MinioPath minioPath = new MinioPath(userId, path);
         executeWithHandling(() -> {
-                    String newFolderName = minioPath.getUserFolder() + minioPath.getPath() + folderName + "/";
+                    String newFolderName = minioPath.getPathByMinio() + folderName + "/";
                     minioClient.putObject(
                             PutObjectArgs.builder()
                                     .bucket(bucket)
@@ -67,9 +65,9 @@ public class MinioFileRepository implements FileRepository {
         for (Result<Item> resultItem : resultItems) {
             Item item = getWithHandling(resultItem::get);
             String minioName = item.objectName();
-            if (!minioName.equals(minioPath.getFullMinioPath())) {
+            if (!minioName.equals(minioPath.getPathByMinio())) {
                 StorageObject object = toStorageObjects(minioPath, item);
-                if (object.getType() == StorageObjectType.FOLDER) {
+                if (object.isFolder()) {
                     object.setSize(getChildCount(new MinioPath(userId, object.getPath())));
                 }
                 objects.add(object);
@@ -99,7 +97,7 @@ public class MinioFileRepository implements FileRepository {
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(bucket)
-                            .object(minioPath.getFullMinioPath() + file.getOriginalFilename())
+                            .object(minioPath.getPathByMinio() + file.getOriginalFilename())
                             .stream(file.getInputStream(), file.getSize(), -1)
                             .contentType(file.getContentType())
                             .build()
@@ -112,7 +110,7 @@ public class MinioFileRepository implements FileRepository {
         MinioPath minioPath = new MinioPath(userId, path);
         return getWithHandling(() -> minioClient.getObject(GetObjectArgs.builder()
                 .bucket(bucket)
-                .object(minioPath.getFullMinioPath())
+                .object(minioPath.getPathByMinio())
                 .build()));
     }
 
@@ -120,24 +118,34 @@ public class MinioFileRepository implements FileRepository {
         Iterable<Result<Item>> minioItems = minioClient.listObjects(
                 ListObjectsArgs.builder()
                         .bucket(bucket)
-                        .prefix(minioPath.getFullMinioPath())
+                        .prefix(minioPath.getPathByMinio())
                         .build());
         if (!minioItems.iterator().hasNext()) {
-            throw new StorageObjectNotFoundException(String.format("%s not exist", minioPath.getPath()));
+            throw new StorageObjectNotFoundException(String.format("%s not exist", minioPath.getPathByUser()));
         }
         return minioItems;
+    }
+
+    private StorageObject toStorageObjects(MinioPath minioPath, Item item) {
+        String minioName = item.objectName();
+        String path = minioName.replace(minioPath.getUserFolder(), "");
+        StorageObject object = new StorageObject(path);
+        if (!object.isFolder()) {
+            object.setSize(item.size());
+        }
+        return object;
     }
 
     private long getChildCount(MinioPath minioPath) {
         Iterable<Result<Item>> minioItems = minioClient.listObjects(
                 ListObjectsArgs.builder()
                         .bucket(bucket)
-                        .prefix(minioPath.getFullMinioPath())
+                        .prefix(minioPath.getPathByMinio())
                         .build());
         long count = 0;
         for (Result<Item> minioItem : minioItems) {
             Item item = getWithHandling(minioItem::get);
-            if (!item.objectName().equals(minioPath.getFullMinioPath())) {
+            if (!item.objectName().equals(minioPath.getPathByMinio())) {
                 count++;
             }
         }
@@ -148,11 +156,11 @@ public class MinioFileRepository implements FileRepository {
         Iterable<Result<Item>> minioItems = minioClient.listObjects(
                 ListObjectsArgs.builder()
                         .bucket(bucket)
-                        .prefix(minioPath.getFullMinioPath())
+                        .prefix(minioPath.getPathByMinio())
                         .recursive(true)
                         .build());
         if (!minioItems.iterator().hasNext()) {
-            throw new StorageObjectNotFoundException(String.format("%s not exist", minioPath.getPath()));
+            throw new StorageObjectNotFoundException(String.format("%s not exist", minioPath.getPathByUser()));
         }
         return minioItems;
     }

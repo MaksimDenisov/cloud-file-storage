@@ -5,11 +5,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.dto.LinkDTO;
-import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
+import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
+import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.model.User;
 import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
-import ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioFileRepository;
 import ru.denisovmaksim.cloudfilestorage.repository.UserRepository;
+import ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioFileRepository;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -43,10 +44,11 @@ public class FileService {
         fileRepository.createFolder(getAuthUserId(), path, folderName);
     }
 
-    public List<StorageObject> getContentOfDirectory(String path) {
+    public List<StorageObjectDTO> getContentOfDirectory(String path) {
         return fileRepository.getStorageObjects(getAuthUserId(), path)
                 .stream()
-                .sorted(Comparator.comparing(StorageObject::getType).thenComparing(StorageObject::getName))
+                .map(StorageObjectDTOMapper::toDTO)
+                .sorted(Comparator.comparing(StorageObjectDTO::getType).thenComparing(StorageObjectDTO::getName))
                 .collect(Collectors.toList());
     }
 
