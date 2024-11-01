@@ -11,7 +11,7 @@ import java.security.NoSuchAlgorithmException;
 @Slf4j
 class MinioExceptionHandler {
 
-    static <T> T getWithHandling(MinioThrowingSupplier<T> supplier) {
+    static <T> T interceptMinioExceptions(MinioThrowingSupplier<T> supplier) {
         try {
             return supplier.get();
         } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
@@ -20,7 +20,7 @@ class MinioExceptionHandler {
         }
     }
 
-    static void executeWithHandling(MinioThrowingRunnable supplier) {
+    static void interceptMinioExceptions(MinioThrowingRunnable supplier) {
         try {
             supplier.run();
         } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
