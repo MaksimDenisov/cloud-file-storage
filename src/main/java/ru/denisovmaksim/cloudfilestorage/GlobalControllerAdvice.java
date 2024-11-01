@@ -1,5 +1,6 @@
 package ru.denisovmaksim.cloudfilestorage;
 
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.security.core.Authentication;
@@ -48,8 +49,12 @@ public class GlobalControllerAdvice {
 
     @ExceptionHandler(ConstraintViolationException.class)
     public String handleDBValidationException(ConstraintViolationException e, RedirectAttributes attributes) {
+        String errors = e.getConstraintViolations()
+                .stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.joining(". "));
         attributes.addFlashAttribute("flashType", "danger");
-        attributes.addFlashAttribute("flashMsg", "Error");
+        attributes.addFlashAttribute("flashMsg", errors);
         return "redirect:/";
     }
 
