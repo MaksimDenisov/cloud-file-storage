@@ -2,6 +2,7 @@ package ru.denisovmaksim.cloudfilestorage;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,6 +19,10 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalControllerAdvice {
+
+    @Value("${MAX_FILE_SIZE:10MB}")
+    private String maxFileSize;
+
     @ExceptionHandler(UserAlreadyExistException.class)
     public String handleUserAlreadyExist(UserAlreadyExistException e, RedirectAttributes attributes) {
         attributes.addFlashAttribute("flashType", "danger");
@@ -58,11 +63,10 @@ public class GlobalControllerAdvice {
         return "redirect:/";
     }
 
-
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public String handleMaxSizeException(MaxUploadSizeExceededException e, RedirectAttributes attributes) {
         attributes.addFlashAttribute("flashType", "danger");
-        attributes.addFlashAttribute("flashMsg", "File size exceeds limit!");
+        attributes.addFlashAttribute("flashMsg", String.format("File size exceeds %s!", maxFileSize));
         return "redirect:/";
     }
 }
