@@ -56,8 +56,8 @@ public class FileService {
         fileRepository.uploadFile(getAuthUserId(), path, file);
     }
 
-    public void renameFolder(String oldFolderName, String newFolderName) {
-
+    public void renameFolder(String path, String newFolderName) {
+        fileRepository.renameFolder(getAuthUserId(), path, newFolderName);
     }
 
     public void deleteFolder(String path) {

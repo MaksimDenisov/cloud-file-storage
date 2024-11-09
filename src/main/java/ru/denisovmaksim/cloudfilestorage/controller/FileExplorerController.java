@@ -61,15 +61,34 @@ public class FileExplorerController {
         return "file-explorer";
     }
 
+    @PostMapping("/rename-folder")
+    public String renameFolder(@Pattern(regexp = PATH_VALIDATION_REGEXP,
+            message = PATH_INVALID_CHARACTERS)
+                               @ModelAttribute("redirect-path") String redirectPath,
+                               @ModelAttribute("folder-name")
+                               @Pattern(regexp = FILENAME_VALIDATION_REGEXP,
+                                       message = FILENAME_INVALID_MESSAGE)
+                               String folderName,
+                               @Pattern(regexp = PATH_VALIDATION_REGEXP,
+                                       message = PATH_INVALID_CHARACTERS)
+                               @ModelAttribute("path") String folderPath,
+                               RedirectAttributes redirectAttributes) {
+        log.info("Rename folder with path {} to {}", folderPath, folderName);
+        fileService.renameFolder(folderPath, folderName);
+        if (!redirectPath.isEmpty()) {
+            redirectAttributes.addAttribute("path", redirectPath);
+        }
+        return "redirect:/";
+    }
+
     @PostMapping("/delete-folder")
-    public String deleteFolder(
-            @Pattern(regexp = PATH_VALIDATION_REGEXP,
-                    message = PATH_INVALID_CHARACTERS)
-            @ModelAttribute("redirect-path") String redirectPath,
-            @Pattern(regexp = PATH_VALIDATION_REGEXP,
-                    message = PATH_INVALID_CHARACTERS)
-            @ModelAttribute("folder-path") String folderPath,
-            RedirectAttributes redirectAttributes) {
+    public String deleteFolder(@Pattern(regexp = PATH_VALIDATION_REGEXP,
+            message = PATH_INVALID_CHARACTERS)
+                               @ModelAttribute("redirect-path") String redirectPath,
+                               @Pattern(regexp = PATH_VALIDATION_REGEXP,
+                                       message = PATH_INVALID_CHARACTERS)
+                               @ModelAttribute("folder-path") String folderPath,
+                               RedirectAttributes redirectAttributes) {
         log.info("Delete folder with path {}", folderPath);
         fileService.deleteFolder(folderPath);
         if (!redirectPath.isEmpty()) {

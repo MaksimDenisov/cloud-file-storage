@@ -3,7 +3,9 @@
 <head>
 </head>
 <body>
+
 <div th:fragment="files (storageObjects)">
+
     <table id="example" class="table table-bordered table-striped text-center px-2">
         <thead>
         <tr>
@@ -17,6 +19,7 @@
         </thead>
         <tbody>
         <tr th:each="item : ${storageObjects}">
+            <div th:insert="~{fragments/dialog-rename-folder}"></div>
             <th:block th:switch="${#strings.toString(item.getType())}">
                 <div th:case="'FOLDER'">
                     <td>
@@ -30,7 +33,12 @@
                     </td>
                     <td></td>
                     <td>
-                        <button type="button" class="btn btn-light"><i class="bi bi-pencil-square text-primary"></i>
+                        <button type="button" class="btn btn-light"
+                                th:data-bs-name="${item.getName()}"
+                                th:data-bs-path="${item.getPath()}"
+                                th:data-bs-redirect-path="${currentPath}"
+                                data-bs-toggle="modal" data-bs-target="#rename-folder">
+                            <i class="bi bi-pencil-square text-primary"></i>
                         </button>
                     </td>
                     <td>
@@ -65,14 +73,25 @@
                     </td>
                     <td>
                         <form action="/delete-file" method="POST">
-                            <!--<input type="hidden" name="redirect-path" th:value="${content.getPath()}">
-                            <input type="hidden" name="folder-path" th:value="${item.getPath()}">-->
                             <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i>
                             </button>
                         </form>
                     </td>
                 </div>
+                <script>
+                    var renameFolderModal = document.getElementById('rename-folder')
+                    renameFolderModal.addEventListener('show.bs.modal', function (event) {
+                        const button = event.relatedTarget;
 
+                        const folderNameInput = renameFolderModal.querySelector('#folder-name');
+                        const pathInput = renameFolderModal.querySelector('#old-folder-path')
+                        const redirectPathInput = renameFolderModal.querySelector('#redirect-path')
+
+                        folderNameInput.value = button.getAttribute('data-bs-name');
+                        pathInput.value = button.getAttribute('data-bs-path');
+                        redirectPathInput.value = button.getAttribute('data-bs-redirect-path');
+                    })
+                </script>
             </th:block>
         </tr>
         </tbody>

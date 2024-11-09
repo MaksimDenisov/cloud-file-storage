@@ -14,4 +14,14 @@ class MinioPath {
         this.pathByUser = path;
         pathByMinio = userFolder + path;
     }
+
+    public String getParentMinioPath() {
+        String[] elements = pathByUser.split("/");
+        StringBuilder builder = new StringBuilder(userFolder);
+        for (int i = 0; i < elements.length - 1; i++) {
+            builder.append(elements[i])
+                    .append("/");
+        }
+        return builder.toString();
+    }
 }

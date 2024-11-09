@@ -1,5 +1,7 @@
 package ru.denisovmaksim.cloudfilestorage.repository.miniorepository;
 
+import io.minio.CopyObjectArgs;
+import io.minio.CopySource;
 import io.minio.GetObjectArgs;
 import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
@@ -73,6 +75,22 @@ public class MinioFileRepository implements FileRepository {
             }
         }
         return objects;
+    }
+
+    @Override
+    public void renameFolder(Long userId, String path, String newFolderName) {
+        log.info("Rename folder {} for user with id = {}", path, userId);
+        MinioPath minioPath = new MinioPath(userId, path);
+        interceptMinioExceptions(() -> {
+            Iterable<Result<Item>> minioItems = getMinioItemsRecursive(new MinioPath(userId, path));
+            for (Result<Item> result : minioItems) {
+                String sourceName = result.get().objectName();
+                String destName = sourceName.replace(minioPath.getPathByMinio(),
+                        minioPath.getParentMinioPath() + newFolderName + "/");
+                copyObject(sourceName, destName);
+            }
+        });
+        deleteFolder(userId, path);
     }
 
     @Override
@@ -162,5 +180,19 @@ public class MinioFileRepository implements FileRepository {
             throw new StorageObjectNotFoundException(String.format("%s not exist", minioPath.getPathByUser()));
         }
         return minioItems;
+    }
+
+    private void copyObject(String sourceName, String destName) {
+        interceptMinioExceptions(() ->
+                minioClient.copyObject(
+                        CopyObjectArgs.builder()
+                                .bucket(bucket)
+                                .object(destName)
+                                .source(
+                                        CopySource.builder()
+                                                .bucket(bucket)
+                                                .object(sourceName)
+                                                .build())
+                                .build()));
     }
 }
