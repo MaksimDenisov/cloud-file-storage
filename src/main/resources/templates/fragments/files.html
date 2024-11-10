@@ -29,7 +29,7 @@
                         <a th:href="@{/(path=${item.getPath()})}" th:text="${item.getName()}"></a>
                     </td>
                     <td>
-                        <i th:text="${item.getSize()}"></i>
+                        <i th:text="${item.getSize()==0?'Empty':item.getSize() + (item.getSize()==1?' object':' objects')}"></i>
                     </td>
                     <td></td>
                     <td>
@@ -79,7 +79,7 @@
                     </td>
                 </div>
                 <script>
-                    var renameFolderModal = document.getElementById('rename-folder')
+                    const renameFolderModal = document.getElementById('rename-folder')
                     renameFolderModal.addEventListener('show.bs.modal', function (event) {
                         const button = event.relatedTarget;
 
