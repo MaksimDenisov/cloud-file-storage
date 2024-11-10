@@ -73,6 +73,8 @@
                     </td>
                     <td>
                         <form action="/delete-file" method="POST">
+                            <input type="hidden" name="parent-path" th:value="${currentPath}">
+                            <input type="hidden" name="file-name" th:value="${item.getName()}">
                             <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i>
                             </button>
                         </form>

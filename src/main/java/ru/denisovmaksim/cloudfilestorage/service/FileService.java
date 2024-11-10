@@ -61,7 +61,11 @@ public class FileService {
     }
 
     public void deleteFolder(String path) {
-        fileRepository.deleteFolder(getAuthUserId(), path);
+        fileRepository.deleteObjects(getAuthUserId(), path);
+    }
+
+    public void deleteFile(String parentPath, String fileName) {
+        fileRepository.deleteObjects(getAuthUserId(), parentPath + fileName);
     }
 
     private Long getAuthUserId() {

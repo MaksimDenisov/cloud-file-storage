@@ -90,11 +90,11 @@ public class MinioFileRepository implements FileRepository {
                 copyObject(sourceName, destName);
             }
         });
-        deleteFolder(userId, path);
+        deleteObjects(userId, path);
     }
 
     @Override
-    public void deleteFolder(Long userId, String path) {
+    public void deleteObjects(Long userId, String path) {
         log.info("Delete folder {} for user with id = {}", path, userId);
         MinioPath minioPath = new MinioPath(userId, path);
         if (minioPath.isRoot()) {
@@ -134,6 +134,7 @@ public class MinioFileRepository implements FileRepository {
                 .object(minioPath.getPathByMinio())
                 .build()));
     }
+
 
     private Iterable<Result<Item>> getMinioItems(MinioPath minioPath) {
         Iterable<Result<Item>> minioItems = minioClient.listObjects(

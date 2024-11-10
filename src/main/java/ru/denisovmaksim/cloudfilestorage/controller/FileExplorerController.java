@@ -96,4 +96,20 @@ public class FileExplorerController {
         }
         return "redirect:/";
     }
+
+    @PostMapping("/delete-file")
+    public String deleteFile(@Pattern(regexp = PATH_VALIDATION_REGEXP,
+            message = ERROR_MSG_PATH_INVALID_CHARACTERS)
+                             @ModelAttribute("parent-path") String parentPath,
+                             @Pattern(regexp = FILENAME_VALIDATION_REGEXP,
+                                     message = ERROR_MSG_FILENAME_INVALID)
+                             @ModelAttribute("file-name") String fileName,
+                             RedirectAttributes redirectAttributes) {
+        log.info("Delete file with path {}", fileName);
+        fileService.deleteFile(parentPath, fileName);
+        if (!parentPath.isEmpty()) {
+            redirectAttributes.addAttribute("path", parentPath);
+        }
+        return "redirect:/";
+    }
 }

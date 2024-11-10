@@ -13,7 +13,7 @@ public interface FileRepository {
 
     void renameFolder(Long userId, String path, String newFolderName);
 
-    void deleteFolder(Long authUserId, String folderName);
+    void deleteObjects(Long authUserId, String folderName);
 
     void uploadFile(Long authUserId, String path, MultipartFile file);
 
