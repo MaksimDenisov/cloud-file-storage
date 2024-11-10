@@ -96,8 +96,12 @@ public class MinioFileRepository implements FileRepository {
     @Override
     public void deleteFolder(Long userId, String path) {
         log.info("Delete folder {} for user with id = {}", path, userId);
+        MinioPath minioPath = new MinioPath(userId, path);
+        if (minioPath.isRoot()) {
+            return;
+        }
         interceptMinioExceptions(() -> {
-            Iterable<Result<Item>> minioItems = getMinioItemsRecursive(new MinioPath(userId, path));
+            Iterable<Result<Item>> minioItems = getMinioItemsRecursive(minioPath);
             for (Result<Item> resultItem : minioItems) {
                 minioClient.removeObject(
                         RemoveObjectArgs.builder().bucket(bucket)
@@ -137,7 +141,7 @@ public class MinioFileRepository implements FileRepository {
                         .bucket(bucket)
                         .prefix(minioPath.getPathByMinio())
                         .build());
-        if (!minioItems.iterator().hasNext()) {
+        if (!minioItems.iterator().hasNext() && !minioPath.isRoot()) {
             throw new StorageObjectNotFoundException(String.format("%s not exist", minioPath.getPathByUser()));
         }
         return minioItems;
@@ -176,7 +180,7 @@ public class MinioFileRepository implements FileRepository {
                         .prefix(minioPath.getPathByMinio())
                         .recursive(true)
                         .build());
-        if (!minioItems.iterator().hasNext()) {
+        if (!minioItems.iterator().hasNext() && !minioPath.isRoot()) {
             throw new StorageObjectNotFoundException(String.format("%s not exist", minioPath.getPathByUser()));
         }
         return minioItems;

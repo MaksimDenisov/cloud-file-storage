@@ -15,6 +15,10 @@ class MinioPath {
         pathByMinio = userFolder + path;
     }
 
+    public boolean isRoot() {
+        return getPathByMinio().equals(userFolder);
+    }
+
     public String getParentMinioPath() {
         String[] elements = pathByUser.split("/");
         StringBuilder builder = new StringBuilder(userFolder);
