@@ -11,9 +11,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import ru.denisovmaksim.cloudfilestorage.service.FileService;
+
+import static ru.denisovmaksim.cloudfilestorage.config.ValidationConstants.ERROR_MSG_FILENAME_INVALID;
+import static ru.denisovmaksim.cloudfilestorage.config.ValidationConstants.ERROR_MSG_PATH_INVALID_CHARACTERS;
+import static ru.denisovmaksim.cloudfilestorage.config.ValidationConstants.FILENAME_VALIDATION_REGEXP;
+import static ru.denisovmaksim.cloudfilestorage.config.ValidationConstants.PATH_VALIDATION_REGEXP;
 
 
 @Controller
@@ -21,11 +26,6 @@ import ru.denisovmaksim.cloudfilestorage.service.FileService;
 @Profile({"dev", "prod"})
 @Validated
 public class FileExplorerController {
-    public static final String FILENAME_VALIDATION_REGEXP = "^[^/\\\\:*?\"<>|]+$";
-    public static final String FILENAME_INVALID_MESSAGE = "Filename must not contains / \\ : * ? \\ \" < > | ";
-    public static final String PATH_VALIDATION_REGEXP = "^([^\\\\:*?\"<>|]*\\/)?$";
-    public static final String PATH_INVALID_CHARACTERS = "Not valid path";
-
     private final FileService fileService;
 
     public FileExplorerController(FileService fileService) {
@@ -35,10 +35,10 @@ public class FileExplorerController {
     @PostMapping("/add-folder")
     public String addFolder(@ModelAttribute("folder-name")
                             @Pattern(regexp = FILENAME_VALIDATION_REGEXP,
-                                    message = FILENAME_INVALID_MESSAGE)
+                                    message = ERROR_MSG_FILENAME_INVALID)
                             String folderName,
                             @Pattern(regexp = PATH_VALIDATION_REGEXP,
-                                    message = PATH_INVALID_CHARACTERS)
+                                    message = ERROR_MSG_PATH_INVALID_CHARACTERS)
                             @ModelAttribute("path") String path,
                             RedirectAttributes redirectAttributes) {
         log.info("Add folder with name {}", folderName);
@@ -52,7 +52,7 @@ public class FileExplorerController {
     @GetMapping("/")
     public String getObjects(Model model, Authentication authentication,
                              @Pattern(regexp = PATH_VALIDATION_REGEXP,
-                                     message = PATH_INVALID_CHARACTERS)
+                                     message = ERROR_MSG_PATH_INVALID_CHARACTERS)
                              @RequestParam(required = false, defaultValue = "") String path) {
         model.addAttribute("username", authentication.getName());
         model.addAttribute("breadcrumbs", fileService.getChainLinksFromPath(path));
@@ -63,14 +63,14 @@ public class FileExplorerController {
 
     @PostMapping("/rename-folder")
     public String renameFolder(@Pattern(regexp = PATH_VALIDATION_REGEXP,
-            message = PATH_INVALID_CHARACTERS)
+            message = ERROR_MSG_PATH_INVALID_CHARACTERS)
                                @ModelAttribute("redirect-path") String redirectPath,
                                @ModelAttribute("folder-name")
                                @Pattern(regexp = FILENAME_VALIDATION_REGEXP,
-                                       message = FILENAME_INVALID_MESSAGE)
+                                       message = ERROR_MSG_FILENAME_INVALID)
                                String folderName,
                                @Pattern(regexp = PATH_VALIDATION_REGEXP,
-                                       message = PATH_INVALID_CHARACTERS)
+                                       message = ERROR_MSG_PATH_INVALID_CHARACTERS)
                                @ModelAttribute("path") String folderPath,
                                RedirectAttributes redirectAttributes) {
         log.info("Rename folder with path {} to {}", folderPath, folderName);
@@ -83,10 +83,10 @@ public class FileExplorerController {
 
     @PostMapping("/delete-folder")
     public String deleteFolder(@Pattern(regexp = PATH_VALIDATION_REGEXP,
-            message = PATH_INVALID_CHARACTERS)
+            message = ERROR_MSG_PATH_INVALID_CHARACTERS)
                                @ModelAttribute("redirect-path") String redirectPath,
                                @Pattern(regexp = PATH_VALIDATION_REGEXP,
-                                       message = PATH_INVALID_CHARACTERS)
+                                       message = ERROR_MSG_PATH_INVALID_CHARACTERS)
                                @ModelAttribute("folder-path") String folderPath,
                                RedirectAttributes redirectAttributes) {
         log.info("Delete folder with path {}", folderPath);
@@ -94,26 +94,6 @@ public class FileExplorerController {
         if (!redirectPath.isEmpty()) {
             redirectAttributes.addAttribute("path", redirectPath);
         }
-        return "redirect:/";
-    }
-
-    @PostMapping("/upload")
-    public String uploadFile(
-            @Pattern(regexp = PATH_VALIDATION_REGEXP,
-                    message = PATH_INVALID_CHARACTERS)
-            @ModelAttribute("path") String path,
-            @RequestParam("file") MultipartFile file,
-            RedirectAttributes attributes) {
-        if (!path.isEmpty()) {
-            attributes.addAttribute("path", path);
-        }
-        if (file.isEmpty()) {
-            attributes.addFlashAttribute("flashType", "danger");
-            attributes.addFlashAttribute("flashMsg", "Please select a file to upload.");
-            return "redirect:/";
-        }
-        log.info("Upload file with name {}", file.getOriginalFilename());
-        fileService.uploadFile(path, file);
         return "redirect:/";
     }
 }

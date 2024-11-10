@@ -1,5 +1,6 @@
 package ru.denisovmaksim.cloudfilestorage.controller;
 
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -10,21 +11,28 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.service.FileService;
 
 import java.io.InputStream;
+
+import static ru.denisovmaksim.cloudfilestorage.config.ValidationConstants.ERROR_MSG_PATH_INVALID_CHARACTERS;
+import static ru.denisovmaksim.cloudfilestorage.config.ValidationConstants.PATH_VALIDATION_REGEXP;
 
 @Controller
 @AllArgsConstructor
 @Slf4j
 @Profile({"dev", "prod"})
-@RequestMapping("/download")
-public class DownloadController {
+@RequestMapping()
+public class FileTransferController {
     private final FileService fileService;
 
-    @GetMapping("")
+    @GetMapping("/download")
     public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() String path) {
         try {
             InputStream inputStream = fileService.downloadFile(path);
@@ -41,6 +49,26 @@ public class DownloadController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @PostMapping("/upload")
+    public String uploadFile(
+            @Pattern(regexp = PATH_VALIDATION_REGEXP,
+                    message = ERROR_MSG_PATH_INVALID_CHARACTERS)
+            @ModelAttribute("path") String path,
+            @RequestParam("file") MultipartFile file,
+            RedirectAttributes attributes) {
+        if (!path.isEmpty()) {
+            attributes.addAttribute("path", path);
+        }
+        if (file.isEmpty()) {
+            attributes.addFlashAttribute("flashType", "danger");
+            attributes.addFlashAttribute("flashMsg", "Please select a file to upload.");
+            return "redirect:/";
+        }
+        log.info("Upload file with name {}", file.getOriginalFilename());
+        fileService.uploadFile(path, file);
+        return "redirect:/";
     }
 }
 
