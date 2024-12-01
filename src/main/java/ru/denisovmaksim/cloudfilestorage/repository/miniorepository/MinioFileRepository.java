@@ -21,7 +21,9 @@ import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioExceptionHandler.interceptMinioExceptions;
 
@@ -112,7 +114,7 @@ public class MinioFileRepository implements FileRepository {
     }
 
     @Override
-    public void uploadFile(Long userId, String path, MultipartFile file) {
+    public void saveObject(Long userId, String path, MultipartFile file) {
         MinioPath minioPath = new MinioPath(userId, path);
         interceptMinioExceptions(() -> {
             minioClient.putObject(
@@ -127,7 +129,7 @@ public class MinioFileRepository implements FileRepository {
     }
 
     @Override
-    public InputStream downloadFile(Long userId, String path) {
+    public InputStream getObjectAsStream(Long userId, String path) {
         MinioPath minioPath = new MinioPath(userId, path);
         return interceptMinioExceptions(() -> minioClient.getObject(GetObjectArgs.builder()
                 .bucket(bucket)
@@ -135,6 +137,24 @@ public class MinioFileRepository implements FileRepository {
                 .build()));
     }
 
+    @Override
+    public Map<String, InputStream> getObjectsAsStreams(Long userId, String path) {
+        MinioPath minioPath = new MinioPath(userId, path);
+        Map<String, InputStream> result = new HashMap<>();
+        return interceptMinioExceptions(() -> {
+            Iterable<Result<Item>> minioItems = getMinioItemsRecursive(minioPath);
+            for (Result<Item> resultItem : minioItems) {
+                String objectName = resultItem.get().objectName();
+                String name = objectName.replace(minioPath.getUserFolder(), "");
+                InputStream objectInputStream = minioClient.getObject(GetObjectArgs.builder()
+                        .bucket(bucket)
+                        .object(objectName)
+                        .build());
+                result.put(name, objectInputStream);
+            }
+            return result;
+        });
+    }
 
     private Iterable<Result<Item>> getMinioItems(MinioPath minioPath) {
         Iterable<Result<Item>> minioItems = minioClient.listObjects(

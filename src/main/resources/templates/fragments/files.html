@@ -31,7 +31,13 @@
                     <td>
                         <i th:text="${item.getSize()==0?'Empty':item.getSize() + (item.getSize()==1?' object':' objects')}"></i>
                     </td>
-                    <td></td>
+                    <td>
+                        <a th:href="@{download-folder(path=${item.getPath()})}">
+                            <button type="button" class="btn btn-light text-success">
+                                <i class="bi bi-save"></i>
+                            </button>
+                        </a>
+                    </td>
                     <td>
                         <button type="button" class="btn btn-light"
                                 th:data-bs-name="${item.getName()}"
@@ -53,7 +59,6 @@
 
                 <div th:case="*">
                     <td>
-                        <!--<th:block th:switch="${#strings.toString(item.getType())}">-->
                         <i class="bi bi-file-binary h5 text-secondary"></i>
                     </td>
                     <td class="text-start">
@@ -63,9 +68,11 @@
                         <i th:text="${item.getSize() / 1024}  + ' KB'"></i>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-light text-success">
-                            <i class="bi bi-cloud-download-fill"></i>
-                        </button>
+                        <a th:href="@{download(path=${item.getPath()})}">
+                            <button type="button" class="btn btn-light text-success">
+                                <i class="bi bi-cloud-download"></i>
+                            </button>
+                        </a>
                     </td>
                     <td>
                         <button type="button" class="btn btn-light"><i class="bi bi-pencil-square text-primary"></i>

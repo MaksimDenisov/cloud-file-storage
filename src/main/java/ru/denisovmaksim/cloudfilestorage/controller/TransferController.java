@@ -29,13 +29,34 @@ import static ru.denisovmaksim.cloudfilestorage.config.ValidationConstants.PATH_
 @Slf4j
 @Profile({"dev", "prod"})
 @RequestMapping()
-public class FileTransferController {
+public class TransferController {
     private final FileService fileService;
+
+    @GetMapping("/download-folder")
+    public ResponseEntity<InputStreamResource> downloadZipFolder(@RequestParam() String path) {
+        try {
+            log.info("Zip folder from path {}", path);
+            InputStream inputStream = fileService.getZipFolderAsStream(path);
+
+            InputStreamResource resource = new InputStreamResource(inputStream);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "folder.zip");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentLength(-1) // or specify the length if known
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
     @GetMapping("/download")
     public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() String path) {
         try {
-            InputStream inputStream = fileService.downloadFile(path);
+            InputStream inputStream = fileService.getFileAsStream(path);
             InputStreamResource resource = new InputStreamResource(inputStream);
 
             HttpHeaders headers = new HttpHeaders();

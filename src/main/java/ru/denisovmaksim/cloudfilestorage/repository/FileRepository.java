@@ -5,6 +5,7 @@ import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 public interface FileRepository {
     void createFolder(Long userId, String pathOfCurrentUser, String folderName);
@@ -15,7 +16,10 @@ public interface FileRepository {
 
     void deleteObjects(Long authUserId, String folderName);
 
-    void uploadFile(Long authUserId, String path, MultipartFile file);
+    void saveObject(Long authUserId, String path, MultipartFile file);
 
-    InputStream downloadFile(Long userId, String path);
+    InputStream getObjectAsStream(Long userId, String path);
+
+    Map<String, InputStream> getObjectsAsStreams(Long authUserId, String path);
+
 }
