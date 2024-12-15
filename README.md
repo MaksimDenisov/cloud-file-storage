@@ -4,6 +4,9 @@
 #### Тех.задание.
 https://zhukovsd.github.io/java-backend-learning-course/projects/cloud-file-storage/
 
+
+[![Deploy](https://github.com/MaksimDenisov/cloud-file-storage/actions/workflows/deploy.yml/badge.svg)](https://github.com/MaksimDenisov/cloud-file-storage/actions/workflows/deploy.yml)
+
 ### Quality by Code Climate
 [![Maintainability](https://api.codeclimate.com/v1/badges/d03079dc7c034b59a341/maintainability)](https://codeclimate.com/github/MaksimDenisov/cloud-file-storage/maintainability)
 

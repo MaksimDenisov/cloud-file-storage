@@ -1,18 +1,29 @@
 services:
   app:
+    container_name: app
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-    expose:
-      - 9000
+    environment:
+      - JDBC_ROOT=root
+      - JDBC_PASSWORD=root
+      - JDBC_URL=jdbc:mysql://mysql:3306/file_storage
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=redis-password
+      - MINIO_URL=http://s3:9000
+      - MINIO_USER=minio-user
+      - MINIO_PASSWORD=password
     networks:
       - internal_network
+    restart: on-failure:5
     depends_on:
       - mysql
       - s3
       - redis
+    command: ["java", "-jar", "/usr/app/build/libs/cloud-file-storage.jar" ]
   mysql:
     container_name: mysql-container
     image: mysql:8
@@ -21,8 +32,11 @@ services:
     environment:
       MYSQL_DATABASE: file_storage
       MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
     expose:
       - 3306
+      - 33060
     networks:
       - internal_network
   s3:
@@ -39,7 +53,7 @@ services:
       - internal_network
     command: server /data --console-address ":9001"
   redis:
-    container_name: redis_container
+    container_name: redis-container
     image: redis:latest
     environment:
       REDIS_PASSWORD: redis-password

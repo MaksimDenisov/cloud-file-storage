@@ -3,9 +3,11 @@ spring:
     username: ${JDBC_ROOT:root}
     password: ${JDBC_PASSWORD:root}
     url: ${JDBC_URL:jdbc:mysql://127.0.0.1:3306/file_storage}
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: create
+      show-sql: true
   data:
     redis:
       host: ${REDIS_HOST:127.0.0.1}
