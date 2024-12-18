@@ -24,6 +24,5 @@ ENV MINIO_PASSWORD=password
 
 WORKDIR $APP_HOME
 RUN ls -al $APP_HOME
-COPY --from=TEMP_BUILD_IMAGE /usr/app/wait-for-it.sh $APP_HOME/wait-for-it.sh
 COPY --from=TEMP_BUILD_IMAGE /usr/app/build/libs/cloud-file-storage-0.0.1-SNAPSHOT.jar $APP_HOME/build/libs/cloud-file-storage.jar
 EXPOSE 8080
