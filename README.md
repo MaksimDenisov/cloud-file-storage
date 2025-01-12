@@ -14,21 +14,21 @@ https://zhukovsd.github.io/java-backend-learning-course/projects/cloud-file-stor
 [![Test Coverage](https://api.codeclimate.com/v1/badges/d03079dc7c034b59a341/test_coverage)](https://codeclimate.com/github/MaksimDenisov/cloud-file-storage/test_coverage)
 
 
-### This project is powered by:
+### This project used:
+![Java](https://img.shields.io/badge/Java-007396?style=flat&logo=openjdk)
 
-![Spring Boot](https://img.shields.io/badge/Powered%20by-Spring%20Boot-6DB33F?style=flat&logo=spring)
-![Thymeleaf](https://img.shields.io/badge/Powered%20by-Thymeleaf-005F0F?style=flat&logo=thymeleaf)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat&logo=spring)
+![Thymeleaf](https://img.shields.io/badge/Thymeleaf-005F0F?style=flat&logo=thymeleaf)
 
-![Java](https://img.shields.io/badge/Powered%20by-Java-007396?style=flat&logo=openjdk)
-![HTML5](https://img.shields.io/badge/Powered%20by-HTML5-E34F26?style=flat&logo=html5)
-![CSS3](https://img.shields.io/badge/Powered%20by-CSS3-1572B6?style=flat&logo=css3)
-![JavaScript](https://img.shields.io/badge/Powered%20by-JavaScript-F7DF1E?style=flat&logo=javascript)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=html5)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=css3)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat&logo=javascript)
 
-![MySQL](https://img.shields.io/badge/Powered%20by-MySQL-4479A1?style=flat&logo=mysql)
-![Redis](https://img.shields.io/badge/Powered%20by-Redis-DC382D?style=flat&logo=redis)
-![Minio](https://img.shields.io/badge/Powered%20by-MinIO-00B5E2?style=flat&logo=minio)
+![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat&logo=mysql)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat&logo=redis)
+![Minio](https://img.shields.io/badge/MinIO-00B5E2?style=flat&logo=minio)
 
-![Docker](https://img.shields.io/badge/Powered%20by-Docker-2496ED?style=flat&logo=docker)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker)
 
 
 
