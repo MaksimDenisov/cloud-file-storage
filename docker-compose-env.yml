@@ -1,28 +1,12 @@
 services:
-  cfs-app:
-    container_name: app
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    env_file:
-      - dev.env
-    networks:
-      - internal_network
-    restart: on-failure:5
-    depends_on:
-      - mysql
-      - s3
-      - redis
-    command: [ "java", "-jar", "/usr/app/build/libs/cloud-file-storage.jar" ]
   mysql:
     container_name: mysql-container
     image: mysql:8
     volumes:
       - mysql_volume:/var/lib/mysql
-    env_file:
-      - dev.env
+    environment:
+      MYSQL_DATABASE: file_storage
+      MYSQL_ROOT_PASSWORD: root
     ports:
       - "3306:3306"
     expose:
@@ -32,8 +16,9 @@ services:
   s3:
     container_name: file-storage-minio
     image: minio/minio:latest
-    env_file:
-      - dev.env
+    environment:
+      MINIO_ROOT_USER: minio-user
+      MINIO_ROOT_PASSWORD: password
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -47,8 +32,10 @@ services:
   redis:
     container_name: redis_container
     image: redis:latest
-    env_file:
-      - dev.env
+    environment:
+      REDIS_PASSWORD: redis-password
+      REDIS_USER: redis-user
+      REDIS_USER_PASSWORD: redis-user-password
     ports:
       - "6379:6379"
     expose:
