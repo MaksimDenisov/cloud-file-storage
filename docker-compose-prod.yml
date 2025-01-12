@@ -6,16 +6,8 @@ services:
       dockerfile: Dockerfile
     expose:
       - 8080
-    environment:
-      - JDBC_ROOT=root
-      - JDBC_PASSWORD=root
-      - JDBC_URL=jdbc:mysql://mysql:3306/file_storage
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=redis-password
-      - MINIO_URL=http://s3:9000
-      - MINIO_USER=minio-user
-      - MINIO_PASSWORD=password
+    env_file:
+      - prod.env
     networks:
       - nginx-net
     restart: on-failure:5
@@ -29,9 +21,8 @@ services:
     image: mysql:8
     volumes:
       - /srv/cfs/mysql:/var/lib/mysql
-    environment:
-      MYSQL_DATABASE: file_storage
-      MYSQL_ROOT_PASSWORD: root
+    env_file:
+      - prod.env
     expose:
       - 3306
       - 33060
@@ -40,9 +31,8 @@ services:
   s3:
     container_name: minio-container
     image: minio/minio:latest
-    environment:
-      MINIO_ROOT_USER: minio-user
-      MINIO_ROOT_PASSWORD: password
+    env_file:
+      - prod.env
     expose:
       - 9000
     volumes:
@@ -53,10 +43,8 @@ services:
   redis:
     container_name: redis-container
     image: redis:latest
-    environment:
-      REDIS_PASSWORD: redis-password
-      REDIS_USER: redis-user
-      REDIS_USER_PASSWORD: redis-user-password
+    env_file:
+      - prod.env
     expose:
       - 6379
     volumes:

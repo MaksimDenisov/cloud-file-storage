@@ -5,19 +5,13 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+    env:
+      JDBC_PASSWORD: root
+      REDIS_PASSWORD: redis-password
+      MINIO_ROOT_PASSWORD: password
     steps:
       - name: checkout repo
         uses: actions/checkout@v4
       - name: docker-compose
         run: make deploy
-        env:
-          JDBC_DB_NAME:
-          JDBC_ROOT:
-          JDBC_PASSWORD:
-          JDBC_URL:
-          REDIS_HOST:
-          REDIS_PORT:
-          REDIS_PASSWORD:
-          MINIO_URL:
-          MINIO_USER:
-          MINIO_PASSWORD:
+

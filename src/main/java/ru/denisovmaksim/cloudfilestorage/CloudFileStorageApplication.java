@@ -30,6 +30,10 @@ public class CloudFileStorageApplication {
                     System.getenv().getOrDefault("MINIO_USER", " Default value"));
             log.info("MINIO_PASSWORD = {}",
                     System.getenv().getOrDefault("MINIO_PASSWORD", " Default value"));
+            log.info("MINIO_ROOT_USER     = {}",
+                    System.getenv().getOrDefault("MINIO_ROOT_USER", " Default value"));
+            log.info("MINIO_ROOT_PASSWORD = {}",
+                    System.getenv().getOrDefault("MINIO_ROOT_PASSWORD", " Default value"));
         }
         new SpringApplicationBuilder(CloudFileStorageApplication.class)
                 .profiles(System.getenv().getOrDefault("APP_ENV", "dev"))
