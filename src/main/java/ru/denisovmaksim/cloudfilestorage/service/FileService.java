@@ -49,7 +49,7 @@ public class FileService {
     }
 
     public void createFolder(String path, String folderName) {
-        fileRepository.createFolder(getAuthUserId(), path, folderName);
+        fileRepository.createEmptyPath(getAuthUserId(), path, folderName);
     }
 
     public List<StorageObjectDTO> getContentOfDirectory(String path) {

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface FileRepository {
-    void createFolder(Long userId, String pathOfCurrentUser, String folderName);
+    void createEmptyPath(Long userId, String pathOfCurrentUser, String folderName);
 
     List<StorageObject> getStorageObjects(Long authUserId, String path);
 

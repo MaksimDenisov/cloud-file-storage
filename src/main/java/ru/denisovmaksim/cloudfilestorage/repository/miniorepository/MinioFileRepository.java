@@ -45,7 +45,7 @@ public class MinioFileRepository implements FileRepository {
         this.bucket = bucket;
     }
 
-    public void createFolder(Long userId, String path, String folderName) {
+    public void createEmptyPath(Long userId, String path, String folderName) {
         log.info("Create folder path = {} name = {} for user with id = {}", path, folderName, userId);
         MinioPath minioPath = new MinioPath(userId, path);
         interceptMinioExceptions(() -> {
