@@ -3,6 +3,7 @@ package ru.denisovmaksim.cloudfilestorage.repository.miniorepository;
 import io.minio.CopyObjectArgs;
 import io.minio.CopySource;
 import io.minio.GetObjectArgs;
+import io.minio.GetObjectResponse;
 import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.exceptions.StorageObjectNotFoundException;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
+import ru.denisovmaksim.cloudfilestorage.model.StorageObjectStream;
+import ru.denisovmaksim.cloudfilestorage.model.StorageObjectsStreams;
 import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 
 import java.io.ByteArrayInputStream;
@@ -129,30 +132,36 @@ public class MinioFileRepository implements FileRepository {
     }
 
     @Override
-    public InputStream getObjectAsStream(Long userId, String path) {
+    public StorageObjectStream getObjectAsStream(Long userId, String path) {
         MinioPath minioPath = new MinioPath(userId, path);
-        return interceptMinioExceptions(() -> minioClient.getObject(GetObjectArgs.builder()
-                .bucket(bucket)
-                .object(minioPath.getPathByMinio())
-                .build()));
+        return interceptMinioExceptions(() -> {
+            GetObjectResponse response = minioClient.getObject(GetObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(minioPath.getPathByMinio())
+                    .build());
+            return new StorageObjectStream(path, response);
+        });
     }
 
     @Override
-    public Map<String, InputStream> getObjectsAsStreams(Long userId, String path) {
+    public StorageObjectsStreams getObjectsAsStreams(Long userId, String path) {
         MinioPath minioPath = new MinioPath(userId, path);
         Map<String, InputStream> result = new HashMap<>();
         return interceptMinioExceptions(() -> {
             Iterable<Result<Item>> minioItems = getMinioItemsRecursive(minioPath);
             for (Result<Item> resultItem : minioItems) {
                 String objectName = resultItem.get().objectName();
-                String name = objectName.replace(minioPath.getUserFolder(), "");
+                String name = objectName.replace(minioPath.getPathByMinio(), "");
+                if (name.isEmpty()) {
+                    continue;
+                }
                 InputStream objectInputStream = minioClient.getObject(GetObjectArgs.builder()
                         .bucket(bucket)
                         .object(objectName)
                         .build());
                 result.put(name, objectInputStream);
             }
-            return result;
+            return new StorageObjectsStreams(path, result);
         });
     }
 

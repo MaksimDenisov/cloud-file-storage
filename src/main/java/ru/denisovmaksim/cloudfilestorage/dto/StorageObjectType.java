@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.model;
+package ru.denisovmaksim.cloudfilestorage.dto;
 
 public enum StorageObjectType {
     FOLDER,

@@ -2,10 +2,10 @@ package ru.denisovmaksim.cloudfilestorage.repository;
 
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
+import ru.denisovmaksim.cloudfilestorage.model.StorageObjectStream;
+import ru.denisovmaksim.cloudfilestorage.model.StorageObjectsStreams;
 
-import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 public interface FileRepository {
     void createEmptyPath(Long userId, String pathOfCurrentUser, String folderName);
@@ -18,8 +18,8 @@ public interface FileRepository {
 
     void saveObject(Long authUserId, String path, MultipartFile file);
 
-    InputStream getObjectAsStream(Long userId, String path);
+    StorageObjectStream getObjectAsStream(Long userId, String path);
 
-    Map<String, InputStream> getObjectsAsStreams(Long authUserId, String path);
+    StorageObjectsStreams getObjectsAsStreams(Long authUserId, String path);
 
 }

@@ -3,14 +3,11 @@ package ru.denisovmaksim.cloudfilestorage.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.io.InputStream;
+
 @AllArgsConstructor
 @Getter
-public class StorageObjectDTO {
-    private final String path;
-
+public class NamedStreamDTO {
     private final String name;
-
-    private final StorageObjectType type;
-
-    private final Long size;
+    private final InputStream stream;
 }

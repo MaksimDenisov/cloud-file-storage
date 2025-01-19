@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.service.FileService;
 
 import java.io.InputStream;
@@ -36,12 +37,12 @@ public class TransferController {
     public ResponseEntity<InputStreamResource> downloadZipFolder(@RequestParam() String path) {
         try {
             log.info("Zip folder from path {}", path);
-            InputStream inputStream = fileService.getZipFolderAsStream(path);
-
+            NamedStreamDTO dto = fileService.getZipFolderAsStream(path);
+            InputStream inputStream = dto.getStream();
             InputStreamResource resource = new InputStreamResource(inputStream);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "folder.zip");
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s", dto.getName()));
 
             return ResponseEntity.ok()
                     .headers(headers)
@@ -56,11 +57,12 @@ public class TransferController {
     @GetMapping("/download")
     public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() String path) {
         try {
-            InputStream inputStream = fileService.getFileAsStream(path);
+            NamedStreamDTO dto = fileService.getFileAsStream(path);
+            InputStream inputStream = dto.getStream();
             InputStreamResource resource = new InputStreamResource(inputStream);
 
             HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "file");
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s", dto.getName()));
 
             return ResponseEntity.ok()
                     .headers(headers)

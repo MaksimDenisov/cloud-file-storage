@@ -5,9 +5,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.dto.LinkDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
 import ru.denisovmaksim.cloudfilestorage.exceptions.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
+import ru.denisovmaksim.cloudfilestorage.model.StorageObjectStream;
+import ru.denisovmaksim.cloudfilestorage.model.StorageObjectsStreams;
 import ru.denisovmaksim.cloudfilestorage.model.User;
 import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 import ru.denisovmaksim.cloudfilestorage.repository.UserRepository;
@@ -17,6 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -76,15 +81,19 @@ public class FileService {
         fileRepository.deleteObjects(getAuthUserId(), parentPath + fileName);
     }
 
-    public InputStream getFileAsStream(String path) {
-        return fileRepository.getObjectAsStream(getAuthUserId(), path);
+    public NamedStreamDTO getFileAsStream(String path) {
+        StorageObjectStream storageObjectStream = fileRepository.getObjectAsStream(getAuthUserId(), path);
+        String encodedFileName = URLEncoder.encode(storageObjectStream.getName(), StandardCharsets.UTF_8)
+                .replace("+", "%20");
+        return new NamedStreamDTO(encodedFileName, storageObjectStream.getStream());
     }
 
-    public InputStream getZipFolderAsStream(String path) {
+    public NamedStreamDTO getZipFolderAsStream(String path) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        StorageObjectsStreams storageObjects = fileRepository.getObjectsAsStreams(getAuthUserId(), path);
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
-            Map<String, InputStream> map = fileRepository.getObjectsAsStreams(getAuthUserId(), path);
-            for (Map.Entry<String, InputStream> entry :map.entrySet()) {
+            Map<String, InputStream> map = storageObjects.getStreams();
+            for (Map.Entry<String, InputStream> entry : map.entrySet()) {
                 ZipEntry zipEntry = new ZipEntry(entry.getKey());
                 zipOutputStream.putNextEntry(zipEntry);
                 byte[] buffer = new byte[1024];
@@ -95,10 +104,12 @@ public class FileService {
                 }
                 zipOutputStream.closeEntry();
             }
-            } catch (IOException e) {
+        } catch (IOException e) {
             throw new FileStorageException(e);
         }
-        return new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+        String encodedFileName = URLEncoder.encode(storageObjects.getName() + ".zip", StandardCharsets.UTF_8)
+                .replace("+", "%20");
+        return new NamedStreamDTO(encodedFileName, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
     }
 
     private Long getAuthUserId() {
