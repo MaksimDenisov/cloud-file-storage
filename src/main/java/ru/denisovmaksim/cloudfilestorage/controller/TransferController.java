@@ -1,6 +1,5 @@
 package ru.denisovmaksim.cloudfilestorage.controller;
 
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -19,11 +18,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.service.FileService;
+import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
 import java.io.InputStream;
 
-import static ru.denisovmaksim.cloudfilestorage.config.ValidationConstants.ERROR_MSG_PATH_INVALID_CHARACTERS;
-import static ru.denisovmaksim.cloudfilestorage.config.ValidationConstants.PATH_VALIDATION_REGEXP;
 
 @Controller
 @AllArgsConstructor
@@ -34,7 +32,7 @@ public class TransferController {
     private final FileService fileService;
 
     @GetMapping("/download-folder")
-    public ResponseEntity<InputStreamResource> downloadZipFolder(@RequestParam() String path) {
+    public ResponseEntity<InputStreamResource> downloadZipFolder(@RequestParam() @ValidPath String path) {
         try {
             log.info("Zip folder from path {}", path);
             NamedStreamDTO dto = fileService.getZipFolderAsStream(path);
@@ -55,7 +53,7 @@ public class TransferController {
     }
 
     @GetMapping("/download")
-    public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() String path) {
+    public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() @ValidPath String path) {
         try {
             NamedStreamDTO dto = fileService.getFileAsStream(path);
             InputStream inputStream = dto.getStream();
@@ -75,12 +73,10 @@ public class TransferController {
     }
 
     @PostMapping("/upload")
-    public String uploadFile(
-            @Pattern(regexp = PATH_VALIDATION_REGEXP,
-                    message = ERROR_MSG_PATH_INVALID_CHARACTERS)
-            @ModelAttribute("path") String path,
-            @RequestParam("file") MultipartFile file,
-            RedirectAttributes attributes) {
+    public String uploadFile(@ModelAttribute("path")
+                             @ValidPath String path,
+                             @RequestParam("file") MultipartFile file,
+                             RedirectAttributes attributes) {
         if (!path.isEmpty()) {
             attributes.addAttribute("path", path);
         }
