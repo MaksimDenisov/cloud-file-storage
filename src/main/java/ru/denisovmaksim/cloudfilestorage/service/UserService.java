@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.denisovmaksim.cloudfilestorage.model.User;
 import ru.denisovmaksim.cloudfilestorage.repository.UserRepository;
-import ru.denisovmaksim.cloudfilestorage.exceptions.UserAlreadyExistException;
+import ru.denisovmaksim.cloudfilestorage.exception.UserAlreadyExistException;
 
 import java.util.List;
 

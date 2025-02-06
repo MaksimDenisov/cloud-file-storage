@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import ru.denisovmaksim.cloudfilestorage.exceptions.StorageObjectNotFoundException;
+import ru.denisovmaksim.cloudfilestorage.exception.StorageObjectNotFoundException;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObjectStream;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObjectsStreams;

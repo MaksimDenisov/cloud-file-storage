@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.exceptions;
+package ru.denisovmaksim.cloudfilestorage.exception;
 
 public class StorageObjectNotFoundException extends RuntimeException {
 

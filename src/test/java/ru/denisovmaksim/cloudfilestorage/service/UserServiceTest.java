@@ -11,7 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import ru.denisovmaksim.cloudfilestorage.model.User;
 import ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioFileRepository;
 import ru.denisovmaksim.cloudfilestorage.repository.UserRepository;
-import ru.denisovmaksim.cloudfilestorage.exceptions.UserAlreadyExistException;
+import ru.denisovmaksim.cloudfilestorage.exception.UserAlreadyExistException;
 
 import java.util.Optional;
 

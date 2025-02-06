@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.dto.LinkDTO;
 import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
-import ru.denisovmaksim.cloudfilestorage.exceptions.FileStorageException;
+import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObjectStream;
 import ru.denisovmaksim.cloudfilestorage.model.StorageObjectsStreams;

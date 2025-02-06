@@ -2,7 +2,7 @@ package ru.denisovmaksim.cloudfilestorage.repository.miniorepository;
 
 import io.minio.errors.MinioException;
 import lombok.extern.slf4j.Slf4j;
-import ru.denisovmaksim.cloudfilestorage.exceptions.FileStorageException;
+import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;

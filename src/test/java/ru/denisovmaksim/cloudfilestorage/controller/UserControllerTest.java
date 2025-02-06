@@ -17,7 +17,7 @@ import ru.denisovmaksim.cloudfilestorage.GlobalControllerAdvice;
 import ru.denisovmaksim.cloudfilestorage.model.User;
 import ru.denisovmaksim.cloudfilestorage.service.AuthenticationService;
 import ru.denisovmaksim.cloudfilestorage.service.UserService;
-import ru.denisovmaksim.cloudfilestorage.exceptions.UserAlreadyExistException;
+import ru.denisovmaksim.cloudfilestorage.exception.UserAlreadyExistException;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;

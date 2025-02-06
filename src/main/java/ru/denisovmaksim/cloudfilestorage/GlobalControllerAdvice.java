@@ -12,8 +12,8 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.controller.UserController;
-import ru.denisovmaksim.cloudfilestorage.exceptions.StorageObjectNotFoundException;
-import ru.denisovmaksim.cloudfilestorage.exceptions.UserAlreadyExistException;
+import ru.denisovmaksim.cloudfilestorage.exception.StorageObjectNotFoundException;
+import ru.denisovmaksim.cloudfilestorage.exception.UserAlreadyExistException;
 
 import java.util.stream.Collectors;
 
