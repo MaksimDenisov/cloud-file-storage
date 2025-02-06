@@ -9,12 +9,11 @@ import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
 import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
-import ru.denisovmaksim.cloudfilestorage.model.StorageObjectStream;
-import ru.denisovmaksim.cloudfilestorage.model.StorageObjectsStreams;
+import ru.denisovmaksim.cloudfilestorage.storage.MinioFileRepository;
+import ru.denisovmaksim.cloudfilestorage.storage.object.StorageObjectStream;
+import ru.denisovmaksim.cloudfilestorage.storage.object.StorageObjectsStreams;
 import ru.denisovmaksim.cloudfilestorage.model.User;
-import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
 import ru.denisovmaksim.cloudfilestorage.repository.UserRepository;
-import ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioFileRepository;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,7 +33,7 @@ import java.util.zip.ZipOutputStream;
 @Service
 @Profile({"dev", "prod"})
 public class FileService {
-    private final FileRepository fileRepository;
+    private final MinioFileRepository fileRepository;
     private final UserRepository userRepository;
 
     public FileService(MinioFileRepository fileRepository,

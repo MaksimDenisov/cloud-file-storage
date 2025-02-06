@@ -1,7 +1,7 @@
 package ru.denisovmaksim.cloudfilestorage.mapper;
 
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
-import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
+import ru.denisovmaksim.cloudfilestorage.storage.object.StorageObject;
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectType;
 
 public class StorageObjectDTOMapper {

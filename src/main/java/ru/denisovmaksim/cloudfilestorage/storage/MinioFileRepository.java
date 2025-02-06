@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.repository.miniorepository;
+package ru.denisovmaksim.cloudfilestorage.storage;
 
 import io.minio.CopyObjectArgs;
 import io.minio.CopySource;
@@ -16,10 +16,9 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.exception.StorageObjectNotFoundException;
-import ru.denisovmaksim.cloudfilestorage.model.StorageObject;
-import ru.denisovmaksim.cloudfilestorage.model.StorageObjectStream;
-import ru.denisovmaksim.cloudfilestorage.model.StorageObjectsStreams;
-import ru.denisovmaksim.cloudfilestorage.repository.FileRepository;
+import ru.denisovmaksim.cloudfilestorage.storage.object.StorageObject;
+import ru.denisovmaksim.cloudfilestorage.storage.object.StorageObjectStream;
+import ru.denisovmaksim.cloudfilestorage.storage.object.StorageObjectsStreams;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -28,12 +27,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ru.denisovmaksim.cloudfilestorage.repository.miniorepository.MinioExceptionHandler.interceptMinioExceptions;
-
 @Component
 @Slf4j
 @Profile({"dev", "prod"})
-public class MinioFileRepository implements FileRepository {
+public class MinioFileRepository {
     // https://min.io/docs/minio/linux/developers/java/minio-java.html
     // Examples
     // https://github.com/minio/minio-java/tree/release/examples
@@ -51,7 +48,7 @@ public class MinioFileRepository implements FileRepository {
     public void createEmptyPath(Long userId, String path, String folderName) {
         log.info("Create folder path = {} name = {} for user with id = {}", path, folderName, userId);
         MinioPath minioPath = new MinioPath(userId, path);
-        interceptMinioExceptions(() -> {
+        MinioExceptionHandler.interceptMinioExceptions(() -> {
                     String newFolderName = minioPath.getPathByMinio() + folderName + "/";
                     minioClient.putObject(
                             PutObjectArgs.builder()
@@ -69,7 +66,7 @@ public class MinioFileRepository implements FileRepository {
         Iterable<Result<Item>> resultItems = getMinioItems(minioPath);
         List<StorageObject> objects = new ArrayList<>();
         for (Result<Item> resultItem : resultItems) {
-            Item item = interceptMinioExceptions(resultItem::get);
+            Item item = MinioExceptionHandler.interceptMinioExceptions(resultItem::get);
             String minioName = item.objectName();
             if (!minioName.equals(minioPath.getPathByMinio())) {
                 StorageObject object = toStorageObjects(minioPath, item);
@@ -82,11 +79,10 @@ public class MinioFileRepository implements FileRepository {
         return objects;
     }
 
-    @Override
     public void renameFolder(Long userId, String path, String newFolderName) {
         log.info("Rename folder {} for user with id = {}", path, userId);
         MinioPath minioPath = new MinioPath(userId, path);
-        interceptMinioExceptions(() -> {
+        MinioExceptionHandler.interceptMinioExceptions(() -> {
             Iterable<Result<Item>> minioItems = getMinioItemsRecursive(new MinioPath(userId, path));
             for (Result<Item> result : minioItems) {
                 String sourceName = result.get().objectName();
@@ -98,14 +94,13 @@ public class MinioFileRepository implements FileRepository {
         deleteObjects(userId, path);
     }
 
-    @Override
     public void deleteObjects(Long userId, String path) {
         log.info("Delete folder {} for user with id = {}", path, userId);
         MinioPath minioPath = new MinioPath(userId, path);
         if (minioPath.isRoot()) {
             return;
         }
-        interceptMinioExceptions(() -> {
+        MinioExceptionHandler.interceptMinioExceptions(() -> {
             Iterable<Result<Item>> minioItems = getMinioItemsRecursive(minioPath);
             for (Result<Item> resultItem : minioItems) {
                 minioClient.removeObject(
@@ -116,10 +111,9 @@ public class MinioFileRepository implements FileRepository {
         });
     }
 
-    @Override
     public void saveObject(Long userId, String path, MultipartFile file) {
         MinioPath minioPath = new MinioPath(userId, path);
-        interceptMinioExceptions(() -> {
+        MinioExceptionHandler.interceptMinioExceptions(() -> {
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(bucket)
@@ -131,10 +125,9 @@ public class MinioFileRepository implements FileRepository {
         });
     }
 
-    @Override
     public StorageObjectStream getObjectAsStream(Long userId, String path) {
         MinioPath minioPath = new MinioPath(userId, path);
-        return interceptMinioExceptions(() -> {
+        return MinioExceptionHandler.interceptMinioExceptions(() -> {
             GetObjectResponse response = minioClient.getObject(GetObjectArgs.builder()
                     .bucket(bucket)
                     .object(minioPath.getPathByMinio())
@@ -143,11 +136,10 @@ public class MinioFileRepository implements FileRepository {
         });
     }
 
-    @Override
     public StorageObjectsStreams getObjectsAsStreams(Long userId, String path) {
         MinioPath minioPath = new MinioPath(userId, path);
         Map<String, InputStream> result = new HashMap<>();
-        return interceptMinioExceptions(() -> {
+        return MinioExceptionHandler.interceptMinioExceptions(() -> {
             Iterable<Result<Item>> minioItems = getMinioItemsRecursive(minioPath);
             for (Result<Item> resultItem : minioItems) {
                 String objectName = resultItem.get().objectName();
@@ -195,7 +187,7 @@ public class MinioFileRepository implements FileRepository {
                         .build());
         long count = 0;
         for (Result<Item> minioItem : minioItems) {
-            Item item = interceptMinioExceptions(minioItem::get);
+            Item item = MinioExceptionHandler.interceptMinioExceptions(minioItem::get);
             if (!item.objectName().equals(minioPath.getPathByMinio())) {
                 count++;
             }
@@ -217,7 +209,7 @@ public class MinioFileRepository implements FileRepository {
     }
 
     private void copyObject(String sourceName, String destName) {
-        interceptMinioExceptions(() ->
+        MinioExceptionHandler.interceptMinioExceptions(() ->
                 minioClient.copyObject(
                         CopyObjectArgs.builder()
                                 .bucket(bucket)

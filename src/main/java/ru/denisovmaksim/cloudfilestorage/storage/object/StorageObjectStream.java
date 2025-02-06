@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.model;
+package ru.denisovmaksim.cloudfilestorage.storage.object;
 
 import lombok.Getter;
 

@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.repository.miniorepository;
+package ru.denisovmaksim.cloudfilestorage.storage;
 
 import io.minio.errors.MinioException;
 import lombok.extern.slf4j.Slf4j;

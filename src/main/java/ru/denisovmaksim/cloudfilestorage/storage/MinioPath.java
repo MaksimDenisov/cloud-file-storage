@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.repository.miniorepository;
+package ru.denisovmaksim.cloudfilestorage.storage;
 
 
 import lombok.Getter;
