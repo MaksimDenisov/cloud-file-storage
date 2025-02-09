@@ -4,17 +4,31 @@
 </head>
 <body>
 <div th:fragment="breadcrumbs-path (links)">
-    <div class="row">
-        <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '>';">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li th:each="item, iStat: ${links}" th:class="breadcrumb-item">
-                    <a th:if="!${iStat.last}" th:href="@{/(path=${item.path})}" th:text="${item.name}"></a>
-                    <span class="breadcrumb-item active" th:if="${iStat.last}" th:text="${item.name}"></span>
-                </li>
-            </ol>
-        </nav>
-    </div>
+
+    <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '>';">
+        <div class="row">
+            <div class="col-8">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li th:each="item, iStat: ${links}" th:class="breadcrumb-item">
+                        <a th:if="!${iStat.last}" th:href="@{/(path=${item.path})}" th:text="${item.name}"></a>
+                        <span class="breadcrumb-item active" th:if="${iStat.last}" th:text="${item.name}"></span>
+                    </li>
+                </ol>
+            </div>
+            <div class="col-4">
+                <button type="button" class="btn btn-primary col-4 m-3 align-middle float-end" data-bs-toggle="modal"
+                        data-bs-target="#add-folder">
+                    Add folder
+                </button>
+                <button type="button" class="btn btn-primary col-4 m-3 align-middle float-end" data-bs-toggle="modal"
+                        data-bs-target="#dialog-upload">
+                    Upload
+                </button>
+            </div>
+        </div>
+    </nav>
+
 </div>
 </body>
 </html>
