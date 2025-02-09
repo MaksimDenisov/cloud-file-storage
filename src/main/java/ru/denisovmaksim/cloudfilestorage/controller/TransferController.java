@@ -32,7 +32,7 @@ public class TransferController {
     private final FileService fileService;
 
     @GetMapping("/download-folder")
-    public ResponseEntity<InputStreamResource> downloadZipFolder(@RequestParam() @ValidPath String path) {
+    public ResponseEntity<InputStreamResource> downloadZipFolder(@RequestParam() String path) {
         try {
             log.info("Zip folder from path {}", path);
             NamedStreamDTO dto = fileService.getZipFolderAsStream(path);
@@ -53,7 +53,7 @@ public class TransferController {
     }
 
     @GetMapping("/download")
-    public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() @ValidPath String path) {
+    public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() String path) {
         try {
             NamedStreamDTO dto = fileService.getFileAsStream(path);
             InputStream inputStream = dto.getStream();

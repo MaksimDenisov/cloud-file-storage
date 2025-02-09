@@ -15,9 +15,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
 @Retention(RUNTIME)
-@Constraint(validatedBy = FileNameValidator.class)
+@Constraint(validatedBy = NameValidator.class)
 @Documented
-public @interface ValidFileName {
+public @interface ValidName {
 
     String message() default "Name must not contains / \\ : * ? \\ \" < > | ";;
     Class<?>[] groups() default {};

@@ -1,6 +1,6 @@
 package ru.denisovmaksim.cloudfilestorage.dto;
 
-public enum StorageObjectType {
+public enum FileType {
     FOLDER,
     UNKNOWN_FILE,
     IMAGE,

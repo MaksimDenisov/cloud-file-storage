@@ -1,13 +1,13 @@
 package ru.denisovmaksim.cloudfilestorage.mapper;
 
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
-import ru.denisovmaksim.cloudfilestorage.storage.object.StorageObject;
-import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectType;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageObject;
+import ru.denisovmaksim.cloudfilestorage.dto.FileType;
 
 public class StorageObjectDTOMapper {
     public static StorageObjectDTO toDTO(StorageObject object) {
-        StorageObjectType type = object.isFolder()
-                ? StorageObjectType.FOLDER : StorageObjectType.UNKNOWN_FILE;
-        return new StorageObjectDTO(object.getPath(), object.getName(), type, object.getSize());
+        FileType type = object.isFolder()
+                ? FileType.FOLDER : FileType.UNKNOWN_FILE;
+        return new StorageObjectDTO(object.getParentPath(), object.getName(), type, object.getSize());
     }
 }

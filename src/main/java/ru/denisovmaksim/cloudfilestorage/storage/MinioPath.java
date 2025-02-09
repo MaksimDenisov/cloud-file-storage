@@ -15,11 +15,11 @@ class MinioPath {
         pathByMinio = userFolder + path;
     }
 
-    public boolean isRoot() {
+    boolean isRoot() {
         return getPathByMinio().equals(userFolder);
     }
 
-    public String getParentMinioPath() {
+    String getParentMinioPath() {
         String[] elements = pathByUser.split("/");
         StringBuilder builder = new StringBuilder(userFolder);
         for (int i = 0; i < elements.length - 1; i++) {
@@ -27,5 +27,13 @@ class MinioPath {
                     .append("/");
         }
         return builder.toString();
+    }
+
+    String extractPathByUser(String fullPath) {
+        return fullPath.replace(getUserFolder(), "");
+    }
+
+    boolean isNotSame(String fullPath) {
+        return !fullPath.equals(getPathByMinio());
     }
 }

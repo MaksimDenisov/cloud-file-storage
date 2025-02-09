@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.storage.object;
+package ru.denisovmaksim.cloudfilestorage.storage;
 
 import lombok.Getter;
 
@@ -8,7 +8,7 @@ import java.io.InputStream;
 public class StorageObjectStream extends StorageObject {
     private final InputStream stream;
 
-    public StorageObjectStream(String path, InputStream stream) {
+    StorageObjectStream(String path, InputStream stream) {
         super(path);
         this.stream = stream;
     }

@@ -9,7 +9,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import ru.denisovmaksim.cloudfilestorage.model.User;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioFileRepository;
+import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
 import ru.denisovmaksim.cloudfilestorage.repository.UserRepository;
 import ru.denisovmaksim.cloudfilestorage.exception.UserAlreadyExistException;
 
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
     @Mock
-    private MinioFileRepository minioRepository;
+    private MinioFileStorage minioRepository;
     @Mock
     private UserRepository userRepository;
     @InjectMocks

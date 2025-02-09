@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.service.FileService;
-import ru.denisovmaksim.cloudfilestorage.validation.ValidFileName;
-import ru.denisovmaksim.cloudfilestorage.validation.ValidFolderName;
+import ru.denisovmaksim.cloudfilestorage.validation.ValidName;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
 
@@ -30,7 +29,7 @@ public class FileExplorerController {
 
     @PostMapping("/add-folder")
     public String addFolder(@ModelAttribute("folder-name")
-                            @ValidFolderName String folderName,
+                            @ValidName String folderName,
                             @ModelAttribute("path")
                             @ValidPath String path,
                             RedirectAttributes redirectAttributes) {
@@ -57,7 +56,7 @@ public class FileExplorerController {
     public String renameFolder(@ModelAttribute("redirect-path")
                                @ValidPath String redirectPath,
                                @ModelAttribute("folder-name")
-                               @ValidFolderName String folderName,
+                               @ValidName String folderName,
                                @ModelAttribute("path")
                                @ValidPath String folderPath,
                                RedirectAttributes redirectAttributes) {
@@ -87,7 +86,7 @@ public class FileExplorerController {
     public String deleteFile(@ModelAttribute("parent-path")
                              @ValidPath String parentPath,
                              @ModelAttribute("file-name")
-                             @ValidFileName String fileName,
+                             @ValidName String fileName,
                              RedirectAttributes redirectAttributes) {
         log.info("Delete file with path {}", fileName);
         fileService.deleteFile(parentPath, fileName);
