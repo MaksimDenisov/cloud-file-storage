@@ -43,7 +43,7 @@ public class MinioFileStorage {
         this.bucket = bucket;
     }
 
-    public void createEmptyPath(Long userId, String path, String folderName) {
+    public void createEmptyFolder(Long userId, String path, String folderName) {
         log.info("Create folder path = {} name = {} for user with id = {}", path, folderName, userId);
         MinioPath minioPath = new MinioPath(userId, path);
         MinioExceptionHandler.interceptMinioExceptions(() -> {
