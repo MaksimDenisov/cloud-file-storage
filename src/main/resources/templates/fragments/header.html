@@ -7,10 +7,15 @@
     <div class="navbar navbar-dark bg-dark shadow-sm mb-3">
         <div class="container-fluid d-flex justify-content-between">
             <p class="h3 text-start text-white px-5" th:text="${user} + '\'s files.'"></p>
+            <form class="form-inline my-2 my-lg-0 text-end d-flex align-items-center ms-auto">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
             <div class="col-md-3 text-end">
                 <a href="/sign-out" class="btn btn-outline-danger" th:text="'Sign out    ' + ${user}"></a>
             </div>
         </div>
+
     </div>
 </div>
 
