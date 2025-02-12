@@ -1,6 +1,7 @@
 package ru.denisovmaksim.cloudfilestorage.storage;
 
 
+import io.minio.messages.Item;
 import lombok.Getter;
 
 @Getter
@@ -33,7 +34,7 @@ class MinioPath {
         return fullPath.replace(getUserFolder(), "");
     }
 
-    boolean isNotSame(String fullPath) {
-        return !fullPath.equals(getPathByMinio());
+    boolean equalsMinioItem(Item item) {
+        return pathByMinio.equals(item.objectName());
     }
 }
