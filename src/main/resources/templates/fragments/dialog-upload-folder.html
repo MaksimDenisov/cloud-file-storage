@@ -3,8 +3,8 @@
 <head>
 </head>
 <body>
-<div th:fragment="dialog-upload (currentpath)">
-    <div class="modal fade" id="dialog-upload" tabindex="-1" role="dialog" aria-labelledby="dialog-upload-label"
+<div th:fragment="dialog-upload-folder (currentpath)">
+    <div class="modal fade" id="dialog-upload-folder" tabindex="-1" role="dialog" aria-labelledby="dialog-upload-label"
          aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -14,19 +14,22 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
+
                 <div class="modal-body">
-                    <form id="upload-form" action="/upload" enctype="multipart/form-data" method="post">
+                    <form id="upload-folder-form" action="/upload-folder" enctype="multipart/form-data" method="post">
                         <div data-mdb-input-init class="form-outline mb-4">
-                            <label for="formFile" class="form-label">Upload file.</label>
+                            <label for="formFolder" class="form-label">Upload folder.</label>
                             <input type="hidden" name="path" th:value="${currentpath}">
-                            <input class="form-control" type="file" id="formFile" name="file">
+                            <input class="form-control" type="file" id="formFolder" name="files"
+                                   webkitdirectory directory multiple>
                         </div>
                     </form>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary"
-                            onclick="$('#upload-form').submit();">Upload
+                            onclick="$('#upload-folder-form').submit();">Upload
                     </button>
                 </div>
             </div>

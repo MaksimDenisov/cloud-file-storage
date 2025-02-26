@@ -111,6 +111,10 @@ public class FileService {
         return new NamedStreamDTO(encodedFileName, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
     }
 
+    public void uploadFolder(String path, List<MultipartFile> files) {
+        files.forEach(file -> fileRepository.saveObject(getAuthUserId(), path, file));
+    }
+
     private Long getAuthUserId() {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByName(userName)

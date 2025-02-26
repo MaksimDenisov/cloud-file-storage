@@ -21,6 +21,7 @@ import ru.denisovmaksim.cloudfilestorage.service.FileService;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
 import java.io.InputStream;
+import java.util.List;
 
 
 @Controller
@@ -72,7 +73,7 @@ public class TransferController {
         }
     }
 
-    @PostMapping("/upload")
+    @PostMapping("/upload-file")
     public String uploadFile(@ModelAttribute("path")
                              @ValidPath String path,
                              @RequestParam("file") MultipartFile file,
@@ -87,6 +88,22 @@ public class TransferController {
         }
         log.info("Upload file with name {}", file.getOriginalFilename());
         fileService.uploadFile(path, file);
+        return "redirect:/";
+    }
+
+    @PostMapping("/upload-folder")
+    public String uploadFolder(@ModelAttribute("path")
+                             @ValidPath String path,
+                             @RequestParam("files") List<MultipartFile> files,
+                             RedirectAttributes attributes) {
+        if (!path.isEmpty()) {
+            attributes.addAttribute("path", path);
+        }
+        log.info("Folder" + path);
+        for (MultipartFile file : files) {
+            log.info("Upload file: " + file.getOriginalFilename());
+        }
+        fileService.uploadFolder(path, files);
         return "redirect:/";
     }
 }

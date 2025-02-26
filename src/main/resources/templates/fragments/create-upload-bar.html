@@ -1,0 +1,30 @@
+<div th:fragment="create-upload-bar">
+    <div class="row">
+        <div class="float-end">
+            <button type="button" class="btn btn-success col-1 m-3 float-end" data-bs-toggle="modal"
+                    data-bs-target="#dialog-upload-file">
+                Upload file
+            </button>
+            <button id="button-upload-folder" type="button" class="btn btn-primary col-1 m-3 float-end"
+                    data-bs-toggle="modal"
+                    data-bs-target="#dialog-upload-folder">
+                Upload folder
+            </button>
+            <button type="button" class="btn btn-primary col-1 m-3 float-end" data-bs-toggle="modal"
+                    data-bs-target="#add-folder">
+                Create folder
+            </button>
+        </div>
+    </div>
+    <div th:replace="~{fragments/dialog-create-folder :: dialog-create-folder (${currentPath})}"></div>
+    <div th:replace="~{fragments/dialog-upload-file :: dialog-upload-file (${currentPath})}"></div>
+    <div th:replace="~{fragments/dialog-upload-folder :: dialog-upload-folder (${currentPath})}"></div>
+    <script>
+        var isFirefox = /Firefox/.test(navigator.userAgent);
+        if (isFirefox) {
+            var fileInput = document.getElementById('button-upload-folder');
+            fileInput.hidden = true;
+        }
+    </script>
+
+</div>

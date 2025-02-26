@@ -3,23 +3,16 @@
 <!-- https://frontbackend.com/thymeleaf/spring-boot-bootstrap-thymeleaf-table -->
 <section layout:fragment="content">
 
-    <div th:insert="~{fragments/header::authenticated(${username})}"></div>
+    <div th:replace="~{fragments/header::authenticated(${username})}"></div>
 
-    <div th:insert="~{fragments/flash-message::flash-message (type=${flashType}, message=${flashMsg})}"></div>
+    <div th:replace="~{fragments/flash-message::flash-message (type=${flashType}, message=${flashMsg})}"></div>
 
     <div class="row">
-
         <main class="overflow-auto px-4">
-
-            <div th:insert="~{fragments/breadcrumbs-path :: breadcrumbs-path (${breadcrumbs})}"></div>
-
-            <div th:insert="~{fragments/dialog-create-folder :: dialog-create-folder (${currentPath})}"></div>
-            <div th:insert="~{fragments/dialog-upload :: dialog-upload (${currentPath})}"></div>
-
-            <div th:insert="~{fragments/files::files(${storageObjects})}"></div>
-
+            <div th:replace="~{fragments/create-upload-bar :: create-upload-bar}"></div>
+            <div th:replace="~{fragments/breadcrumbs-path :: breadcrumbs-path (${breadcrumbs})}"></div>
+            <div th:replace="~{fragments/files::files(${storageObjects})}"></div>
         </main>
     </div>
-
 </section>
 </html>
