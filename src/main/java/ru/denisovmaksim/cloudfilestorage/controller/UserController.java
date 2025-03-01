@@ -34,14 +34,14 @@ public class UserController {
             attributes.addFlashAttribute("flashMsg", "Incorrect login or password.");
             return "redirect:sign-in";
         }
-        return "sign-in";
+        return "auth/sign-in";
 
     }
 
     @GetMapping(SIGN_UP)
     public String getSignUpPage() {
         log.info("GET: Sign up");
-        return "sign-up";
+        return "auth/sign-up";
     }
 
     @PostMapping(SIGN_UP)

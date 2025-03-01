@@ -16,9 +16,9 @@
             </button>
         </div>
     </div>
-    <div th:replace="~{fragments/dialog-create-folder :: dialog-create-folder (${currentPath})}"></div>
-    <div th:replace="~{fragments/dialog-upload-file :: dialog-upload-file (${currentPath})}"></div>
-    <div th:replace="~{fragments/dialog-upload-folder :: dialog-upload-folder (${currentPath})}"></div>
+    <div th:replace="~{explorer/dialog-create-folder :: dialog-create-folder (${currentPath})}"></div>
+    <div th:replace="~{explorer/dialog-upload-file :: dialog-upload-file (${currentPath})}"></div>
+    <div th:replace="~{explorer/dialog-upload-folder :: dialog-upload-folder (${currentPath})}"></div>
     <script>
         var isFirefox = /Firefox/.test(navigator.userAgent);
         if (isFirefox) {

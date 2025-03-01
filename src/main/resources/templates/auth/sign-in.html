@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{fragments/decoration-layout.html}">
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/decoration-layout.html}">
 <section layout:fragment="content">
 
-    <div th:insert="~{fragments/header::anonymous}"></div>
+    <div th:insert="~{common/header::anonymous}"></div>
 
 
-    <div th:insert="~{fragments/flash-message::flash-message (type=${flashType}, message=${flashMsg})}"></div>
+    <div th:insert="~{common/flash-message::flash-message (type=${flashType}, message=${flashMsg})}"></div>
 
     <div class="card col-8 offset-2">
         <div class="card-body">

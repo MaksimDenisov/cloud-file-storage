@@ -19,7 +19,7 @@
         </thead>
         <tbody>
         <tr th:each="item : ${storageObjects}">
-            <div th:insert="~{fragments/dialog-rename-folder}"></div>
+            <div th:insert="~{explorer/dialog-rename-folder}"></div>
             <th:block th:switch="${#strings.toString(item.getType())}">
                 <div th:case="'FOLDER'">
                     <td>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/decoration-layout.html}">
+
+<section layout:fragment="content">
+    <div th:replace="~{common/header::authenticated(${username})}"></div>
+
+    <div th:replace="~{common/flash-message::flash-message (type=${flashType}, message=${flashMsg})}"></div>
+
+    <div class="row">
+        <main class="overflow-auto px-4">
+            <div th:replace="~{explorer/create-upload-bar :: create-upload-bar}"></div>
+            <div th:replace="~{explorer/breadcrumbs-path :: breadcrumbs-path (${breadcrumbs})}"></div>
+            <div th:replace="~{explorer/files::files(${storageObjects})}"></div>
+        </main>
+    </div>
+</section>
+</html>

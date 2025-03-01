@@ -49,7 +49,7 @@ public class FileExplorerController {
         model.addAttribute("breadcrumbs", fileService.getChainLinksFromPath(path));
         model.addAttribute("storageObjects", fileService.getContentOfDirectory(path));
         model.addAttribute("currentPath", path);
-        return "file-explorer";
+        return "explorer/file-explorer";
     }
 
     @PostMapping("/rename-folder")
