@@ -1,6 +1,10 @@
 <div th:fragment="create-upload-bar">
     <div class="row">
         <div class="float-end">
+            <button type="button" class="btn btn-warning col-1 m-3 float-end" data-bs-toggle="modal"
+                    data-bs-target="#dialog-drop-area">
+                Open drop zone
+            </button>
             <button type="button" class="btn btn-success col-1 m-3 float-end" data-bs-toggle="modal"
                     data-bs-target="#dialog-upload-file">
                 Upload file
@@ -19,6 +23,7 @@
     <div th:replace="~{explorer/dialog-create-folder :: dialog-create-folder (${currentPath})}"></div>
     <div th:replace="~{explorer/dialog-upload-file :: dialog-upload-file (${currentPath})}"></div>
     <div th:replace="~{explorer/dialog-upload-folder :: dialog-upload-folder (${currentPath})}"></div>
+    <div th:replace="~{explorer/dialog-drop-area :: dialog-drop-area (${currentPath})}"></div>
     <script>
         var isFirefox = /Firefox/.test(navigator.userAgent);
         if (isFirefox) {
