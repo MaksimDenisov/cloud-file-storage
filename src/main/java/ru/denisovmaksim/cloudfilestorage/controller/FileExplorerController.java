@@ -1,7 +1,7 @@
 package ru.denisovmaksim.cloudfilestorage.controller;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,21 +11,18 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ru.denisovmaksim.cloudfilestorage.mapper.PathLinksDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.service.FileService;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidName;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
 
 @Controller
+@AllArgsConstructor
 @Slf4j
-@Profile({"dev", "prod"})
 @Validated
 public class FileExplorerController {
     private final FileService fileService;
-
-    public FileExplorerController(FileService fileService) {
-        this.fileService = fileService;
-    }
 
     @PostMapping("/add-folder")
     public String addFolder(@ModelAttribute("folder-name")
@@ -46,7 +43,7 @@ public class FileExplorerController {
                              @ValidPath
                              @RequestParam(required = false, defaultValue = "") String path) {
         model.addAttribute("username", authentication.getName());
-        model.addAttribute("breadcrumbs", fileService.getChainLinksFromPath(path));
+        model.addAttribute("breadcrumbs", PathLinksDTOMapper.toChainLinksFromPath(path));
         model.addAttribute("storageObjects", fileService.getContentOfDirectory(path));
         model.addAttribute("currentPath", path);
         return "explorer/file-explorer";

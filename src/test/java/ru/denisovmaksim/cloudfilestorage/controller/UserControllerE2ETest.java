@@ -1,6 +1,10 @@
-package ru.denisovmaksim.cloudfilestorage;
+package ru.denisovmaksim.cloudfilestorage.controller;
 
 import com.redis.testcontainers.RedisContainer;
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import io.minio.errors.MinioException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,6 +12,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
@@ -16,13 +23,18 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
-import ru.denisovmaksim.cloudfilestorage.controller.UserController;
 import ru.denisovmaksim.cloudfilestorage.model.User;
 import ru.denisovmaksim.cloudfilestorage.repository.UserRepository;
+import ru.denisovmaksim.cloudfilestorage.service.FileService;
+
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -37,7 +49,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @Testcontainers
 @EnableRedisHttpSession
-public class UserControllerIntegrationTest {
+public class UserControllerE2ETest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -45,8 +57,11 @@ public class UserControllerIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @MockBean
+    private FileService  fileService;
+
     @Container
-    private static MySQLContainer mySQLContainer = new MySQLContainer("mysql:8:0:26")
+    private static final MySQLContainer MY_SQL_CONTAINER = new MySQLContainer("mysql:8:0:26")
             .withDatabaseName("db_name")
             .withUsername("root")
             .withPassword("password");
@@ -55,11 +70,45 @@ public class UserControllerIntegrationTest {
             new RedisContainer(DockerImageName.parse("redis:latest"))
                     .withExposedPorts(6379)
                     .withReuse(true);
+    @Container
+    private static final MinIOContainer MINIO_CONTAINER = new MinIOContainer("minio/minio")
+            .withExposedPorts(9000)
+            .withEnv("MINIO_ROOT_USER", "user")
+            .withEnv("MINIO_ROOT_PASSWORD", "password")
+            .withCommand("server /data");
+
+    @TestConfiguration
+    public static class MinioConfig {
+        @Bean
+        public MinioClient minioClient() {
+            try {
+                String minioEndpoint = "http://"
+                        + MINIO_CONTAINER.getHost()
+                        + ":"
+                        + MINIO_CONTAINER.getMappedPort(9000);
+
+                MinioClient minioClient =
+                        MinioClient.builder()
+                                .endpoint(minioEndpoint)
+                                .credentials("user", "password")
+                                .build();
+                boolean found =
+                        minioClient.bucketExists(BucketExistsArgs.builder().bucket("user-files").build());
+                if (!found) {
+                    minioClient.makeBucket(MakeBucketArgs.builder().bucket("user-files").build());
+                }
+                return minioClient;
+            } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mySQLContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", mySQLContainer::getUsername);
-        registry.add("spring.datasource.password", mySQLContainer::getPassword);
+        registry.add("spring.datasource.url", MY_SQL_CONTAINER::getJdbcUrl);
+        registry.add("spring.datasource.username", MY_SQL_CONTAINER::getUsername);
+        registry.add("spring.datasource.password", MY_SQL_CONTAINER::getPassword);
 
         registry.add("spring.data.redis.host", REDIS_CONTAINER::getHost);
         registry.add("spring.data.redis.port", () -> REDIS_CONTAINER.getMappedPort(6379).toString());

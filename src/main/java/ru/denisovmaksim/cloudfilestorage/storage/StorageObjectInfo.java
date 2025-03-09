@@ -11,7 +11,9 @@ import java.util.function.Supplier;
 @Getter
 @ToString
 @Slf4j
-public class StorageObject {
+public final class StorageObjectInfo {
+
+    @Deprecated
     private String parentPath = "";
 
     private final String name;
@@ -22,7 +24,7 @@ public class StorageObject {
     private long size;
 
 
-    private StorageObject(Builder builder) {
+    private StorageObjectInfo(Builder builder) {
         String path = builder.path;
         this.folder = path.endsWith("/");
         if (path.endsWith("/")) {
@@ -46,6 +48,8 @@ public class StorageObject {
         return parentPath + name + (isFolder() ? "/" : "");
     }
 
+
+    @Deprecated
     static class Builder {
         private final String path;
         private long size = 0;
@@ -66,24 +70,8 @@ public class StorageObject {
             return this;
         }
 
-        public StorageObject build() {
-            return new StorageObject(this);
+        public StorageObjectInfo build() {
+            return new StorageObjectInfo(this);
         }
     }
-
-    StorageObject(String path) {
-        this.folder = path.endsWith("/");
-        if (path.endsWith("/")) {
-            this.name = path.substring(path.lastIndexOf('/', path.length() - 2) + 1, path.length() - 1);
-            path = path.substring(0, path.length() - 1);
-        } else {
-            this.name = path.substring(path.lastIndexOf('/') + 1);
-        }
-        int lastSlashIndex = path.lastIndexOf('/');
-        if (lastSlashIndex != -1) {
-            this.parentPath = path.substring(0, lastSlashIndex + 1);
-        }
-    }
-
-
 }

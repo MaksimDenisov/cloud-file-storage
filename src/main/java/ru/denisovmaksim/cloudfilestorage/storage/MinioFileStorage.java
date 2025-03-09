@@ -3,7 +3,6 @@ package ru.denisovmaksim.cloudfilestorage.storage;
 import io.minio.CopyObjectArgs;
 import io.minio.CopySource;
 import io.minio.GetObjectArgs;
-import io.minio.GetObjectResponse;
 import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -12,104 +11,98 @@ import io.minio.Result;
 import io.minio.messages.Item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import ru.denisovmaksim.cloudfilestorage.exception.StorageObjectNotFoundException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Component
 @Slf4j
-@Profile({"dev", "prod"})
 public class MinioFileStorage {
-    // https://min.io/docs/minio/linux/developers/java/minio-java.html
-    // Examples
-    // https://github.com/minio/minio-java/tree/release/examples
-
-    //https://min.io/docs/minio/linux/developers/java/API.html
     private final MinioClient minioClient;
-
     private final String bucket;
+    private final MinioPathResolver resolver;
 
-    public MinioFileStorage(MinioClient minioClient, @Value("${app.bucket}") String bucket) {
+    public MinioFileStorage(MinioClient minioClient,
+                            MinioPathResolver resolver,
+                            @Value("${app.bucket}") String bucket) {
         this.minioClient = minioClient;
+        this.resolver = resolver;
         this.bucket = bucket;
     }
 
-    public void createEmptyFolder(Long userId, String path, String folderName) {
-        log.info("Create folder path = {} name = {} for user with id = {}", path, folderName, userId);
-        MinioPath minioPath = new MinioPath(userId, path);
+    public void createPath(Long userId, String path) {
+        log.info("Create path = {} for user with id = {}", path, userId);
+        MinioPath minioPath = resolver.resolve(userId, path);
         MinioExceptionHandler.interceptMinioExceptions(() -> {
-                    String newFolderName = minioPath.getPathByMinio() + folderName + "/";
                     minioClient.putObject(
                             PutObjectArgs.builder()
                                     .bucket(bucket)
-                                    .object(newFolderName)
+                                    .object(minioPath.getPathByMinio())
                                     .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
                                     .build());
                 }
         );
     }
 
-    public List<StorageObject> getStorageObjects(Long userId, String path) {
+    public Optional<List<StorageObjectInfo>> getPathContent(Long userId, String path) {
         log.info("Get objects from path = {} for user with id = {}", path, userId);
-        MinioPath minioPath = new MinioPath(userId, path);
-        Iterable<Result<Item>> resultItems = getMinioItems(minioPath, false);
-        List<Item> items = StreamSupport.stream(resultItems.spliterator(), false)
-                .map(item -> MinioExceptionHandler.interceptMinioExceptions(item::get))
-                .filter(item -> !minioPath.equalsMinioItem(item))
-                .toList();
-        return items.stream()
-                .map(item -> {
-                    final String objectPath = minioPath.extractPathByUser(item.objectName());
-                    return new StorageObject.Builder(objectPath)
-                            .objectSize(item.size())
-                            .withFolderSizeSupplier(
-                                    () -> getChildCount(new MinioPath(userId, objectPath)))
-                            .build();
-                }).toList();
+        MinioPath minioPath = resolver.resolve(userId, path);
+        return getMinioItems(minioPath, false)
+                .map(list -> list.stream()
+                        .map(item -> {
+                            String objectPath = resolver.resolvePathFromMinioObjectName(userId, item.objectName());
+                            return new StorageObjectInfo.Builder(objectPath)
+                                    .objectSize(item.size())
+                                    .withFolderSizeSupplier(() ->
+                                            getChildCount(resolver.resolve(userId, objectPath)))
+                                    .build();
+                        })
+                        .toList()
+                );
     }
 
-    public void renameFolder(Long userId, String path, String newFolderName) {
-        log.info("Rename folder {} for user with id = {}", path, userId);
-        MinioPath minioPath = new MinioPath(userId, path);
-        MinioExceptionHandler.interceptMinioExceptions(() -> {
-            Iterable<Result<Item>> minioItems = getMinioItems(new MinioPath(userId, path), true);
-            for (Result<Item> result : minioItems) {
-                String sourceName = result.get().objectName();
-                String destName = sourceName.replace(minioPath.getPathByMinio(),
-                        minioPath.getParentMinioPath() + newFolderName + "/");
-                copyObject(sourceName, destName);
-            }
+    public FileObject getFileObject(Long userId, String path) {
+        MinioPath minioPath = resolver.resolve(userId, path);
+        return MinioExceptionHandler.interceptMinioExceptions(() -> {
+            InputStream objectInputStream = minioClient.getObject(GetObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(minioPath.getPathByMinio())
+                    .build());
+            return new FileObject(path, objectInputStream);
         });
-        deleteObjects(userId, path);
     }
 
-    public void deleteObjects(Long userId, String path) {
-        log.info("Delete folder {} for user with id = {}", path, userId);
-        MinioPath minioPath = new MinioPath(userId, path);
-        // User folder cannot be deleted
-        if (!minioPath.isRoot()) {
-            MinioExceptionHandler.interceptMinioExceptions(() -> {
-                Iterable<Result<Item>> minioItems = getMinioItems(minioPath, true);
-                for (Result<Item> resultItem : minioItems) {
-                    minioClient.removeObject(
-                            RemoveObjectArgs.builder().bucket(bucket)
-                                    .object(resultItem.get().objectName())
-                                    .build());
+    public List<FileObject> getFileObjects(Long userId, String path) {
+        MinioPath minioPath = resolver.resolve(userId, path);
+        return MinioExceptionHandler.interceptMinioExceptions(() -> {
+            List<FileObject> fileObjects = new ArrayList<>();
+            List<Item> minioItems = getMinioItems(minioPath, true).orElseThrow();
+            for (Item resultItem : minioItems) {
+                String objectName = resultItem.objectName();
+                String objectPath = objectName.replace(minioPath.getUserFolder(), "");
+                if (objectPath.isEmpty()) {
+                    continue;
                 }
-            });
-        }
+                InputStream objectInputStream = minioClient.getObject(GetObjectArgs.builder()
+                        .bucket(bucket)
+                        .object(objectName)
+                        .build());
+                fileObjects.add(new FileObject(objectPath, objectInputStream));
+            }
+            return fileObjects;
+        });
     }
 
     public void saveObject(Long userId, String path, MultipartFile file) {
-        MinioPath minioPath = new MinioPath(userId, path);
+        MinioPath minioPath = resolver.resolve(userId, path);
         MinioExceptionHandler.interceptMinioExceptions(() -> {
             minioClient.putObject(
                     PutObjectArgs.builder()
@@ -122,50 +115,50 @@ public class MinioFileStorage {
         });
     }
 
-    public StorageObjectStream getObjectAsStream(Long userId, String path) {
-        MinioPath minioPath = new MinioPath(userId, path);
-        return MinioExceptionHandler.interceptMinioExceptions(() -> {
-            GetObjectResponse response = minioClient.getObject(GetObjectArgs.builder()
-                    .bucket(bucket)
-                    .object(minioPath.getPathByMinio())
-                    .build());
-            return new StorageObjectStream(path, response);
-        });
+    public void copyObject(Long userId, String srcPath, String destPath) {
+        MinioPath srcMinioPath = resolver.resolve(userId, srcPath);
+        MinioPath destMinioPath = resolver.resolve(userId, destPath);
+        MinioExceptionHandler.interceptMinioExceptions(() ->
+                minioClient.copyObject(
+                        CopyObjectArgs.builder()
+                                .bucket(bucket)
+                                .object(destMinioPath.getPathByMinio())
+                                .source(
+                                        CopySource.builder()
+                                                .bucket(bucket)
+                                                .object(srcMinioPath.getPathByMinio())
+                                                .build())
+                                .build()));
     }
 
-    public StorageObjectsStreams getObjectsAsStreams(Long userId, String path) {
-        MinioPath minioPath = new MinioPath(userId, path);
-        Map<String, InputStream> result = new HashMap<>();
-        return MinioExceptionHandler.interceptMinioExceptions(() -> {
-            Iterable<Result<Item>> minioItems = getMinioItems(minioPath, true);
-            for (Result<Item> resultItem : minioItems) {
-                String objectName = resultItem.get().objectName();
-                String name = objectName.replace(minioPath.getPathByMinio(), "");
-                if (name.isEmpty()) {
-                    continue;
-                }
-                InputStream objectInputStream = minioClient.getObject(GetObjectArgs.builder()
-                        .bucket(bucket)
-                        .object(objectName)
-                        .build());
-                result.put(name, objectInputStream);
-            }
-            return new StorageObjectsStreams(path, result);
-        });
+    public void deleteObjects(Long userId, String path) {
+        log.info("Delete folder {} for user with id = {}", path, userId);
+        MinioPath minioPath = resolver.resolve(userId, path);
+        getMinioItems(minioPath, true)
+                .ifPresent(items -> items
+                        .forEach(item ->
+                                MinioExceptionHandler.interceptMinioExceptions(() -> minioClient.removeObject(
+                                        RemoveObjectArgs.builder().bucket(bucket)
+                                                .object(item.objectName())
+                                                .build()))));
     }
 
-    private Iterable<Result<Item>> getMinioItems(MinioPath minioPath, boolean includeSubObjects) {
+    private Optional<List<Item>> getMinioItems(MinioPath minioPath, boolean includeSubObjects) {
         Iterable<Result<Item>> minioItems = minioClient.listObjects(
                 ListObjectsArgs.builder()
                         .bucket(bucket)
                         .recursive(includeSubObjects)
                         .prefix(minioPath.getPathByMinio())
                         .build());
-        // If storage is empty. Root not contain objects. It is not an error
-        if (!minioItems.iterator().hasNext() && !minioPath.isRoot()) {
-            throw new StorageObjectNotFoundException(String.format("%s not exist", minioPath.getPathByUser()));
+
+        if (!minioItems.iterator().hasNext()) {
+            // If storage is empty. Root not contain objects. It is not an error.
+            return Optional.ofNullable((minioPath.isRoot()) ? Collections.emptyList() : null);
         }
-        return minioItems;
+        return Optional.of(StreamSupport.stream(minioItems.spliterator(), false)
+                .map(item -> MinioExceptionHandler.interceptMinioExceptions(item::get))
+                .filter(item -> !minioPath.getPathByMinio().equals(item.objectName()))
+                .collect(Collectors.toList()));
     }
 
     private Long getChildCount(MinioPath minioPath) {
@@ -180,17 +173,28 @@ public class MinioFileStorage {
                 .count();
     }
 
-    private void copyObject(String sourceName, String destName) {
-        MinioExceptionHandler.interceptMinioExceptions(() ->
-                minioClient.copyObject(
-                        CopyObjectArgs.builder()
-                                .bucket(bucket)
-                                .object(destName)
-                                .source(
-                                        CopySource.builder()
-                                                .bucket(bucket)
-                                                .object(sourceName)
-                                                .build())
-                                .build()));
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Deprecated // Don't use 'file' or 'folder' on this layer.
+    //TODO Move to service layer
+    public void renameFolder(Long userId, String path, String newFolderName) {
+        log.info("Rename folder {} for user with id = {}", path, userId);
+        MinioPath minioPath = resolver.resolve(userId, path);
+        MinioExceptionHandler.interceptMinioExceptions(() -> {
+            List<Item> minioItems = getMinioItems(resolver.resolve(userId, path), true)
+                    .orElseThrow();
+            for (Item result : minioItems) {
+                String sourceName = result.objectName();
+                String destName = sourceName.replace(minioPath.getPathByMinio(),
+                        minioPath.getParentMinioPath() + newFolderName + "/");
+                copyObject(userId, sourceName, destName);
+            }
+        });
+        deleteObjects(userId, path);
     }
+
+
 }
+

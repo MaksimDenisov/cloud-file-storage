@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.controller.UserController;
+import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.exception.StorageObjectNotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.UserAlreadyExistException;
 
@@ -36,7 +37,7 @@ public class GlobalControllerAdvice {
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.addObject("path", e.getPath());
         modelAndView.addObject("username", authentication.getName());
-        modelAndView.setViewName("not-found");
+        modelAndView.setViewName("common/not-found");
         return modelAndView;
     }
 
@@ -67,6 +68,22 @@ public class GlobalControllerAdvice {
     public String handleMaxSizeException(MaxUploadSizeExceededException e, RedirectAttributes attributes) {
         attributes.addFlashAttribute("flashType", "danger");
         attributes.addFlashAttribute("flashMsg", String.format("File size exceeds %s!", maxFileSize));
+        return "redirect:/";
+    }
+
+    @ExceptionHandler(FileStorageException.class)
+    public String handleFileStorageException(FileStorageException e, RedirectAttributes attributes) {
+        attributes.addFlashAttribute("flashType", "danger");
+        attributes.addFlashAttribute("flashMsg",
+                "There’s a problem on our side. Please try again in a little while.");
+        return "redirect:/";
+    }
+
+    @ExceptionHandler(Exception.class)
+    public String handleCommonException(RuntimeException e, RedirectAttributes attributes) {
+        attributes.addFlashAttribute("flashType", "danger");
+        attributes.addFlashAttribute("flashMsg",
+                "An error occurred. Something went wrong.");
         return "redirect:/";
     }
 }

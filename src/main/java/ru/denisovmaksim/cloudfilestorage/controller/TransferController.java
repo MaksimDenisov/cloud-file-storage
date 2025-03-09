@@ -2,7 +2,6 @@ package ru.denisovmaksim.cloudfilestorage.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,7 +26,6 @@ import java.util.List;
 @Controller
 @AllArgsConstructor
 @Slf4j
-@Profile({"dev", "prod"})
 @RequestMapping()
 public class TransferController {
     private final FileService fileService;
