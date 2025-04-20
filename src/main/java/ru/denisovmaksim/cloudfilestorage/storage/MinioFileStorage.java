@@ -141,6 +141,10 @@ public class MinioFileStorage {
                                         RemoveObjectArgs.builder().bucket(bucket)
                                                 .object(item.objectName())
                                                 .build()))));
+        MinioExceptionHandler.interceptMinioExceptions(() -> minioClient.removeObject(
+                RemoveObjectArgs.builder().bucket(bucket)
+                        .object(minioPath.getPathByMinio())
+                        .build()));
     }
 
     private Optional<List<Item>> getMinioItems(MinioPath minioPath, boolean includeSubObjects) {
