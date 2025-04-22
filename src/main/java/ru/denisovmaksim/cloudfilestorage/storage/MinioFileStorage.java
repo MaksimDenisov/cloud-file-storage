@@ -82,23 +82,18 @@ public class MinioFileStorage {
 
     public List<FileObject> getFileObjects(Long userId, String path) {
         MinioPath minioPath = resolver.resolve(userId, path);
-        return MinioExceptionHandler.interceptMinioExceptions(() -> {
-            List<FileObject> fileObjects = new ArrayList<>();
-            List<Item> minioItems = getMinioItems(minioPath, true).orElseThrow();
-            for (Item resultItem : minioItems) {
-                String objectName = resultItem.objectName();
-                String objectPath = objectName.replace(minioPath.getUserFolder(), "");
-                if (objectPath.isEmpty()) {
-                    continue;
-                }
-                InputStream objectInputStream = minioClient.getObject(GetObjectArgs.builder()
-                        .bucket(bucket)
-                        .object(objectName)
-                        .build());
-                fileObjects.add(new FileObject(objectPath, objectInputStream));
-            }
-            return fileObjects;
-        });
+        List<Item> minioItems = getMinioItems(minioPath, true).orElseThrow();
+        return minioItems.stream()
+                .map(item -> {
+                    String objectName = item.objectName();
+                    String objectPath = resolver.resolvePathFromMinioObjectName(userId, objectName);
+                    InputStream objectInputStream = MinioExceptionHandler
+                            .interceptMinioExceptions(() -> minioClient.getObject(GetObjectArgs.builder()
+                                    .bucket(bucket)
+                                    .object(objectName)
+                                    .build()));
+                    return new FileObject(objectPath, objectInputStream);
+                }).collect(Collectors.toList());
     }
 
     public void saveObject(Long userId, String path, MultipartFile file) {
