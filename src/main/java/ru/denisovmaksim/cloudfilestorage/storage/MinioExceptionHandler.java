@@ -15,7 +15,7 @@ class MinioExceptionHandler {
         try {
             return supplier.get();
         } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
-            log.error(e.getMessage());
+            log.error("MinioClient exception occurred while accessing storage", e);
             throw new FileStorageException(e);
         }
     }
@@ -24,7 +24,7 @@ class MinioExceptionHandler {
         try {
             supplier.run();
         } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
-            log.error(e.getMessage());
+            log.error("MinioClient exception occurred while accessing storage.", e);
             throw new FileStorageException(e);
         }
     }
