@@ -38,7 +38,7 @@ public class MinioFileStorage {
     }
 
     public void createPath(Long userId, String path) {
-        log.info("Create path = {} for user with id = {}", path, userId);
+        log.info("Create path '{}' for userId={}", path, userId);
         MinioPath minioPath = resolver.resolve(userId, path);
         MinioExceptionHandler.interceptMinioExceptions(() -> {
                     minioClient.putObject(
@@ -52,7 +52,7 @@ public class MinioFileStorage {
     }
 
     public Optional<List<StorageObjectInfo>> getPathContent(Long userId, String path) {
-        log.info("Get objects from path = {} for user with id = {}", path, userId);
+        log.info("Fetching objects info at path '{}' for userId={}", path, userId);
         MinioPath minioPath = resolver.resolve(userId, path);
         return getMinioItems(minioPath, false)
                 .map(list -> list.stream()
@@ -69,6 +69,7 @@ public class MinioFileStorage {
     }
 
     public FileObject getFileObject(Long userId, String path) {
+        log.info("Downloading object at path '{}' for userId={}", path, userId);
         MinioPath minioPath = resolver.resolve(userId, path);
         return MinioExceptionHandler.interceptMinioExceptions(() -> {
             InputStream objectInputStream = minioClient.getObject(GetObjectArgs.builder()
@@ -96,6 +97,7 @@ public class MinioFileStorage {
     }
 
     public void saveObject(Long userId, String path, MultipartFile file) {
+        log.info("Uploading file '{}' to path '{}' for userId={}", file.getOriginalFilename(), path, userId);
         MinioPath minioPath = resolver.resolve(userId, path);
         MinioExceptionHandler.interceptMinioExceptions(() -> {
             minioClient.putObject(
@@ -110,6 +112,7 @@ public class MinioFileStorage {
     }
 
     public void copyObject(Long userId, String srcPath, String destPath) {
+        log.info("Copying all objects from path '{}' to path '{}' for userId={}", srcPath, destPath, userId);
         MinioPath srcMinioPath = resolver.resolve(userId, srcPath);
         MinioPath destMinioPath = resolver.resolve(userId, destPath);
         MinioExceptionHandler.interceptMinioExceptions(() ->
@@ -126,7 +129,7 @@ public class MinioFileStorage {
     }
 
     public void deleteObjects(Long userId, String path) {
-        log.info("Delete folder {} for user with id = {}", path, userId);
+        log.info("Deleting all objects at path '{}' for userId={}", path, userId);
         MinioPath minioPath = resolver.resolve(userId, path);
         getMinioItems(minioPath, true)
                 .ifPresent(items -> items
