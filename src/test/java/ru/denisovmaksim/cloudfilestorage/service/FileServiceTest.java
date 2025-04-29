@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.denisovmaksim.cloudfilestorage.exception.StorageObjectNotFoundException;
+import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
 
 import java.util.Optional;
@@ -41,7 +41,7 @@ class FileServiceTest {
         when(securityService.getAuthUserId()).thenReturn(userId);
         when(fileStorage.listObjectInfo(userId, path)).thenReturn(Optional.empty());
 
-        assertThrows(StorageObjectNotFoundException.class, () ->
+        assertThrows(NotFoundException.class, () ->
                 fileService.getContentOfDirectory(path)
         );
     }

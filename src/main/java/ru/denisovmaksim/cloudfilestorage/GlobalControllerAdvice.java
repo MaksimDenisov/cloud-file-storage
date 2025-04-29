@@ -4,16 +4,14 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.controller.UserController;
 import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
-import ru.denisovmaksim.cloudfilestorage.exception.StorageObjectNotFoundException;
+import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.UserAlreadyExistException;
 
 import java.util.stream.Collectors;
@@ -31,14 +29,11 @@ public class GlobalControllerAdvice {
         return "redirect:" + UserController.SIGN_UP;
     }
 
-    @ExceptionHandler(StorageObjectNotFoundException.class)
-    public ModelAndView handleNotFoundException(StorageObjectNotFoundException e, Authentication authentication) {
-        //   view.addObject("path", e.getPath());
-        ModelAndView modelAndView = new ModelAndView();
-        modelAndView.addObject("path", e.getPath());
-        modelAndView.addObject("username", authentication.getName());
-        modelAndView.setViewName("common/not-found");
-        return modelAndView;
+    @ExceptionHandler(NotFoundException.class)
+    public String handleNotFoundException(NotFoundException e, RedirectAttributes attributes) {
+        attributes.addFlashAttribute("flashType", "danger");
+        attributes.addFlashAttribute("flashMsg", e.getMessage());
+        return "redirect:/";
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

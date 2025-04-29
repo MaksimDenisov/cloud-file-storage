@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
 import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
-import ru.denisovmaksim.cloudfilestorage.exception.StorageObjectNotFoundException;
+import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
@@ -44,7 +44,7 @@ public class FileService {
 
     public List<StorageObjectDTO> getContentOfDirectory(@ValidPath String path) {
         return fileStorage.listObjectInfo(securityService.getAuthUserId(), path)
-                .orElseThrow(() -> new StorageObjectNotFoundException("Not found"))
+                .orElseThrow(() -> new NotFoundException(path))
                 .stream()
                 .map(StorageObjectDTOMapper::toDTO)
                 .sorted(Comparator.comparing(StorageObjectDTO::getType).thenComparing(StorageObjectDTO::getName))
