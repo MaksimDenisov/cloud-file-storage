@@ -51,7 +51,7 @@ public class MinioFileStorage {
         );
     }
 
-    public Optional<List<StorageObjectInfo>> getPathContent(Long userId, String path) {
+    public Optional<List<StorageObjectInfo>> listObjectInfo(Long userId, String path) {
         log.info("Fetching objects info at path '{}' for userId={}", path, userId);
         MinioPath minioPath = resolver.resolve(userId, path);
         return getMinioItems(minioPath, false)
@@ -68,7 +68,7 @@ public class MinioFileStorage {
                 );
     }
 
-    public FileObject getFileObject(Long userId, String path) {
+    public FileObject getObject(Long userId, String path) {
         log.info("Downloading object at path '{}' for userId={}", path, userId);
         MinioPath minioPath = resolver.resolve(userId, path);
         return MinioExceptionHandler.interceptMinioExceptions(() -> {
@@ -80,7 +80,7 @@ public class MinioFileStorage {
         });
     }
 
-    public List<FileObject> getFileObjects(Long userId, String path) {
+    public List<FileObject> getObjects(Long userId, String path) {
         MinioPath minioPath = resolver.resolve(userId, path);
         List<Item> minioItems = getMinioItems(minioPath, true).orElseThrow();
         return minioItems.stream()

@@ -39,7 +39,7 @@ class FileServiceTest {
         Long userId = 1L;
         String path = "/missing";
         when(securityService.getAuthUserId()).thenReturn(userId);
-        when(fileStorage.getPathContent(userId, path)).thenReturn(Optional.empty());
+        when(fileStorage.listObjectInfo(userId, path)).thenReturn(Optional.empty());
 
         assertThrows(StorageObjectNotFoundException.class, () ->
                 fileService.getContentOfDirectory(path)

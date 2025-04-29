@@ -43,7 +43,7 @@ public class FileService {
     }
 
     public List<StorageObjectDTO> getContentOfDirectory(@ValidPath String path) {
-        return fileStorage.getPathContent(securityService.getAuthUserId(), path)
+        return fileStorage.listObjectInfo(securityService.getAuthUserId(), path)
                 .orElseThrow(() -> new StorageObjectNotFoundException("Not found"))
                 .stream()
                 .map(StorageObjectDTOMapper::toDTO)
@@ -68,7 +68,7 @@ public class FileService {
     }
 
     public NamedStreamDTO getFileAsStream(String path) {
-        FileObject fileObject = fileStorage.getFileObject(securityService.getAuthUserId(), path);
+        FileObject fileObject = fileStorage.getObject(securityService.getAuthUserId(), path);
         String[] pathElements = path.split("/");
         String filename = pathElements[pathElements.length - 1];
         String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8)
@@ -78,7 +78,7 @@ public class FileService {
 
     public NamedStreamDTO getZipFolderAsStream(@ValidPath String path) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        List<FileObject> fileObjects = fileStorage.getFileObjects(securityService.getAuthUserId(), path);
+        List<FileObject> fileObjects = fileStorage.getObjects(securityService.getAuthUserId(), path);
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
             for (FileObject object : fileObjects) {
                 String objectPath = object.path().replaceFirst(path, "");

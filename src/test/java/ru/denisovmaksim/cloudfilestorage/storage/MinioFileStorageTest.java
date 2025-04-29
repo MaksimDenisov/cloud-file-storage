@@ -106,7 +106,7 @@ class MinioFileStorageTest {
                 .objectSize(0)
                 .build();
 
-        List<StorageObjectInfo> actualObjects = fileStorage.getPathContent(1L, "").get();
+        List<StorageObjectInfo> actualObjects = fileStorage.listObjectInfo(1L, "").get();
 
         assertThat(actualObjects)
                 .as("Count of objects")
@@ -137,7 +137,7 @@ class MinioFileStorageTest {
 
         fileStorage.saveObject(1L, "folder/", file);
 
-        FileObject actual = fileStorage.getFileObject(1L, "folder/file.txt");
+        FileObject actual = fileStorage.getObject(1L, "folder/file.txt");
 
         try (InputStream actualStream = actual.stream()) {
             byte[] actualBytes = actualStream.readAllBytes();
@@ -156,29 +156,29 @@ class MinioFileStorageTest {
         MultipartFile file = new MockMultipartFile("file.txt", "file.txt", "text/plain", "Hello".getBytes());
         fileStorage.saveObject(1L, "folder/subFolder1", file);
         fileStorage.saveObject(1L, "folder/subFolder2", file);
-        assertThat(fileStorage.getPathContent(1L, "folder/").get())
+        assertThat(fileStorage.listObjectInfo(1L, "folder/").get())
                 .hasSize(2);
 
         fileStorage.deleteObjects(1L, "folder/");
 
-        assertThat(fileStorage.getPathContent(1L, "").get())
+        assertThat(fileStorage.listObjectInfo(1L, "").get())
                 .hasSize(0);
     }
 
     @Test
     void getStorageObjectsByNotExistPath() {
-        assertFalse(fileStorage.getPathContent(1L, "not-exist-path").isPresent());
+        assertFalse(fileStorage.listObjectInfo(1L, "not-exist-path").isPresent());
     }
 
     @Test
     void getStorageObjectsByRoot() {
-        assertTrue(fileStorage.getPathContent(1L, "").isPresent());
+        assertTrue(fileStorage.listObjectInfo(1L, "").isPresent());
     }
 
     @Test
     void shouldNotDeleteRootFolder() {
         fileStorage.deleteObjects(1L, "");
-        assertTrue(fileStorage.getPathContent(1L, "").isPresent());
+        assertTrue(fileStorage.listObjectInfo(1L, "").isPresent());
     }
 
     @Test
@@ -188,7 +188,7 @@ class MinioFileStorageTest {
 
         fileStorage.copyObject(1L, "folder/file.txt", "folder/copy-file.txt");
 
-        FileObject actual = fileStorage.getFileObject(1L, "folder/copy-file.txt");
+        FileObject actual = fileStorage.getObject(1L, "folder/copy-file.txt");
 
         try (InputStream actualStream = actual.stream()) {
             byte[] actualBytes = actualStream.readAllBytes();
