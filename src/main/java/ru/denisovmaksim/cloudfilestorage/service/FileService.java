@@ -9,8 +9,8 @@ import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
 import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.exception.StorageObjectNotFoundException;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
 import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
+import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidName;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
@@ -69,9 +69,10 @@ public class FileService {
 
     public NamedStreamDTO getFileAsStream(String path) {
         FileObject fileObject = fileStorage.getFileObject(securityService.getAuthUserId(), path);
-        String encodedFileName = URLEncoder.encode(fileObject.path(), StandardCharsets.UTF_8)
+        String[] pathElements = path.split("/");
+        String filename = pathElements[pathElements.length - 1];
+        String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8)
                 .replace("+", "%20");
-        //TODO Get name from path
         return new NamedStreamDTO(encodedFileName, fileObject.stream());
     }
 
@@ -94,8 +95,9 @@ public class FileService {
         } catch (IOException e) {
             throw new FileStorageException(e);
         }
-        //TODO Get name from path
-        String encodedFileName = URLEncoder.encode("arch.zip", StandardCharsets.UTF_8)
+        String[] pathElements = path.split("/");
+        String filename = pathElements[pathElements.length - 1] + ".zip";
+        String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8)
                 .replace("+", "%20");
         return new NamedStreamDTO(encodedFileName, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
     }
