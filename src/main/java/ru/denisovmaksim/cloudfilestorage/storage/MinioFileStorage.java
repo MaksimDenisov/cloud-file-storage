@@ -22,6 +22,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+/**
+ * Component responsible for interacting with MinIO storage.
+ * Provides functionality for uploading, retrieving, copying, and deleting objects.
+ */
 @Component
 @Slf4j
 public class MinioFileStorage {
@@ -37,6 +41,12 @@ public class MinioFileStorage {
         this.bucket = bucket;
     }
 
+    /**
+     * Creates an empty folder object in the storage for the specified user and path.
+     *
+     * @param userId the ID of the user
+     * @param path   the logical path to be created
+     */
     public void createPath(Long userId, String path) {
         log.info("Create path '{}' for userId={}", path, userId);
         MinioPath minioPath = resolver.resolve(userId, path);
@@ -51,6 +61,13 @@ public class MinioFileStorage {
         );
     }
 
+    /**
+     * Retrieves metadata about the objects (files and folders) at the given path.
+     *
+     * @param userId the ID of the user
+     * @param path   the logical user path
+     * @return a list of storage object information if present
+     */
     public Optional<List<StorageObjectInfo>> listObjectInfo(Long userId, String path) {
         log.info("Fetching objects info at path '{}' for userId={}", path, userId);
         MinioPath minioPath = resolver.resolve(userId, path);
@@ -68,6 +85,13 @@ public class MinioFileStorage {
                 );
     }
 
+    /**
+     * Downloads a single object from storage.
+     *
+     * @param userId the ID of the user
+     * @param path   the path to the object
+     * @return the object along with its data stream
+     */
     public FileObject getObject(Long userId, String path) {
         log.info("Downloading object at path '{}' for userId={}", path, userId);
         MinioPath minioPath = resolver.resolve(userId, path);
@@ -80,6 +104,13 @@ public class MinioFileStorage {
         });
     }
 
+    /**
+     * Downloads all objects (recursively) under the specified path.
+     *
+     * @param userId the ID of the user
+     * @param path   the folder path
+     * @return a list of file objects with their data streams
+     */
     public List<FileObject> getObjects(Long userId, String path) {
         MinioPath minioPath = resolver.resolve(userId, path);
         List<Item> minioItems = getMinioItems(minioPath, true).orElseThrow();
@@ -96,6 +127,13 @@ public class MinioFileStorage {
                 }).collect(Collectors.toList());
     }
 
+    /**
+     * Uploads a file to the specified path.
+     *
+     * @param userId the ID of the user
+     * @param path   the folder path where the file will be stored
+     * @param file   the multipart file to upload
+     */
     public void saveObject(Long userId, String path, MultipartFile file) {
         log.info("Uploading file '{}' to path '{}' for userId={}", file.getOriginalFilename(), path, userId);
         MinioPath minioPath = resolver.resolve(userId, path);
@@ -111,6 +149,14 @@ public class MinioFileStorage {
         });
     }
 
+
+    /**
+     * Copies a single object from one path to another.
+     *
+     * @param userId   the ID of the user
+     * @param srcPath  the source path
+     * @param destPath the destination path
+     */
     public void copyOneObject(Long userId, String srcPath, String destPath) {
         log.info("Copying one object from path '{}' to path '{}' for userId={}", srcPath, destPath, userId);
         MinioPath srcMinioPath = resolver.resolve(userId, srcPath);
@@ -128,6 +174,13 @@ public class MinioFileStorage {
                                 .build()));
     }
 
+    /**
+     * Copies all objects (recursively) from one directory to another.
+     *
+     * @param userId   the ID of the user
+     * @param srcPath  the source directory
+     * @param destPath the target directory
+     */
     public void copyObjects(Long userId, String srcPath, String destPath) {
         log.info("Copying all objects from path '{}' to path '{}' for userId={}", srcPath, destPath, userId);
         MinioPath srcMinioPath = resolver.resolve(userId, srcPath);
@@ -145,6 +198,13 @@ public class MinioFileStorage {
         });
     }
 
+
+    /**
+     * Deletes all objects under the specified path, including the folder itself.
+     *
+     * @param userId the ID of the user
+     * @param path   the folder path to delete
+     */
     public void deleteObjects(Long userId, String path) {
         log.info("Deleting all objects at path '{}' for userId={}", path, userId);
         MinioPath minioPath = resolver.resolve(userId, path);
@@ -161,6 +221,13 @@ public class MinioFileStorage {
                         .build()));
     }
 
+    /**
+     * Retrieves raw MinIO items from storage for the given path.
+     *
+     * @param minioPath         the internal MinIO path representation
+     * @param includeSubObjects whether to include nested objects
+     * @return a list of MinIO items or empty if path is empty
+     */
     private Optional<List<Item>> getMinioItems(MinioPath minioPath, boolean includeSubObjects) {
         Iterable<Result<Item>> minioItems = minioClient.listObjects(
                 ListObjectsArgs.builder()
@@ -179,6 +246,12 @@ public class MinioFileStorage {
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * Returns the number of direct children for a given path.
+     *
+     * @param minioPath the internal MinIO path
+     * @return the count of child items
+     */
     private Long getChildCount(MinioPath minioPath) {
         Iterable<Result<Item>> minioItems = minioClient.listObjects(
                 ListObjectsArgs.builder()
