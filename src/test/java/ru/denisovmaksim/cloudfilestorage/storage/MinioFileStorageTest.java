@@ -186,7 +186,7 @@ class MinioFileStorageTest {
         MultipartFile file = new MockMultipartFile("file.txt", "file.txt", "text/plain", "Hello".getBytes());
         fileStorage.saveObject(1L, "folder/", file);
 
-        fileStorage.copyObject(1L, "folder/file.txt", "folder/copy-file.txt");
+        fileStorage.copyOneObject(1L, "folder/file.txt", "folder/copy-file.txt");
 
         FileObject actual = fileStorage.getObject(1L, "folder/copy-file.txt");
 

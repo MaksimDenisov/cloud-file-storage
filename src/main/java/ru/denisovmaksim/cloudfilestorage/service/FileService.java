@@ -55,8 +55,21 @@ public class FileService {
         fileStorage.saveObject(securityService.getAuthUserId(), path, file);
     }
 
+
+    public void renameFile(@ValidPath String path, @ValidName String newFileName) {
+        int lastSlashIndex = path.lastIndexOf('/');
+        String parentPath = (lastSlashIndex == -1) ? "" : path.substring(0, lastSlashIndex);
+        String newPath = parentPath + newFileName;
+        fileStorage.copyOneObject(securityService.getAuthUserId(), path + "/", newPath);
+    }
+
     public void renameFolder(@ValidPath String path, @ValidName String newFolderName) {
-        fileStorage.renameFolder(securityService.getAuthUserId(), path, newFolderName);
+        path = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
+        int lastSlashIndex = path.lastIndexOf('/');
+        String parentPath = (lastSlashIndex == -1) ? "" : path.substring(0, lastSlashIndex) + "/";
+        String newPath = parentPath + newFolderName + "/";
+        fileStorage.copyObjects(securityService.getAuthUserId(), path + "/", newPath);
+        fileStorage.deleteObjects(securityService.getAuthUserId(), path + "/");
     }
 
     public void deleteFolder(String path) {

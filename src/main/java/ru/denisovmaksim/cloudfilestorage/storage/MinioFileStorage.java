@@ -111,8 +111,8 @@ public class MinioFileStorage {
         });
     }
 
-    public void copyObject(Long userId, String srcPath, String destPath) {
-        log.info("Copying all objects from path '{}' to path '{}' for userId={}", srcPath, destPath, userId);
+    public void copyOneObject(Long userId, String srcPath, String destPath) {
+        log.info("Copying one object from path '{}' to path '{}' for userId={}", srcPath, destPath, userId);
         MinioPath srcMinioPath = resolver.resolve(userId, srcPath);
         MinioPath destMinioPath = resolver.resolve(userId, destPath);
         MinioExceptionHandler.interceptMinioExceptions(() ->
@@ -126,6 +126,23 @@ public class MinioFileStorage {
                                                 .object(srcMinioPath.getPathByMinio())
                                                 .build())
                                 .build()));
+    }
+
+    public void copyObjects(Long userId, String srcPath, String destPath) {
+        log.info("Copying all objects from path '{}' to path '{}' for userId={}", srcPath, destPath, userId);
+        MinioPath srcMinioPath = resolver.resolve(userId, srcPath);
+        MinioPath destMinioPath = resolver.resolve(userId, destPath);
+        MinioExceptionHandler.interceptMinioExceptions(() -> {
+            List<Item> minioItems = getMinioItems(srcMinioPath, true)
+                    .orElseThrow();
+            for (Item item : minioItems) {
+                String fromPath = resolver.resolvePathFromMinioObjectName(userId, item.objectName());
+                String toPath = item.objectName()
+                        .replaceFirst(srcMinioPath.getPathByMinio(),
+                                destMinioPath.getPathByUser());
+                copyOneObject(userId, fromPath, toPath);
+            }
+        });
     }
 
     public void deleteObjects(Long userId, String path) {
@@ -173,29 +190,5 @@ public class MinioFileStorage {
                 .filter(item -> !item.objectName().equals(minioPath.getPathByMinio()))
                 .count();
     }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Deprecated // Don't use 'file' or 'folder' on this layer.
-    //TODO Move to service layer
-    public void renameFolder(Long userId, String path, String newFolderName) {
-        log.info("Rename folder {} for user with id = {}", path, userId);
-        MinioPath minioPath = resolver.resolve(userId, path);
-        MinioExceptionHandler.interceptMinioExceptions(() -> {
-            List<Item> minioItems = getMinioItems(resolver.resolve(userId, path), true)
-                    .orElseThrow();
-            for (Item result : minioItems) {
-                String sourceName = result.objectName();
-                String destName = sourceName.replace(minioPath.getPathByMinio(),
-                        minioPath.getParentMinioPath() + newFolderName + "/");
-                copyObject(userId, sourceName, destName);
-            }
-        });
-        deleteObjects(userId, path);
-    }
-
-
 }
 
