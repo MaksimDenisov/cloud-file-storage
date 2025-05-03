@@ -8,6 +8,7 @@ import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
 import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
+import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
@@ -39,6 +40,7 @@ public class FileService {
 
     public void createFolder(@ValidPath String path, @ValidName String folderName) {
         String newFolderName = path + folderName + "/";
+        throwIfObjectExist(newFolderName);
         fileStorage.createPath(securityService.getAuthUserId(), newFolderName);
     }
 
@@ -52,6 +54,7 @@ public class FileService {
     }
 
     public void uploadFile(@ValidPath String path, MultipartFile file) {
+        throwIfObjectExist(path);
         fileStorage.saveObject(securityService.getAuthUserId(), path, file);
     }
 
@@ -60,6 +63,7 @@ public class FileService {
         int lastSlashIndex = path.lastIndexOf('/');
         String parentPath = (lastSlashIndex == -1) ? "" : path.substring(0, lastSlashIndex);
         String newPath = parentPath + newFileName;
+        throwIfObjectExist(newPath);
         fileStorage.copyOneObject(securityService.getAuthUserId(), path, newPath);
         fileStorage.deleteObjects(securityService.getAuthUserId(), path);
     }
@@ -69,6 +73,7 @@ public class FileService {
         int lastSlashIndex = path.lastIndexOf('/');
         String parentPath = (lastSlashIndex == -1) ? "" : path.substring(0, lastSlashIndex) + "/";
         String newPath = parentPath + newFolderName + "/";
+        throwIfObjectExist(newPath);
         fileStorage.copyObjects(securityService.getAuthUserId(), path + "/", newPath);
         fileStorage.deleteObjects(securityService.getAuthUserId(), path + "/");
     }
@@ -117,6 +122,16 @@ public class FileService {
     }
 
     public void uploadFolder(@ValidPath String path, List<MultipartFile> files) {
+        String[] folders = files.get(0)
+                .getOriginalFilename()
+                .split("/");
+        throwIfObjectExist(folders[0]);
         files.forEach(file -> fileStorage.saveObject(securityService.getAuthUserId(), path, file));
+    }
+
+    private void throwIfObjectExist(String path) {
+        if (fileStorage.isExist(securityService.getAuthUserId(), path)) {
+            throw new ObjectAlreadyExistException(String.format("Path %s already exist", path));
+        }
     }
 }

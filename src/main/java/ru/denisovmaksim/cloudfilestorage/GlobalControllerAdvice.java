@@ -12,6 +12,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.controller.UserController;
 import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
+import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.exception.UserAlreadyExistException;
 
 import java.util.stream.Collectors;
@@ -27,6 +28,13 @@ public class GlobalControllerAdvice {
         attributes.addFlashAttribute("flashType", "danger");
         attributes.addFlashAttribute("flashMsg", e.getMessage());
         return "redirect:" + UserController.SIGN_UP;
+    }
+
+    @ExceptionHandler(ObjectAlreadyExistException.class)
+    public String handleObjectAlreadyExist(ObjectAlreadyExistException e, RedirectAttributes attributes) {
+        attributes.addFlashAttribute("flashType", "danger");
+        attributes.addFlashAttribute("flashMsg", e.getMessage());
+        return "redirect:/";
     }
 
     @ExceptionHandler(NotFoundException.class)
