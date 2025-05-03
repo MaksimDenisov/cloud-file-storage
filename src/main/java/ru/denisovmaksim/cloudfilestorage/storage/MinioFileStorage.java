@@ -42,6 +42,26 @@ public class MinioFileStorage {
     }
 
     /**
+     * Checks whether at least one object exists in the specified path for the given user.
+     *
+     * @param userId the ID of the user whose storage space is being checked
+     * @param path the virtual path to check for object existence
+     * @return {@code true} if at least one object exists at the specified path; {@code false} otherwise
+     */
+    public boolean isExist(Long userId, String path) {
+        log.info("Check exist path '{}' for userId={}", path, userId);
+        MinioPath minioPath = resolver.resolve(userId, path);
+        Iterable<Result<Item>> results = minioClient.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket(bucket)
+                        .prefix(minioPath.getPathByMinio())
+                        .maxKeys(1)
+                        .build()
+        );
+        return results.iterator().hasNext();
+    }
+
+    /**
      * Creates an empty folder object in the storage for the specified user and path.
      *
      * @param userId the ID of the user

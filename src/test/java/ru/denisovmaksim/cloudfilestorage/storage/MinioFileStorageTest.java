@@ -146,6 +146,8 @@ class MinioFileStorageTest {
                     .isEqualTo(file.getBytes());
         }
 
+        assertTrue(fileStorage.isExist(1L, "folder/"));
+        assertTrue(fileStorage.isExist(1L, "folder/file.txt"));
         assertThat(actual.path())
                 .as("Match path")
                 .isEqualTo("folder/file.txt");
@@ -167,6 +169,7 @@ class MinioFileStorageTest {
 
     @Test
     void getStorageObjectsByNotExistPath() {
+        assertFalse(fileStorage.isExist(1L, "not-exist-path"));
         assertFalse(fileStorage.listObjectInfo(1L, "not-exist-path").isPresent());
     }
 
