@@ -24,15 +24,4 @@ final class MinioPath {
     String getPathByMinio() {
         return userFolder + pathByUser;
     }
-
-    @Deprecated
-    String getParentMinioPath() {
-        String[] elements = pathByUser.split("/");
-        StringBuilder builder = new StringBuilder(getPathByMinio().replace(pathByUser, ""));
-        for (int i = 0; i < elements.length - 1; i++) {
-            builder.append(elements[i])
-                    .append("/");
-        }
-        return builder.toString();
-    }
 }
