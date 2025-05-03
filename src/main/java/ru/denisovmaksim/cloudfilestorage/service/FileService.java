@@ -56,11 +56,12 @@ public class FileService {
     }
 
 
-    public void renameFile(@ValidPath String path, @ValidName String newFileName) {
+    public void renameFile(@ValidName String path, @ValidName String newFileName) {
         int lastSlashIndex = path.lastIndexOf('/');
         String parentPath = (lastSlashIndex == -1) ? "" : path.substring(0, lastSlashIndex);
         String newPath = parentPath + newFileName;
-        fileStorage.copyOneObject(securityService.getAuthUserId(), path + "/", newPath);
+        fileStorage.copyOneObject(securityService.getAuthUserId(), path, newPath);
+        fileStorage.deleteObjects(securityService.getAuthUserId(), path);
     }
 
     public void renameFolder(@ValidPath String path, @ValidName String newFolderName) {

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+</head>
+<body>
+<div th:fragment="dialog-rename-file ()">
+    <div class="modal fade" id="rename-file" tabindex="-1" role="dialog" aria-labelledby="rename-file-label"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rename-file-label">Rename file</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="rename-file-form" action="/rename-file" method="post">
+                        <div data-mdb-input-init class="form-outline mb-4">
+                            <input type="text" id="file-name" name="file-name" class="form-control"/>
+                            <input id="old-file-path" type="hidden" name="path">
+                            <input id="redirect-path" type="hidden" name="redirect-path">
+                            <label class="form-label" for="file-name">New name of file</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary"
+                            onclick="$('#rename-file-form').submit();">Rename file
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const renameFolderModal = document.getElementById('rename-file')
+        renameFolderModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+
+            const fileNameInput = renameFolderModal.querySelector('#file-name');
+            const pathInput = renameFolderModal.querySelector('#old-file-path')
+            const redirectPathInput = renameFolderModal.querySelector('#redirect-path')
+
+            fileNameInput.value = button.getAttribute('data-bs-name');
+            pathInput.value = button.getAttribute('data-bs-path');
+            redirectPathInput.value = button.getAttribute('data-bs-redirect-path');
+        })
+    </script>
+</div>
+</body>
+</html>

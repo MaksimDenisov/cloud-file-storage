@@ -79,6 +79,22 @@ public class FileExplorerController {
         return "redirect:/";
     }
 
+    @PostMapping("/rename-file")
+    public String renameFile(@ModelAttribute("redirect-path")
+                               @ValidPath String redirectPath,
+                               @ModelAttribute("file-name")
+                               @ValidName String folderName,
+                               @ModelAttribute("path")
+                               String filePath,
+                               RedirectAttributes redirectAttributes) {
+        log.info("Rename file with path {} to {}", folderName, folderName);
+        fileService.renameFile(filePath, folderName);
+        if (!redirectPath.isEmpty()) {
+            redirectAttributes.addAttribute("path", redirectPath);
+        }
+        return "redirect:/";
+    }
+
     @PostMapping("/delete-file")
     public String deleteFile(@ModelAttribute("parent-path")
                              @ValidPath String parentPath,

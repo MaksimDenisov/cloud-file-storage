@@ -18,8 +18,9 @@
         </tr>
         </thead>
         <tbody>
+        <div th:insert="~{explorer/dialog-rename-folder}"></div>
+        <div th:insert="~{explorer/dialog-rename-file}"></div>
         <tr th:each="item : ${storageObjects}">
-            <div th:insert="~{explorer/dialog-rename-folder}"></div>
             <th:block th:switch="${#strings.toString(item.getType())}">
                 <div th:case="'FOLDER'">
                     <td>
@@ -75,7 +76,12 @@
                         </a>
                     </td>
                     <td>
-                        <button type="button" class="btn btn-light"><i class="bi bi-pencil-square text-primary"></i>
+                        <button type="button" class="btn btn-light"
+                                th:data-bs-name="${item.getName()}"
+                                th:data-bs-path="${item.getPath()}"
+                                th:data-bs-redirect-path="${item.getParentPath()}"
+                                data-bs-toggle="modal" data-bs-target="#rename-file">
+                            <i class="bi bi-pencil-square text-primary"></i>
                         </button>
                     </td>
                     <td>
