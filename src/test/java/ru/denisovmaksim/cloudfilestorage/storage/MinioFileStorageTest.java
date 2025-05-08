@@ -168,6 +168,64 @@ class MinioFileStorageTest {
     }
 
     @Test
+    void getManyObjects() throws IOException {
+        MultipartFile firstFile = new MockMultipartFile("firstFile.txt", "firstFile.txt",
+                "text/plain", "First".getBytes());
+        MultipartFile secondFile = new MockMultipartFile("secondFile.txt", "secondFile.txt",
+                "text/plain", "Second".getBytes());
+        fileStorage.saveObject(1L, "folder/", firstFile);
+        fileStorage.saveObject(1L, "folder/", secondFile);
+
+        List<FileObject> actual = fileStorage.getObjects(1L, "folder/");
+
+        assertThat(actual).hasSize(2);
+
+        try (InputStream actualStream = actual.get(0).stream()) {
+            byte[] actualBytes = actualStream.readAllBytes();
+            assertThat(actualBytes)
+                    .as("Match first file content")
+                    .isEqualTo(firstFile.getBytes());
+        }
+
+        try (InputStream actualStream = actual.get(1).stream()) {
+            byte[] actualBytes = actualStream.readAllBytes();
+            assertThat(actualBytes)
+                    .as("Match second file content")
+                    .isEqualTo(secondFile.getBytes());
+        }
+    }
+
+    @Test
+    void copyManyObjects() throws IOException {
+        MultipartFile firstFile = new MockMultipartFile("firstFile.txt", "firstFile.txt",
+                "text/plain", "First".getBytes());
+        MultipartFile secondFile = new MockMultipartFile("secondFile.txt", "secondFile.txt",
+                "text/plain", "Second".getBytes());
+        fileStorage.saveObject(1L, "folder/", firstFile);
+        fileStorage.saveObject(1L, "folder/", secondFile);
+
+        fileStorage.copyObjects(1L, "folder/", "copiedFolder/");
+
+        List<FileObject> actual = fileStorage.getObjects(1L, "copiedFolder/");
+
+        assertThat(actual).hasSize(2);
+
+        try (InputStream actualStream = actual.get(0).stream()) {
+            byte[] actualBytes = actualStream.readAllBytes();
+            assertThat(actualBytes)
+                    .as("Match first file content")
+                    .isEqualTo(firstFile.getBytes());
+        }
+
+        try (InputStream actualStream = actual.get(1).stream()) {
+            byte[] actualBytes = actualStream.readAllBytes();
+            assertThat(actualBytes)
+                    .as("Match second file content")
+                    .isEqualTo(secondFile.getBytes());
+        }
+    }
+
+    @Test
     void getStorageObjectsByNotExistPath() {
         assertFalse(fileStorage.isExist(1L, "not-exist-path"));
         assertFalse(fileStorage.listObjectInfo(1L, "not-exist-path").isPresent());
