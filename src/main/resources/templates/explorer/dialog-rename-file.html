@@ -14,10 +14,10 @@
                 <div class="modal-body">
                     <form id="rename-file-form" action="/rename-file" method="post">
                         <div data-mdb-input-init class="form-outline mb-4">
-                            <input type="text" id="file-name" name="file-name" class="form-control"/>
-                            <input id="old-file-path" type="hidden" name="path">
-                            <input id="redirect-path" type="hidden" name="redirect-path">
-                            <label class="form-label" for="file-name">New name of file</label>
+                            <input type="text" id="new-file-name" name="new-file-name" class="form-control"/>
+                            <input id="current-file-name" type="hidden" name="current-file-name">
+                            <input id="parent-path" type="hidden" name="parent-path">
+                            <label class="form-label" for="new-file-name">New name of file</label>
                         </div>
                     </form>
                 </div>
@@ -31,19 +31,19 @@
         </div>
     </div>
     <script>
-        const renameFolderModal = document.getElementById('rename-file')
-        renameFolderModal.addEventListener('show.bs.modal', function (event) {
+        const renameFileModal = document.getElementById('rename-file')
+        renameFileModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
 
-            const fileNameInput = renameFolderModal.querySelector('#file-name');
-            const pathInput = renameFolderModal.querySelector('#old-file-path')
-            const redirectPathInput = renameFolderModal.querySelector('#redirect-path')
+            const pathInput = renameFileModal.querySelector('#parent-path')
+            const currentFileName = renameFileModal.querySelector('#current-file-name');
+            const newFileName = renameFileModal.querySelector('#new-file-name');
 
-            fileNameInput.value = button.getAttribute('data-bs-name');
-            pathInput.value = button.getAttribute('data-bs-path');
-            redirectPathInput.value = button.getAttribute('data-bs-redirect-path');
+            newFileName.value = button.getAttribute('data-bs-name');
+            currentFileName.value = button.getAttribute('data-bs-name');
+            pathInput.value = button.getAttribute('data-bs-parent-path');
         })
     </script>
 </div>
 </body>
-</html>
+</html>7+8095+78-

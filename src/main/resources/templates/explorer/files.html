@@ -42,7 +42,7 @@
                     <td>
                         <button type="button" class="btn btn-light"
                                 th:data-bs-name="${item.getName()}"
-                                th:data-bs-path="${item.getPath()}"
+                                th:data-bs-current-path="${item.getPath()}"
                                 th:data-bs-redirect-path="${item.getParentPath()}"
                                 data-bs-toggle="modal" data-bs-target="#rename-folder">
                             <i class="bi bi-pencil-square text-primary"></i>
@@ -63,13 +63,13 @@
                         <i class="bi bi-file-binary h5 text-secondary"></i>
                     </td>
                     <td class="text-start">
-                        <a th:href="@{download(path=${item.getPath()})}" th:text="${item.getName()}"></a>
+                        <a th:href="@{download(path=${item.getParentPath()},filename=${item.getName()})}" th:text="${item.getName()}"></a>
                     </td>
                     <td>
                         <i th:text="${item.getSize() / 1024}  + ' KB'"></i>
                     </td>
                     <td>
-                        <a th:href="@{download(path=${item.getPath()})}">
+                        <a th:href="@{download(path=${item.getParentPath()},filename=${item.getName()})}">
                             <button type="button" class="btn btn-light text-success">
                                 <i class="bi bi-cloud-download"></i>
                             </button>
@@ -78,8 +78,7 @@
                     <td>
                         <button type="button" class="btn btn-light"
                                 th:data-bs-name="${item.getName()}"
-                                th:data-bs-path="${item.getPath()}"
-                                th:data-bs-redirect-path="${item.getParentPath()}"
+                                th:data-bs-parent-path="${item.getParentPath()}"
                                 data-bs-toggle="modal" data-bs-target="#rename-file">
                             <i class="bi bi-pencil-square text-primary"></i>
                         </button>
@@ -93,20 +92,6 @@
                         </form>
                     </td>
                 </div>
-                <script>
-                    const renameFolderModal = document.getElementById('rename-folder')
-                    renameFolderModal.addEventListener('show.bs.modal', function (event) {
-                        const button = event.relatedTarget;
-
-                        const folderNameInput = renameFolderModal.querySelector('#folder-name');
-                        const pathInput = renameFolderModal.querySelector('#old-folder-path')
-                        const redirectPathInput = renameFolderModal.querySelector('#redirect-path')
-
-                        folderNameInput.value = button.getAttribute('data-bs-name');
-                        pathInput.value = button.getAttribute('data-bs-path');
-                        redirectPathInput.value = button.getAttribute('data-bs-redirect-path');
-                    })
-                </script>
             </th:block>
         </tr>
         </tbody>

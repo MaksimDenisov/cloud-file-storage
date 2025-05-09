@@ -17,9 +17,9 @@
                 <div class="modal-body">
                     <form id="rename-folder-form" action="/rename-folder" method="post">
                         <div data-mdb-input-init class="form-outline mb-4">
-                            <input type="text" id="folder-name" name="folder-name" class="form-control"/>
-                            <input id="old-folder-path" type="hidden" name="path">
+                            <input type="text" id="folder-name" name="new-folder-name" class="form-control"/>
                             <input id="redirect-path" type="hidden" name="redirect-path">
+                            <input id="current-folder-path" type="hidden" name="current-folder-path">
                             <label class="form-label" for="folder-name">New name of folder</label>
                         </div>
                     </form>
@@ -33,6 +33,20 @@
             </div>
         </div>
     </div>
+    <script>
+        const renameFolderModal = document.getElementById('rename-folder')
+        renameFolderModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+
+            const folderNameInput = renameFolderModal.querySelector('#folder-name');
+            const currentPathInput = renameFolderModal.querySelector('#current-folder-path')
+            const redirectPathInput = renameFolderModal.querySelector('#redirect-path')
+
+            folderNameInput.value = button.getAttribute('data-bs-name');
+            currentPathInput.value = button.getAttribute('data-bs-current-path');
+            redirectPathInput.value = button.getAttribute('data-bs-redirect-path');
+        })
+    </script>
 </div>
 </body>
 </html>

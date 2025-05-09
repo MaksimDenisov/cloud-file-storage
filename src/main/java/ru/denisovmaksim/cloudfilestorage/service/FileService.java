@@ -12,8 +12,9 @@ import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
-import ru.denisovmaksim.cloudfilestorage.validation.ValidName;
-import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
+import ru.denisovmaksim.cloudfilestorage.util.FilePathUtil;
+import ru.denisovmaksim.cloudfilestorage.validation.ValidFileName;
+import ru.denisovmaksim.cloudfilestorage.validation.ValidDirPath;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -37,65 +38,67 @@ public class FileService {
 
     private final SecurityService securityService;
 
-
-    public void createFolder(@ValidPath String path, @ValidName String folderName) {
-        String newFolderName = path + folderName + "/";
+    public void createDirectory(@ValidDirPath String parentDirectory, @ValidFileName String directoryName) {
+        String newFolderName = parentDirectory + directoryName + "/";
         throwIfObjectExist(newFolderName);
         fileStorage.createPath(securityService.getAuthUserId(), newFolderName);
     }
 
-    public List<StorageObjectDTO> getContentOfDirectory(@ValidPath String path) {
-        return fileStorage.listObjectInfo(securityService.getAuthUserId(), path)
-                .orElseThrow(() -> new NotFoundException(path))
+    public List<StorageObjectDTO> getContentOfDirectory(@ValidDirPath String directory) {
+        return fileStorage.listObjectInfo(securityService.getAuthUserId(), directory)
+                .orElseThrow(() -> new NotFoundException(directory))
                 .stream()
                 .map(StorageObjectDTOMapper::toDTO)
                 .sorted(Comparator.comparing(StorageObjectDTO::getType).thenComparing(StorageObjectDTO::getName))
                 .collect(Collectors.toList());
     }
 
-    public void uploadFile(@ValidPath String path, MultipartFile file) {
-        throwIfObjectExist(path);
-        fileStorage.saveObject(securityService.getAuthUserId(), path, file);
+    public void uploadFile(@ValidDirPath String parentDirectory, MultipartFile file) {
+        throwIfObjectExist(parentDirectory + file.getOriginalFilename());
+        fileStorage.saveObject(securityService.getAuthUserId(), parentDirectory, file);
     }
 
 
-    public void renameFile(@ValidName String path, @ValidName String newFileName) {
-        int lastSlashIndex = path.lastIndexOf('/');
-        String parentPath = (lastSlashIndex == -1) ? "" : path.substring(0, lastSlashIndex);
-        String newPath = parentPath + newFileName;
+    public void renameFile(@ValidDirPath String parentPath,
+                           @ValidFileName String currentFileName,
+                           @ValidFileName String newFileName) {
+        String dstPath = parentPath + newFileName;
+        String srcPath = parentPath + currentFileName;
+        throwIfObjectExist(dstPath);
+        fileStorage.copyOneObject(securityService.getAuthUserId(), srcPath, dstPath);
+        fileStorage.deleteObjects(securityService.getAuthUserId(), srcPath);
+    }
+
+    public void renameFolder(@ValidDirPath String currentPath, @ValidFileName String newFolderName) {
+        String newPath = FilePathUtil.getParentPath(currentPath) + newFolderName + "/";
         throwIfObjectExist(newPath);
-        fileStorage.copyOneObject(securityService.getAuthUserId(), path, newPath);
+        fileStorage.copyObjects(securityService.getAuthUserId(), currentPath + "/", newPath);
+        fileStorage.deleteObjects(securityService.getAuthUserId(), currentPath + "/");
+    }
+
+    public void deleteFolder(@ValidDirPath String path) {
+        String parentPath = FilePathUtil.getParentPath(path);
         fileStorage.deleteObjects(securityService.getAuthUserId(), path);
+        if (!fileStorage.isExist(securityService.getAuthUserId(), parentPath)) {
+            fileStorage.createPath(securityService.getAuthUserId(), parentPath);
+        }
     }
 
-    public void renameFolder(@ValidPath String path, @ValidName String newFolderName) {
-        path = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
-        int lastSlashIndex = path.lastIndexOf('/');
-        String parentPath = (lastSlashIndex == -1) ? "" : path.substring(0, lastSlashIndex) + "/";
-        String newPath = parentPath + newFolderName + "/";
-        throwIfObjectExist(newPath);
-        fileStorage.copyObjects(securityService.getAuthUserId(), path + "/", newPath);
-        fileStorage.deleteObjects(securityService.getAuthUserId(), path + "/");
-    }
-
-    public void deleteFolder(String path) {
-        fileStorage.deleteObjects(securityService.getAuthUserId(), path);
-    }
-
-    public void deleteFile(@ValidPath String parentPath, @ValidName String fileName) {
+    public void deleteFile(@ValidDirPath String parentPath, @ValidFileName String fileName) {
         fileStorage.deleteObjects(securityService.getAuthUserId(), parentPath + fileName);
+        if (!fileStorage.isExist(securityService.getAuthUserId(), parentPath)) {
+            fileStorage.createPath(securityService.getAuthUserId(), parentPath);
+        }
     }
 
-    public NamedStreamDTO getFileAsStream(String path) {
-        FileObject fileObject = fileStorage.getObject(securityService.getAuthUserId(), path);
-        String[] pathElements = path.split("/");
-        String filename = pathElements[pathElements.length - 1];
+    public NamedStreamDTO getFileAsStream(@ValidDirPath String path, @ValidFileName String filename) {
+        FileObject fileObject = fileStorage.getObject(securityService.getAuthUserId(), path + filename);
         String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8)
                 .replace("+", "%20");
         return new NamedStreamDTO(encodedFileName, fileObject.stream());
     }
 
-    public NamedStreamDTO getZipFolderAsStream(@ValidPath String path) {
+    public NamedStreamDTO getZipFolderAsStream(@ValidDirPath String path) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         List<FileObject> fileObjects = fileStorage.getObjects(securityService.getAuthUserId(), path);
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
@@ -121,7 +124,7 @@ public class FileService {
         return new NamedStreamDTO(encodedFileName, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
     }
 
-    public void uploadFolder(@ValidPath String path, List<MultipartFile> files) {
+    public void uploadFolder(@ValidDirPath String path, List<MultipartFile> files) {
         String[] folders = files.get(0)
                 .getOriginalFilename()
                 .split("/");

@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.mapper.PathLinksDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.service.FileService;
-import ru.denisovmaksim.cloudfilestorage.validation.ValidName;
-import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
 
 @Controller
@@ -25,13 +23,11 @@ public class FileExplorerController {
     private final FileService fileService;
 
     @PostMapping("/add-folder")
-    public String addFolder(@ModelAttribute("folder-name")
-                            @ValidName String folderName,
-                            @ModelAttribute("path")
-                            @ValidPath String path,
+    public String addFolder(@ModelAttribute("folder-name") String folderName,
+                            @ModelAttribute("path") String path,
                             RedirectAttributes redirectAttributes) {
         log.info("Add folder with name {}", folderName);
-        fileService.createFolder(path, folderName);
+        fileService.createDirectory(path, folderName);
         if (!path.isEmpty()) {
             redirectAttributes.addAttribute("path", path);
         }
@@ -40,7 +36,6 @@ public class FileExplorerController {
 
     @GetMapping("/")
     public String getObjects(Model model, Authentication authentication,
-                             @ValidPath
                              @RequestParam(required = false, defaultValue = "") String path) {
         model.addAttribute("username", authentication.getName());
         model.addAttribute("breadcrumbs", PathLinksDTOMapper.toChainLinksFromPath(path));
@@ -50,26 +45,21 @@ public class FileExplorerController {
     }
 
     @PostMapping("/rename-folder")
-    public String renameFolder(@ModelAttribute("redirect-path")
-                               @ValidPath String redirectPath,
-                               @ModelAttribute("folder-name")
-                               @ValidName String folderName,
-                               @ModelAttribute("path")
-                               @ValidPath String folderPath,
+    public String renameFolder(@ModelAttribute("redirect-path") String parentPath,
+                               @ModelAttribute("current-folder-path") String currentFolderPath,
+                               @ModelAttribute("new-folder-name") String newFolderName,
                                RedirectAttributes redirectAttributes) {
-        log.info("Rename folder with path {} to {}", folderPath, folderName);
-        fileService.renameFolder(folderPath, folderName);
-        if (!redirectPath.isEmpty()) {
-            redirectAttributes.addAttribute("path", redirectPath);
+        log.info("Rename folder with path {} to {}", currentFolderPath, newFolderName);
+        fileService.renameFolder(currentFolderPath, newFolderName);
+        if (!parentPath.isEmpty()) {
+            redirectAttributes.addAttribute("path", parentPath);
         }
         return "redirect:/";
     }
 
     @PostMapping("/delete-folder")
-    public String deleteFolder(@ModelAttribute("redirect-path")
-                               @ValidPath String redirectPath,
-                               @ModelAttribute("folder-path")
-                               @ValidPath String folderPath,
+    public String deleteFolder(@ModelAttribute("redirect-path") String redirectPath,
+                               @ModelAttribute("folder-path") String folderPath,
                                RedirectAttributes redirectAttributes) {
         log.info("Delete folder with path {}", folderPath);
         fileService.deleteFolder(folderPath);
@@ -80,26 +70,21 @@ public class FileExplorerController {
     }
 
     @PostMapping("/rename-file")
-    public String renameFile(@ModelAttribute("redirect-path")
-                               @ValidPath String redirectPath,
-                               @ModelAttribute("file-name")
-                               @ValidName String folderName,
-                               @ModelAttribute("path")
-                               String filePath,
-                               RedirectAttributes redirectAttributes) {
-        log.info("Rename file with path {} to {}", folderName, folderName);
-        fileService.renameFile(filePath, folderName);
-        if (!redirectPath.isEmpty()) {
-            redirectAttributes.addAttribute("path", redirectPath);
+    public String renameFile(@ModelAttribute("parent-path") String parentPath,
+                             @ModelAttribute("current-file-name") String currentFileName,
+                             @ModelAttribute("new-file-name") String newFileName,
+                             RedirectAttributes redirectAttributes) {
+        log.info("Rename file folder {} form {} to {}", parentPath, currentFileName, newFileName);
+        fileService.renameFile(parentPath, currentFileName, newFileName);
+        if (!parentPath.isEmpty()) {
+            redirectAttributes.addAttribute("path", parentPath);
         }
         return "redirect:/";
     }
 
     @PostMapping("/delete-file")
-    public String deleteFile(@ModelAttribute("parent-path")
-                             @ValidPath String parentPath,
-                             @ModelAttribute("file-name")
-                             @ValidName String fileName,
+    public String deleteFile(@ModelAttribute("parent-path") String parentPath,
+                             @ModelAttribute("file-name") String fileName,
                              RedirectAttributes redirectAttributes) {
         log.info("Delete file with path {}", fileName);
         fileService.deleteFile(parentPath, fileName);

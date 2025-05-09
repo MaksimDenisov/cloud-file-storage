@@ -29,7 +29,7 @@ class FileServiceTest {
     @Test
     @DisplayName("Should create an empty folder")
     void createFolderShouldCreateEmptyPath() {
-        fileService.createFolder("", "folder");
+        fileService.createDirectory("", "folder");
         verify(fileStorage).createPath(0L, "folder/");
     }
 

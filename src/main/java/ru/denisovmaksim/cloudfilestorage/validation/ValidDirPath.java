@@ -15,9 +15,9 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Target({ METHOD, FIELD, ANNOTATION_TYPE, CONSTRUCTOR, PARAMETER })
 @Retention(RUNTIME)
-@Constraint(validatedBy = PathValidator.class)
+@Constraint(validatedBy = DirectoryPathValidator.class)
 @Documented
-public @interface ValidPath {
+public @interface ValidDirPath {
     String ERROR_MSG_PATH_INVALID_CHARACTERS = "Not valid path";
     String message() default ERROR_MSG_PATH_INVALID_CHARACTERS;
     Class<?>[] groups() default {};

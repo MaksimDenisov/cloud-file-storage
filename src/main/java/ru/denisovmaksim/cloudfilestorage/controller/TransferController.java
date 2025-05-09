@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.service.FileService;
-import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
 import java.io.InputStream;
 import java.util.List;
@@ -52,9 +51,10 @@ public class TransferController {
     }
 
     @GetMapping("/download")
-    public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() String path) {
+    public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() String path,
+                                                            @RequestParam() String filename) {
         try {
-            NamedStreamDTO dto = fileService.getFileAsStream(path);
+            NamedStreamDTO dto = fileService.getFileAsStream(path, filename);
             InputStream inputStream = dto.getStream();
             InputStreamResource resource = new InputStreamResource(inputStream);
 
@@ -72,8 +72,7 @@ public class TransferController {
     }
 
     @PostMapping("/upload-file")
-    public String uploadFile(@ModelAttribute("path")
-                             @ValidPath String path,
+    public String uploadFile(@ModelAttribute("path") String path,
                              @RequestParam("file") MultipartFile file,
                              RedirectAttributes attributes) {
         if (!path.isEmpty()) {
@@ -90,10 +89,9 @@ public class TransferController {
     }
 
     @PostMapping("/upload-folder")
-    public String uploadFolder(@ModelAttribute("path")
-                             @ValidPath String path,
-                             @RequestParam("files") List<MultipartFile> files,
-                             RedirectAttributes attributes) {
+    public String uploadFolder(@ModelAttribute("path") String path,
+                               @RequestParam("files") List<MultipartFile> files,
+                               RedirectAttributes attributes) {
         if (!path.isEmpty()) {
             attributes.addAttribute("path", path);
         }
