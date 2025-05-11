@@ -39,9 +39,12 @@ public class FileService {
     private final SecurityService securityService;
 
     public void createDirectory(@ValidDirPath String parentDirectory, @ValidFileName String directoryName) {
-        String newFolderName = parentDirectory + directoryName + "/";
-        throwIfObjectExist(newFolderName);
-        fileStorage.createPath(securityService.getAuthUserId(), newFolderName);
+        String newFolderPath = parentDirectory + directoryName;
+        if (!newFolderPath.endsWith("/")) {
+            newFolderPath = newFolderPath + "/";
+        }
+        throwIfObjectExist(newFolderPath);
+        fileStorage.createPath(securityService.getAuthUserId(), newFolderPath);
     }
 
     public List<StorageObjectDTO> getContentOfDirectory(@ValidDirPath String directory) {
@@ -70,10 +73,13 @@ public class FileService {
     }
 
     public void renameFolder(@ValidDirPath String currentPath, @ValidFileName String newFolderName) {
-        String newPath = FilePathUtil.getParentPath(currentPath) + newFolderName + "/";
+        String newPath = FilePathUtil.getParentPath(currentPath) + newFolderName;
+        if (!newPath.endsWith("/")) {
+            newPath = newPath + "/";
+        }
         throwIfObjectExist(newPath);
-        fileStorage.copyObjects(securityService.getAuthUserId(), currentPath + "/", newPath);
-        fileStorage.deleteObjects(securityService.getAuthUserId(), currentPath + "/");
+        fileStorage.copyObjects(securityService.getAuthUserId(), currentPath, newPath);
+        fileStorage.deleteObjects(securityService.getAuthUserId(), currentPath);
     }
 
     public void deleteFolder(@ValidDirPath String path) {
