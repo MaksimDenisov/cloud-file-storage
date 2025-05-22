@@ -40,7 +40,7 @@ class FileServiceTest {
     private SecurityService securityService;
 
     @InjectMocks
-    private FileService fileService;
+    private ExplorerService explorerService;
 
     private static final Long USER_ID = 1L;
 
@@ -54,7 +54,7 @@ class FileServiceTest {
     void createDirectory() {
         when(fileStorage.isExist(USER_ID, "dir/")).thenReturn(false);
 
-        fileService.createDirectory("", "dir/");
+        explorerService.createDirectory("", "dir/");
 
         verify(fileStorage).createPath(USER_ID, "dir/");
     }
@@ -65,7 +65,7 @@ class FileServiceTest {
         when(fileStorage.isExist(USER_ID, "dir/")).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class, () ->
-                fileService.createDirectory("", "dir/")
+                explorerService.createDirectory("", "dir/")
         );
     }
 
@@ -74,7 +74,7 @@ class FileServiceTest {
     void getContentOfDirectory() {
         when(fileStorage.listObjectInfo(USER_ID, "dir/")).thenReturn(Optional.of(List.of()));
 
-        List<StorageObjectDTO> result = fileService.getContentOfDirectory("dir/");
+        List<StorageObjectDTO> result = explorerService.getContentOfDirectory("dir/");
         assertNotNull(result);
     }
 
@@ -83,7 +83,7 @@ class FileServiceTest {
     void getContentOfNotExistDirectoryShouldThrowNotFound() {
         when(fileStorage.listObjectInfo(USER_ID, "dir/")).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> fileService.getContentOfDirectory("dir/"));
+        assertThrows(NotFoundException.class, () -> explorerService.getContentOfDirectory("dir/"));
     }
 
     @Test
@@ -93,7 +93,7 @@ class FileServiceTest {
         when(file.getOriginalFilename()).thenReturn("file.txt");
         when(fileStorage.isExist(USER_ID, "dir/file.txt")).thenReturn(false);
 
-        fileService.uploadFile("dir/", file);
+        explorerService.uploadFile("dir/", file);
 
         verify(fileStorage).saveObject(USER_ID, "dir/", file);
     }
@@ -105,7 +105,7 @@ class FileServiceTest {
         when(file.getOriginalFilename()).thenReturn("file.txt");
         when(fileStorage.isExist(USER_ID, "dir/file.txt")).thenReturn(true);
 
-        assertThrows(ObjectAlreadyExistException.class, () -> fileService.uploadFile("dir/", file));
+        assertThrows(ObjectAlreadyExistException.class, () -> explorerService.uploadFile("dir/", file));
     }
 
     @Test
@@ -113,7 +113,7 @@ class FileServiceTest {
     void renameFileShouldCopyAndDeleteWhenNewNotExists() {
         when(fileStorage.isExist(USER_ID, "dir/new.txt")).thenReturn(false);
 
-        fileService.renameFile("dir/", "old.txt", "new.txt");
+        explorerService.renameFile("dir/", "old.txt", "new.txt");
 
         verify(fileStorage).copyOneObject(USER_ID, "dir/old.txt", "dir/new.txt");
         verify(fileStorage).deleteObjects(USER_ID, "dir/old.txt");
@@ -124,7 +124,7 @@ class FileServiceTest {
     void deleteFileShouldDeleteAndCreateParentFolderIfMissing() {
         when(fileStorage.isExist(USER_ID, "dir/")).thenReturn(false);
 
-        fileService.deleteFile("dir/", "file.txt");
+        explorerService.deleteFile("dir/", "file.txt");
 
         verify(fileStorage).deleteObjects(USER_ID, "dir/file.txt");
         verify(fileStorage).createPath(USER_ID, "dir/");
@@ -138,7 +138,7 @@ class FileServiceTest {
         when(fileStorage.getObject(USER_ID, "dir/file.txt"))
                 .thenReturn(new FileObject("dir/file.txt", stream));
 
-        NamedStreamDTO result = fileService.getFileAsStream("dir/", "file.txt");
+        NamedStreamDTO result = explorerService.getFileAsStream("dir/", "file.txt");
         assertEquals("file.txt", java.net.URLDecoder.decode(result.getName(), java.nio.charset.StandardCharsets.UTF_8));
     }
 
@@ -151,7 +151,7 @@ class FileServiceTest {
                 new FileObject("dir/file.txt", stream)
         ));
 
-        NamedStreamDTO result = fileService.getZipFolderAsStream("dir/");
+        NamedStreamDTO result = explorerService.getZipFolderAsStream("dir/");
         assertTrue(result.getName().endsWith(".zip"));
     }
 
@@ -164,7 +164,7 @@ class FileServiceTest {
 
         when(fileStorage.isExist(USER_ID, "folder")).thenReturn(false);
 
-        fileService.uploadFolder("", files);
+        explorerService.uploadFolder("", files);
 
         verify(fileStorage).saveObject(USER_ID, "", file);
     }
@@ -178,7 +178,7 @@ class FileServiceTest {
 
         when(fileStorage.isExist(USER_ID, newPath)).thenReturn(false);
 
-        fileService.renameFolder(currentPath, newFolderName);
+        explorerService.renameFolder(currentPath, newFolderName);
 
         verify(fileStorage).copyObjects(USER_ID, currentPath, newPath);
         verify(fileStorage).deleteObjects(USER_ID, currentPath);
@@ -194,7 +194,7 @@ class FileServiceTest {
         when(fileStorage.isExist(USER_ID, newPath)).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class, () ->
-                fileService.renameFolder(currentPath, newFolderName)
+                explorerService.renameFolder(currentPath, newFolderName)
         );
 
         verify(fileStorage, never()).copyObjects(any(), any(), any());
@@ -209,7 +209,7 @@ class FileServiceTest {
 
         when(fileStorage.isExist(USER_ID, parentPath)).thenReturn(false);
 
-        fileService.deleteFolder(path);
+        explorerService.deleteFolder(path);
 
         verify(fileStorage).deleteObjects(USER_ID, path);
         verify(fileStorage).createPath(USER_ID, parentPath);
@@ -223,7 +223,7 @@ class FileServiceTest {
 
         when(fileStorage.isExist(USER_ID, parentPath)).thenReturn(true);
 
-        fileService.deleteFolder(path);
+        explorerService.deleteFolder(path);
 
         verify(fileStorage).deleteObjects(USER_ID, path);
         verify(fileStorage, never()).createPath(any(), any());

@@ -60,6 +60,7 @@ public final class StorageObjectInfo {
             this.path = path;
         }
 
+        @Deprecated
         public Builder withFolderSizeSupplier(Supplier<Long> folderSizeSupplier) {
             this.folderSizeSupplier = folderSizeSupplier;
             return this;

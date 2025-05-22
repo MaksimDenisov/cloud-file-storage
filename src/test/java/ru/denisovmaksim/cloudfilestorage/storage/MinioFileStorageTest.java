@@ -262,4 +262,8 @@ class MinioFileStorageTest {
                 .as("Match path")
                 .isEqualTo("folder/copy-file.txt");
     }
+
+    //TODO Add countOfDirectChildTest
+
+    //TODO Add commonSizeTest
 }

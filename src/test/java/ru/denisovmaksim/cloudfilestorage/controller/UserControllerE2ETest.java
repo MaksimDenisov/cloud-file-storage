@@ -30,7 +30,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import ru.denisovmaksim.cloudfilestorage.model.User;
 import ru.denisovmaksim.cloudfilestorage.repository.UserRepository;
-import ru.denisovmaksim.cloudfilestorage.service.FileService;
+import ru.denisovmaksim.cloudfilestorage.service.ExplorerService;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -58,7 +58,7 @@ public class UserControllerE2ETest {
     private UserRepository userRepository;
 
     @MockBean
-    private FileService  fileService;
+    private ExplorerService explorerService;
 
     @Container
     private static final MySQLContainer MY_SQL_CONTAINER = new MySQLContainer("mysql:8:0:26")

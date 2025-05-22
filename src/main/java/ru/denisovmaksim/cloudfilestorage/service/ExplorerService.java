@@ -32,7 +32,7 @@ import java.util.zip.ZipOutputStream;
 @Service
 @Validated
 @AllArgsConstructor
-public class FileService {
+public class ExplorerService {
 
     private final MinioFileStorage fileStorage;
 

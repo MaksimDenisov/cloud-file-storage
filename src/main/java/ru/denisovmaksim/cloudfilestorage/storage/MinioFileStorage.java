@@ -45,7 +45,7 @@ public class MinioFileStorage {
      * Checks whether at least one object exists in the specified path for the given user.
      *
      * @param userId the ID of the user whose storage space is being checked
-     * @param path the virtual path to check for object existence
+     * @param path   the virtual path to check for object existence
      * @return {@code true} if at least one object exists at the specified path; {@code false} otherwise
      */
     public boolean isExist(Long userId, String path) {
@@ -95,14 +95,43 @@ public class MinioFileStorage {
                 .map(list -> list.stream()
                         .map(item -> {
                             String objectPath = resolver.resolvePathFromMinioObjectName(userId, item.objectName());
+                            //TODO Up to service
                             return new StorageObjectInfo.Builder(objectPath)
                                     .objectSize(item.size())
                                     .withFolderSizeSupplier(() ->
-                                            getChildCount(resolver.resolve(userId, objectPath)))
+                                            getDirectChildCount(userId, objectPath))
                                     .build();
                         })
                         .toList()
                 );
+    }
+
+    /**
+     * Retrieves metadata about the objects (files and folders) containing query substring in path.
+     *
+     * @param userId the ID of the user
+     * @param query  Searching substring
+     * @return a list of storage object information if present
+     */
+    public List<StorageObjectInfo> searchObjectInfo(Long userId, String path, String query) {
+        log.info("Searching objects info at path '{}' for userId={}", path, userId);
+        MinioPath minioPath = resolver.resolve(userId, path);
+        List<Item> items = getMinioItems(minioPath, true)
+                .orElseGet(Collections::emptyList);
+        final String upperCaseQuery = query.toUpperCase();
+        return items.stream()
+                .filter(name -> resolver.resolvePathFromMinioObjectName(userId, name.objectName()).toUpperCase()
+                        .contains(upperCaseQuery))
+                .map(item -> {
+                    String objectPath = resolver.resolvePathFromMinioObjectName(userId, item.objectName());
+                    //TODO Up to service
+                    return new StorageObjectInfo.Builder(objectPath)
+                            .objectSize(item.size())
+                            .withFolderSizeSupplier(() ->
+                                    getDirectChildCount(userId, objectPath))
+                            .build();
+                })
+                .toList();
     }
 
     /**
@@ -269,10 +298,13 @@ public class MinioFileStorage {
     /**
      * Returns the number of direct children for a given path.
      *
-     * @param minioPath the internal MinIO path
+     * @param userId the ID of the user
+     * @param path   the folder path to delete
      * @return the count of child items
      */
-    private Long getChildCount(MinioPath minioPath) {
+    public Long getDirectChildCount(Long userId, String path) {
+        log.info("Get count direct child at path '{}' for userId={}", path, userId);
+        MinioPath minioPath = resolver.resolve(userId, path);
         Iterable<Result<Item>> minioItems = minioClient.listObjects(
                 ListObjectsArgs.builder()
                         .bucket(bucket)
@@ -283,5 +315,8 @@ public class MinioFileStorage {
                 .filter(item -> !item.objectName().equals(minioPath.getPathByMinio()))
                 .count();
     }
+
+
+    //TODO Add commonSize
 }
 

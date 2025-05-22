@@ -2,6 +2,7 @@ package ru.denisovmaksim.cloudfilestorage;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,6 +19,7 @@ import ru.denisovmaksim.cloudfilestorage.exception.UserAlreadyExistException;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalControllerAdvice {
 
     @Value("${MAX_FILE_SIZE:10MB}")
@@ -82,8 +84,9 @@ public class GlobalControllerAdvice {
         return "redirect:/";
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(RuntimeException.class)
     public String handleCommonException(RuntimeException e, RedirectAttributes attributes) {
+        log.debug(e.getMessage());
         attributes.addFlashAttribute("flashType", "danger");
         attributes.addFlashAttribute("flashMsg",
                 "An error occurred. Something went wrong.");
