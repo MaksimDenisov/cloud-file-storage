@@ -16,6 +16,8 @@ public final class StorageObjectInfo {
     @Deprecated
     private String parentPath = "";
 
+    private String path = "";
+
     private final String name;
 
     private final boolean folder;
@@ -25,6 +27,7 @@ public final class StorageObjectInfo {
 
 
     private StorageObjectInfo(Builder builder) {
+        //TODO move to utils
         String path = builder.path;
         this.folder = path.endsWith("/");
         if (path.endsWith("/")) {

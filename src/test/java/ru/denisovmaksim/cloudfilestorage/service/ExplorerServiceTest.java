@@ -7,31 +7,23 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.multipart.MultipartFile;
-import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
-import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class FileServiceTest {
+class ExplorerServiceTest {
 
     @Mock
     private MinioFileStorage fileStorage;
@@ -86,27 +78,6 @@ class FileServiceTest {
         assertThrows(NotFoundException.class, () -> explorerService.getContentOfDirectory("dir/"));
     }
 
-    @Test
-    @DisplayName("Upload file should save it to storage.")
-    void uploadFileShouldSaveWhenNotExists() {
-        MultipartFile file = mock(MultipartFile.class);
-        when(file.getOriginalFilename()).thenReturn("file.txt");
-        when(fileStorage.isExist(USER_ID, "dir/file.txt")).thenReturn(false);
-
-        explorerService.uploadFile("dir/", file);
-
-        verify(fileStorage).saveObject(USER_ID, "dir/", file);
-    }
-
-    @Test
-    @DisplayName("Upload file should save it to storage.")
-    void uploadFileShouldThrowWhenExists() {
-        MultipartFile file = mock(MultipartFile.class);
-        when(file.getOriginalFilename()).thenReturn("file.txt");
-        when(fileStorage.isExist(USER_ID, "dir/file.txt")).thenReturn(true);
-
-        assertThrows(ObjectAlreadyExistException.class, () -> explorerService.uploadFile("dir/", file));
-    }
 
     @Test
     @DisplayName("Rename file should copy and delete.")
@@ -130,44 +101,7 @@ class FileServiceTest {
         verify(fileStorage).createPath(USER_ID, "dir/");
     }
 
-    @Test
-    @DisplayName("Get file should return stream.")
-    void getFileShouldReturnStreamDTO() {
-        InputStream stream = new ByteArrayInputStream("test".getBytes());
 
-        when(fileStorage.getObject(USER_ID, "dir/file.txt"))
-                .thenReturn(new FileObject("dir/file.txt", stream));
-
-        NamedStreamDTO result = explorerService.getFileAsStream("dir/", "file.txt");
-        assertEquals("file.txt", java.net.URLDecoder.decode(result.getName(), java.nio.charset.StandardCharsets.UTF_8));
-    }
-
-    @Test
-    @DisplayName("Get folder should return zipped stream.")
-    void getZipFolderAsStreamShouldReturnZippedStreamDTO() {
-        InputStream stream = new ByteArrayInputStream("test".getBytes());
-        // when(securityService.getAuthUserId()).thenReturn(USER_ID);
-        when(fileStorage.getObjects(USER_ID, "dir/")).thenReturn(List.of(
-                new FileObject("dir/file.txt", stream)
-        ));
-
-        NamedStreamDTO result = explorerService.getZipFolderAsStream("dir/");
-        assertTrue(result.getName().endsWith(".zip"));
-    }
-
-    @Test
-    @DisplayName("Get folder should return zipped stream.")
-    void uploadFolderShouldSaveEachFile() {
-        MultipartFile file = mock(MultipartFile.class);
-        when(file.getOriginalFilename()).thenReturn("folder/file.txt");
-        List<MultipartFile> files = List.of(file);
-
-        when(fileStorage.isExist(USER_ID, "folder")).thenReturn(false);
-
-        explorerService.uploadFolder("", files);
-
-        verify(fileStorage).saveObject(USER_ID, "", file);
-    }
 
     @Test
     @DisplayName("Rename folder should rename all files.")

@@ -98,8 +98,8 @@ public class MinioFileStorage {
                             //TODO Up to service
                             return new StorageObjectInfo.Builder(objectPath)
                                     .objectSize(item.size())
-                                    .withFolderSizeSupplier(() ->
-                                            getDirectChildCount(userId, objectPath))
+                                    /*.withFolderSizeSupplier(() ->
+                                            getDirectChildCount(userId, objectPath))*/
                                     .build();
                         })
                         .toList()
@@ -127,8 +127,8 @@ public class MinioFileStorage {
                     //TODO Up to service
                     return new StorageObjectInfo.Builder(objectPath)
                             .objectSize(item.size())
-                            .withFolderSizeSupplier(() ->
-                                    getDirectChildCount(userId, objectPath))
+/*                            .withFolderSizeSupplier(() ->
+                                    getDirectChildCount(userId, objectPath))*/
                             .build();
                 })
                 .toList();
@@ -198,7 +198,6 @@ public class MinioFileStorage {
         });
     }
 
-
     /**
      * Copies a single object from one path to another.
      *
@@ -246,7 +245,6 @@ public class MinioFileStorage {
             }
         });
     }
-
 
     /**
      * Deletes all objects under the specified path, including the folder itself.

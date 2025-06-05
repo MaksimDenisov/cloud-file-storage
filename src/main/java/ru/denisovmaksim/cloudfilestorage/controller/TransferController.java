@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
-import ru.denisovmaksim.cloudfilestorage.service.ExplorerService;
+import ru.denisovmaksim.cloudfilestorage.service.TransferService;
 
 import java.io.InputStream;
 import java.util.List;
@@ -27,13 +27,13 @@ import java.util.List;
 @Slf4j
 @RequestMapping()
 public class TransferController {
-    private final ExplorerService explorerService;
+    private final TransferService transferService;
 
     @GetMapping("/download-folder")
     public ResponseEntity<InputStreamResource> downloadZipFolder(@RequestParam() String path) {
         try {
             log.info("Zip folder from path {}", path);
-            NamedStreamDTO dto = explorerService.getZipFolderAsStream(path);
+            NamedStreamDTO dto = transferService.getZipFolderAsStream(path);
             InputStream inputStream = dto.getStream();
             InputStreamResource resource = new InputStreamResource(inputStream);
 
@@ -54,7 +54,7 @@ public class TransferController {
     public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() String path,
                                                             @RequestParam() String filename) {
         try {
-            NamedStreamDTO dto = explorerService.getFileAsStream(path, filename);
+            NamedStreamDTO dto = transferService.getFileAsStream(path, filename);
             InputStream inputStream = dto.getStream();
             InputStreamResource resource = new InputStreamResource(inputStream);
 
@@ -84,7 +84,7 @@ public class TransferController {
             return "redirect:/";
         }
         log.info("Upload file with name {}", file.getOriginalFilename());
-        explorerService.uploadFile(path, file);
+        transferService.uploadFile(path, file);
         return "redirect:/";
     }
 
@@ -99,7 +99,7 @@ public class TransferController {
         for (MultipartFile file : files) {
             log.info("Upload file: " + file.getOriginalFilename());
         }
-        explorerService.uploadFolder(path, files);
+        transferService.uploadFolder(path, files);
         return "redirect:/";
     }
 }

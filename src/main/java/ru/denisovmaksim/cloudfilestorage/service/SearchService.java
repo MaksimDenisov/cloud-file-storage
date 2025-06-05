@@ -28,7 +28,8 @@ public class SearchService {
     private final SecurityService securityService;
 
     public List<StorageObjectDTO> search(String query) {
-        List<StorageObjectInfo> objectInfos = fileStorage.searchObjectInfo(securityService.getAuthUserId(), "", query);
+        Long userId = securityService.getAuthUserId();
+        List<StorageObjectInfo> objectInfos = fileStorage.searchObjectInfo(userId, "", query);
         objectInfos.forEach(a -> log.info("File {} at path {}", a.getPath(), a.getPath()));
         Map<String, StorageObjectDTO> dtoMap = new HashMap<>();
         for (StorageObjectInfo info : objectInfos) {
@@ -41,6 +42,12 @@ public class SearchService {
                 if (!dtoMap.containsKey(path)) {
                     FileType type = (info.isFolder())
                             ? FileType.FOLDER : FileType.UNKNOWN_FILE;
+
+                    //TODO add calculate size option probably extract another method
+                    if (info.isFolder()) {
+                        info.setSize(fileStorage.getDirectChildCount(userId, info.getPath()));
+                    }
+
                     StorageObjectDTO dto = new StorageObjectDTO(FilePathUtil.getParentPath(path),
                             path.replace(FilePathUtil.getParentPath(path), ""),
                             type, info.getSize());

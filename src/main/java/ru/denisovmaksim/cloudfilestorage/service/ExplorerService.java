@@ -12,6 +12,7 @@ import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 import ru.denisovmaksim.cloudfilestorage.util.FilePathUtil;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidFileName;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidDirPath;
@@ -48,19 +49,20 @@ public class ExplorerService {
     }
 
     public List<StorageObjectDTO> getContentOfDirectory(@ValidDirPath String directory) {
-        return fileStorage.listObjectInfo(securityService.getAuthUserId(), directory)
-                .orElseThrow(() -> new NotFoundException(directory))
-                .stream()
+        Long userId = securityService.getAuthUserId();
+        List<StorageObjectInfo> infos = fileStorage.listObjectInfo(userId, directory)
+                .orElseThrow(() -> new NotFoundException(directory));
+        //TODO add calculate size option probably extract another method
+        for (StorageObjectInfo info : infos) {
+            if (info.isFolder()) {
+                info.setSize(fileStorage.getDirectChildCount(userId, info.getPath()));
+            }
+        }
+        return infos.stream()
                 .map(StorageObjectDTOMapper::toDTO)
                 .sorted(Comparator.comparing(StorageObjectDTO::getType).thenComparing(StorageObjectDTO::getName))
                 .collect(Collectors.toList());
     }
-
-    public void uploadFile(@ValidDirPath String parentDirectory, MultipartFile file) {
-        throwIfObjectExist(parentDirectory + file.getOriginalFilename());
-        fileStorage.saveObject(securityService.getAuthUserId(), parentDirectory, file);
-    }
-
 
     public void renameFile(@ValidDirPath String parentPath,
                            @ValidFileName String currentFileName,
@@ -95,47 +97,6 @@ public class ExplorerService {
         if (!fileStorage.isExist(securityService.getAuthUserId(), parentPath)) {
             fileStorage.createPath(securityService.getAuthUserId(), parentPath);
         }
-    }
-
-    public NamedStreamDTO getFileAsStream(@ValidDirPath String path, @ValidFileName String filename) {
-        FileObject fileObject = fileStorage.getObject(securityService.getAuthUserId(), path + filename);
-        String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8)
-                .replace("+", "%20");
-        return new NamedStreamDTO(encodedFileName, fileObject.stream());
-    }
-
-    public NamedStreamDTO getZipFolderAsStream(@ValidDirPath String path) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        List<FileObject> fileObjects = fileStorage.getObjects(securityService.getAuthUserId(), path);
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
-            for (FileObject object : fileObjects) {
-                String objectPath = object.path().replaceFirst(path, "");
-                ZipEntry zipEntry = new ZipEntry(objectPath);
-                zipOutputStream.putNextEntry(zipEntry);
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                InputStream objectInputStream = object.stream();
-                while ((bytesRead = objectInputStream.read(buffer)) != -1) {
-                    zipOutputStream.write(buffer, 0, bytesRead);
-                }
-                zipOutputStream.closeEntry();
-            }
-        } catch (IOException e) {
-            throw new FileStorageException(e);
-        }
-        String[] pathElements = path.split("/");
-        String filename = pathElements[pathElements.length - 1] + ".zip";
-        String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8)
-                .replace("+", "%20");
-        return new NamedStreamDTO(encodedFileName, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
-    }
-
-    public void uploadFolder(@ValidDirPath String path, List<MultipartFile> files) {
-        String[] folders = files.get(0)
-                .getOriginalFilename()
-                .split("/");
-        throwIfObjectExist(folders[0]);
-        files.forEach(file -> fileStorage.saveObject(securityService.getAuthUserId(), path, file));
     }
 
     private void throwIfObjectExist(String path) {
