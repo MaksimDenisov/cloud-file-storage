@@ -5,17 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.denisovmaksim.cloudfilestorage.dto.FileType;
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
-import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
-import ru.denisovmaksim.cloudfilestorage.util.FilePathUtil;
+import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,8 +45,8 @@ public class SearchService {
                         info.setSize(fileStorage.getDirectChildCount(userId, info.getPath()));
                     }
 
-                    StorageObjectDTO dto = new StorageObjectDTO(FilePathUtil.getParentPath(path),
-                            path.replace(FilePathUtil.getParentPath(path), ""),
+                    StorageObjectDTO dto = new StorageObjectDTO(PathUtil.getParentDirName(path),
+                            path.replace(PathUtil.getParentDirName(path), ""),
                             type, info.getSize());
                     dtoMap.put(path, dto);
                 }

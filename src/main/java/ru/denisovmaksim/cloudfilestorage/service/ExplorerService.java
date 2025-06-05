@@ -3,31 +3,19 @@ package ru.denisovmaksim.cloudfilestorage.service;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.multipart.MultipartFile;
-import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
-import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
-import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
-import ru.denisovmaksim.cloudfilestorage.util.FilePathUtil;
+import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidFileName;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidDirPath;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 
 @Service
@@ -75,7 +63,7 @@ public class ExplorerService {
     }
 
     public void renameFolder(@ValidDirPath String currentPath, @ValidFileName String newFolderName) {
-        String newPath = FilePathUtil.getParentPath(currentPath) + newFolderName;
+        String newPath = PathUtil.getParentDirName(currentPath) + newFolderName;
         if (!newPath.endsWith("/")) {
             newPath = newPath + "/";
         }
@@ -85,7 +73,7 @@ public class ExplorerService {
     }
 
     public void deleteFolder(@ValidDirPath String path) {
-        String parentPath = FilePathUtil.getParentPath(path);
+        String parentPath = PathUtil.getParentDirName(path);
         fileStorage.deleteObjects(securityService.getAuthUserId(), path);
         if (!fileStorage.isExist(securityService.getAuthUserId(), parentPath)) {
             fileStorage.createPath(securityService.getAuthUserId(), parentPath);
