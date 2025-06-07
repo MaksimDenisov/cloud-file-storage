@@ -9,8 +9,8 @@ import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
-import ru.denisovmaksim.cloudfilestorage.validation.ValidDirPath;
-import ru.denisovmaksim.cloudfilestorage.validation.ValidFileName;
+import ru.denisovmaksim.cloudfilestorage.validation.PathType;
+import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,20 +32,21 @@ public class TransferService {
     private final SecurityService securityService;
 
 
-    public void uploadFile(@ValidDirPath String parentDirectory, MultipartFile file) {
+    public void uploadFile(@ValidPath(PathType.DIR) String parentDirectory, MultipartFile file) {
         throwIfObjectExist(parentDirectory + file.getOriginalFilename());
         fileStorage.saveObject(securityService.getAuthUserId(), parentDirectory, file);
     }
 
 
-    public NamedStreamDTO getFileAsStream(@ValidDirPath String path, @ValidFileName String filename) {
+    public NamedStreamDTO getFileAsStream(@ValidPath(PathType.DIR) String path,
+                                          @ValidPath(PathType.FILENAME) String filename) {
         FileObject fileObject = fileStorage.getObject(securityService.getAuthUserId(), path + filename);
         String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8)
                 .replace("+", "%20");
         return new NamedStreamDTO(encodedFileName, fileObject.stream());
     }
 
-    public NamedStreamDTO getZipFolderAsStream(@ValidDirPath String path) {
+    public NamedStreamDTO getZipFolderAsStream(@ValidPath(PathType.DIR) String path) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         List<FileObject> fileObjects = fileStorage.getObjects(securityService.getAuthUserId(), path);
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
@@ -71,7 +72,7 @@ public class TransferService {
         return new NamedStreamDTO(encodedFileName, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
     }
 
-    public void uploadFolder(@ValidDirPath String path, List<MultipartFile> files) {
+    public void uploadFolder(@ValidPath(PathType.DIR) String path, List<MultipartFile> files) {
         String[] folders = files.get(0)
                 .getOriginalFilename()
                 .split("/");

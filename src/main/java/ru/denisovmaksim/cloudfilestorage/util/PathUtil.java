@@ -22,7 +22,7 @@ public class PathUtil {
     }
 
     public static boolean isDir(String path) {
-        return path.endsWith("/");
+        return path.endsWith("/") || path.isEmpty();
     }
 
     public static String getBaseName(String path) {

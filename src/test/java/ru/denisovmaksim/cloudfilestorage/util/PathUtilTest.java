@@ -47,6 +47,11 @@ class PathUtilTest {
     }
 
     @Test
+    void isDirShouldReturnTrueIfRoot() {
+        assertTrue(isDir(""));
+    }
+
+    @Test
     void isDirShouldReturnTrueIfPathEndsWithSlash() {
         assertTrue(isDir("folder/subfolder/"));
     }
@@ -64,6 +69,11 @@ class PathUtilTest {
     @Test
     void getNameShouldReturnLastSegmentForDirectory() {
         assertEquals("subfolder", getBaseName("folder/subfolder/"));
+    }
+
+    @Test
+    void getNameShouldReturnSelfForFileInRoot() {
+        assertEquals("file.txt", getBaseName("file.txt"));
     }
 
     @Test

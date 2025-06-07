@@ -10,8 +10,8 @@ import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
-import ru.denisovmaksim.cloudfilestorage.validation.ValidFileName;
-import ru.denisovmaksim.cloudfilestorage.validation.ValidDirPath;
+import ru.denisovmaksim.cloudfilestorage.validation.PathType;
+import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
 import java.util.Comparator;
 import java.util.List;
@@ -27,7 +27,8 @@ public class ExplorerService {
 
     private final SecurityService securityService;
 
-    public void createDirectory(@ValidDirPath String parentDirectory, @ValidFileName String directoryName) {
+    public void createDirectory(@ValidPath(PathType.DIR) String parentDirectory,
+                                @ValidPath(PathType.FILENAME) String directoryName) {
         String newFolderPath = parentDirectory + directoryName;
         if (!newFolderPath.endsWith("/")) {
             newFolderPath = newFolderPath + "/";
@@ -36,7 +37,7 @@ public class ExplorerService {
         fileStorage.createPath(securityService.getAuthUserId(), newFolderPath);
     }
 
-    public List<StorageObjectDTO> getContentOfDirectory(@ValidDirPath String directory) {
+    public List<StorageObjectDTO> getContentOfDirectory(@ValidPath(PathType.DIR) String directory) {
         Long userId = securityService.getAuthUserId();
         List<StorageObjectInfo> infos = fileStorage.listObjectInfo(userId, directory)
                 .orElseThrow(() -> new NotFoundException(directory));
@@ -52,9 +53,9 @@ public class ExplorerService {
                 .collect(Collectors.toList());
     }
 
-    public void renameFile(@ValidDirPath String parentPath,
-                           @ValidFileName String currentFileName,
-                           @ValidFileName String newFileName) {
+    public void renameFile(@ValidPath(PathType.DIR) String parentPath,
+                           @ValidPath(PathType.FILENAME) String currentFileName,
+                           @ValidPath(PathType.FILENAME) String newFileName) {
         String dstPath = parentPath + newFileName;
         String srcPath = parentPath + currentFileName;
         throwIfObjectExist(dstPath);
@@ -62,7 +63,8 @@ public class ExplorerService {
         fileStorage.deleteObjects(securityService.getAuthUserId(), srcPath);
     }
 
-    public void renameFolder(@ValidDirPath String currentPath, @ValidFileName String newFolderName) {
+    public void renameFolder(@ValidPath(PathType.DIR) String currentPath,
+                             @ValidPath(PathType.FILENAME) String newFolderName) {
         String newPath = PathUtil.getParentDirName(currentPath) + newFolderName;
         if (!newPath.endsWith("/")) {
             newPath = newPath + "/";
@@ -72,7 +74,7 @@ public class ExplorerService {
         fileStorage.deleteObjects(securityService.getAuthUserId(), currentPath);
     }
 
-    public void deleteFolder(@ValidDirPath String path) {
+    public void deleteFolder(@ValidPath(PathType.DIR)String path) {
         String parentPath = PathUtil.getParentDirName(path);
         fileStorage.deleteObjects(securityService.getAuthUserId(), path);
         if (!fileStorage.isExist(securityService.getAuthUserId(), parentPath)) {
@@ -80,7 +82,7 @@ public class ExplorerService {
         }
     }
 
-    public void deleteFile(@ValidDirPath String parentPath, @ValidFileName String fileName) {
+    public void deleteFile(@ValidPath(PathType.DIR) String parentPath, @ValidPath(PathType.FILENAME) String fileName) {
         fileStorage.deleteObjects(securityService.getAuthUserId(), parentPath + fileName);
         if (!fileStorage.isExist(securityService.getAuthUserId(), parentPath)) {
             fileStorage.createPath(securityService.getAuthUserId(), parentPath);
