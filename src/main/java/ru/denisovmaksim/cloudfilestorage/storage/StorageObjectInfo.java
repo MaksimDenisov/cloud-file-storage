@@ -26,6 +26,7 @@ public final class StorageObjectInfo {
     private long size;
 
 
+    @Deprecated
     private StorageObjectInfo(Builder builder) {
         //TODO move to utils
         String path = builder.path;
