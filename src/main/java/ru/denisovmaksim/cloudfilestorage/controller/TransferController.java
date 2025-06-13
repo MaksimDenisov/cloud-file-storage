@@ -32,19 +32,8 @@ public class TransferController {
     @GetMapping("/download-folder")
     public ResponseEntity<InputStreamResource> downloadZipFolder(@RequestParam() String path) {
         try {
-            log.info("Zip folder from path {}", path);
-            NamedStreamDTO dto = transferService.getZipFolderAsStream(path);
-            InputStream inputStream = dto.getStream();
-            InputStreamResource resource = new InputStreamResource(inputStream);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s", dto.getName()));
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .contentLength(-1) // or specify the length if known
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(resource);
+            log.info("Download zip folder from path {}", path);
+            return createStreamResponse(transferService.getZipFolderAsStream(path));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -53,18 +42,7 @@ public class TransferController {
     @GetMapping("/download")
     public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() String path) {
         try {
-            NamedStreamDTO dto = transferService.getFileAsStream(path);
-            InputStream inputStream = dto.getStream();
-            InputStreamResource resource = new InputStreamResource(inputStream);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s", dto.getName()));
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .contentLength(-1) // or specify the length if known
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(resource);
+            return createStreamResponse(transferService.getFileAsStream(path));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -100,6 +78,20 @@ public class TransferController {
         }
         transferService.uploadFolder(path, files);
         return "redirect:/";
+    }
+
+    private ResponseEntity<InputStreamResource> createStreamResponse(NamedStreamDTO dto) {
+        InputStream inputStream = dto.getStream();
+        InputStreamResource resource = new InputStreamResource(inputStream);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s", dto.getName()));
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(-1) // or specify the length if known
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 }
 
