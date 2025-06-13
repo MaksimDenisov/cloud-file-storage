@@ -102,9 +102,8 @@ class MinioFileStorageTest {
     @Test
     void createPath() {
         fileStorage.createPath(1L, "folder/");
-        StorageObjectInfo expectedObject = new StorageObjectInfo.Builder("folder/")
-                .objectSize(0)
-                .build();
+
+        StorageObjectInfo expectedObject = new StorageObjectInfo("folder/", "folder", true, 0);
 
         List<StorageObjectInfo> actualObjects = fileStorage.listObjectInfo(1L, "").get();
 

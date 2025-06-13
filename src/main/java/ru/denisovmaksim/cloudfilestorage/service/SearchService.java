@@ -37,11 +37,11 @@ public class SearchService {
                 String path = info.getPath().substring(0, partPathEnd);
                 log.info("Find path {}", path);
                 if (!dtoMap.containsKey(path)) {
-                    FileType type = (info.isFolder())
+                    FileType type = (info.isDir())
                             ? FileType.FOLDER : FileType.UNKNOWN_FILE;
 
                     //TODO add calculate size option probably extract another method
-                    if (info.isFolder()) {
+                    if (info.isDir()) {
                         info.setSize(fileStorage.getDirectChildCount(userId, info.getPath()));
                     }
 

@@ -43,14 +43,14 @@
                         <button type="button" class="btn btn-light"
                                 th:data-bs-name="${item.getName()}"
                                 th:data-bs-current-path="${item.getPath()}"
-                                th:data-bs-redirect-path="${item.getParentPath()}"
+                                th:data-bs-redirect-path="${currentPath}"
                                 data-bs-toggle="modal" data-bs-target="#rename-folder">
                             <i class="bi bi-pencil-square text-primary"></i>
                         </button>
                     </td>
                     <td>
                         <form action="/delete-folder" method="POST">
-                            <input type="hidden" name="redirect-path" th:value="${item.getParentPath()}">
+                            <input type="hidden" name="redirect-path" th:value="${currentPath}">
                             <input type="hidden" name="folder-path" th:value="${item.getPath()}">
                             <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i>
                             </button>
@@ -63,13 +63,13 @@
                         <i class="bi bi-file-binary h5 text-secondary"></i>
                     </td>
                     <td class="text-start">
-                        <a th:href="@{download(path=${item.getParentPath()},filename=${item.getName()})}" th:text="${item.getName()}"></a>
+                        <a th:href="@{download(path=${item.getPath()})}" th:text="${item.getName()}"></a>
                     </td>
                     <td>
                         <i th:text="${item.getSize() / 1024}  + ' KB'"></i>
                     </td>
                     <td>
-                        <a th:href="@{download(path=${item.getParentPath()},filename=${item.getName()})}">
+                        <a th:href="@{download(path=${item.getPath()})}">
                             <button type="button" class="btn btn-light text-success">
                                 <i class="bi bi-cloud-download"></i>
                             </button>
@@ -78,7 +78,7 @@
                     <td>
                         <button type="button" class="btn btn-light"
                                 th:data-bs-name="${item.getName()}"
-                                th:data-bs-parent-path="${item.getParentPath()}"
+                                th:data-bs-parent-path="${currentPath}"
                                 data-bs-toggle="modal" data-bs-target="#rename-file">
                             <i class="bi bi-pencil-square text-primary"></i>
                         </button>

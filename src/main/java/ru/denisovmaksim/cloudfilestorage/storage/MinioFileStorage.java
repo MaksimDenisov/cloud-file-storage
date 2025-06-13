@@ -91,17 +91,8 @@ public class MinioFileStorage {
         log.info("Fetching objects info at path '{}' for userId={}", path, userId);
         return getMinioItems(userId, path, false)
                 .map(list -> list.stream()
-                        .map(item -> {
-                            String objectPath = resolver.resolvePathFromMinioObjectName(userId, item.objectName());
-                            //TODO Up to service
-                            return new StorageObjectInfo.Builder(objectPath)
-                                    .objectSize(item.size())
-                                    /*.withFolderSizeSupplier(() ->
-                                            getDirectChildCount(userId, objectPath))*/
-                                    .build();
-                        })
-                        .toList()
-                );
+                        .map(item -> toStorageObjectInfo(userId, item))
+                        .toList());
     }
 
     /**
@@ -119,15 +110,7 @@ public class MinioFileStorage {
         return items.stream()
                 .filter(name -> resolver.resolvePathFromMinioObjectName(userId, name.objectName()).toUpperCase()
                         .contains(upperCaseQuery))
-                .map(item -> {
-                    String objectPath = resolver.resolvePathFromMinioObjectName(userId, item.objectName());
-                    //TODO Up to service
-                    return new StorageObjectInfo.Builder(objectPath)
-                            .objectSize(item.size())
-/*                            .withFolderSizeSupplier(() ->
-                                    getDirectChildCount(userId, objectPath))*/
-                            .build();
-                })
+                .map(item -> toStorageObjectInfo(userId, item))
                 .toList();
     }
 
@@ -258,6 +241,30 @@ public class MinioFileStorage {
     }
 
     /**
+     * Returns the number of direct children for a given path.
+     *
+     * @param userId the ID of the user
+     * @param path   the folder path to delete
+     * @return the count of child items
+     */
+    public Long getDirectChildCount(Long userId, String path) {
+        log.info("Get count direct child at path '{}' for userId={}", path, userId);
+        String minioPath = resolver.resolveMinioPath(userId, path);
+        Iterable<Result<Item>> minioItems = minioClient.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket(bucket)
+                        .prefix(minioPath)
+                        .build());
+        return StreamSupport.stream(minioItems.spliterator(), false)
+                .map(item -> MinioExceptionHandler.interceptMinioExceptions(item::get))
+                .filter(item -> !item.objectName().equals(minioPath))
+                .count();
+    }
+
+
+    //TODO Add commonSize
+
+    /**
      * Retrieves raw MinIO items from storage for the given path.
      *
      * @param userId            the ID of the user
@@ -285,27 +292,17 @@ public class MinioFileStorage {
     }
 
     /**
-     * Returns the number of direct children for a given path.
+     * Map raw MinIO item to StorageObjectInfo
      *
      * @param userId the ID of the user
-     * @param path   the folder path to delete
-     * @return the count of child items
+     * @param item   raw MinIO item from storage
+     * @return a StorageObjectInfo object
      */
-    public Long getDirectChildCount(Long userId, String path) {
-        log.info("Get count direct child at path '{}' for userId={}", path, userId);
-        String minioPath = resolver.resolveMinioPath(userId, path);
-        Iterable<Result<Item>> minioItems = minioClient.listObjects(
-                ListObjectsArgs.builder()
-                        .bucket(bucket)
-                        .prefix(minioPath)
-                        .build());
-        return StreamSupport.stream(minioItems.spliterator(), false)
-                .map(item -> MinioExceptionHandler.interceptMinioExceptions(item::get))
-                .filter(item -> !item.objectName().equals(minioPath))
-                .count();
+    private StorageObjectInfo toStorageObjectInfo(Long userId, Item item) {
+        String objectPath = resolver.resolvePathFromMinioObjectName(userId, item.objectName());
+        String baseName = PathUtil.getBaseName(objectPath);
+        boolean isDir = PathUtil.isDir(objectPath);
+        return new StorageObjectInfo(objectPath, baseName, isDir, item.size());
     }
-
-
-    //TODO Add commonSize
 }
 

@@ -73,7 +73,7 @@ class TransferServiceTest {
         when(fileStorage.getObject(USER_ID, "dir/file.txt"))
                 .thenReturn(new FileObject("dir/file.txt", stream));
 
-        NamedStreamDTO result = transferService.getFileAsStream("dir/", "file.txt");
+        NamedStreamDTO result = transferService.getFileAsStream("dir/file.txt");
         assertEquals("file.txt", java.net.URLDecoder.decode(result.getName(), java.nio.charset.StandardCharsets.UTF_8));
     }
 

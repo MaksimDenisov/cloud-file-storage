@@ -43,7 +43,7 @@ public class ExplorerService {
                 .orElseThrow(() -> new NotFoundException(directory));
         //TODO add calculate size option probably extract another method
         for (StorageObjectInfo info : infos) {
-            if (info.isFolder()) {
+            if (info.isDir()) {
                 info.setSize(fileStorage.getDirectChildCount(userId, info.getPath()));
             }
         }

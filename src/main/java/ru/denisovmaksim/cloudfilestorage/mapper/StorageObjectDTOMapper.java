@@ -6,8 +6,8 @@ import ru.denisovmaksim.cloudfilestorage.dto.FileType;
 
 public class StorageObjectDTOMapper {
     public static StorageObjectDTO toDTO(StorageObjectInfo object) {
-        FileType type = object.isFolder()
+        FileType type = object.isDir()
                 ? FileType.FOLDER : FileType.UNKNOWN_FILE;
-        return new StorageObjectDTO(object.getParentPath(), object.getName(), type, object.getSize());
+        return new StorageObjectDTO(object.getPath(), object.getName(), type, object.getSize());
     }
 }

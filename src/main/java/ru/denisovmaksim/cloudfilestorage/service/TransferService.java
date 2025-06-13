@@ -9,6 +9,7 @@ import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
+import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 import ru.denisovmaksim.cloudfilestorage.validation.PathType;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
@@ -38,10 +39,10 @@ public class TransferService {
     }
 
 
-    public NamedStreamDTO getFileAsStream(@ValidPath(PathType.DIR) String path,
-                                          @ValidPath(PathType.FILENAME) String filename) {
-        FileObject fileObject = fileStorage.getObject(securityService.getAuthUserId(), path + filename);
-        String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8)
+    public NamedStreamDTO getFileAsStream(@ValidPath(PathType.FILEPATH) String filepath) {
+        FileObject fileObject = fileStorage.getObject(securityService.getAuthUserId(), filepath);
+        String baseName = PathUtil.getBaseName(filepath);
+        String encodedFileName = URLEncoder.encode(baseName, StandardCharsets.UTF_8)
                 .replace("+", "%20");
         return new NamedStreamDTO(encodedFileName, fileObject.stream());
     }

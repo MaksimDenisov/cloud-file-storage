@@ -51,10 +51,9 @@ public class TransferController {
     }
 
     @GetMapping("/download")
-    public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() String path,
-                                                            @RequestParam() String filename) {
+    public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() String path) {
         try {
-            NamedStreamDTO dto = transferService.getFileAsStream(path, filename);
+            NamedStreamDTO dto = transferService.getFileAsStream(path);
             InputStream inputStream = dto.getStream();
             InputStreamResource resource = new InputStreamResource(inputStream);
 
