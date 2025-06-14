@@ -1,10 +1,15 @@
 # First stage, build the application
 FROM openjdk:17-jdk-alpine AS TEMP_BUILD_IMAGE
 WORKDIR /usr/app
+
+COPY build.gradle settings.gradle gradle.properties gradlew /usr/app/
+COPY gradle /usr/app/gradle
+
+RUN chmod +x gradlew && ./gradlew dependencies || return 0
+
 COPY . .
-RUN chmod +x gradlew
+
 RUN ./gradlew build -x test
-RUN ls -al build/libs/
 
 # Second stage, build a docker image with output artifact from previous stage.
 FROM openjdk:17-jdk-alpine

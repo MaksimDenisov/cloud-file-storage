@@ -21,12 +21,10 @@ repositories {
 
 dependencies {
     testImplementation 'org.projectlombok:lombok:1.18.28'
-    testImplementation 'org.projectlombok:lombok:1.18.28'
-    testImplementation 'org.projectlombok:lombok:1.18.28'
-    compileOnly 'org.projectlombok:lombok:1.18.26'
+    compileOnly 'org.projectlombok:lombok:1.18.28'
 
     annotationProcessor(
-            'org.projectlombok:lombok:1.18.26'
+            'org.projectlombok:lombok:1.18.28'
     )
 
     implementation(
@@ -41,9 +39,6 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-security:3.0.4',
             'mysql:mysql-connector-java:8.0.28',
             'io.minio:minio:8.5.11'
-
-
-
     )
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -54,7 +49,6 @@ dependencies {
     testImplementation "org.testcontainers:mysql:1.20.1"
     testImplementation "org.testcontainers:minio:1.20.6"
     testImplementation 'com.redis.testcontainers:testcontainers-redis:1.6.4'
-
 
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly 'com.h2database:h2'

@@ -17,5 +17,6 @@ run-app-docker:
 	docker run --detach -p 8080:8080  --network cloud-file-storage_internal_network 'cloud-file-storage'
 
 deploy:
+	docker-compose -f docker-compose-prod.yml up -d mysql redis s3
 	docker-compose -f docker-compose-prod.yml build cfs-app
 	docker-compose -f docker-compose-prod.yml up -d --no-deps --force-recreate cfs-app
