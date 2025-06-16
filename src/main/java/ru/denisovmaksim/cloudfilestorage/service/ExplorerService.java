@@ -70,11 +70,13 @@ public class ExplorerService {
             newPath = newPath + "/";
         }
         throwIfObjectExist(newPath);
-        fileStorage.copyObjects(securityService.getAuthUserId(), currentPath, newPath);
+        if (fileStorage.copyObjects(securityService.getAuthUserId(), currentPath, newPath) == 0) {
+            fileStorage.createPath(securityService.getAuthUserId(), newPath);
+        }
         fileStorage.deleteObjects(securityService.getAuthUserId(), currentPath);
     }
 
-    public void deleteFolder(@ValidPath(PathType.DIR)String path) {
+    public void deleteFolder(@ValidPath(PathType.DIR) String path) {
         String parentPath = PathUtil.getParentDirName(path);
         fileStorage.deleteObjects(securityService.getAuthUserId(), path);
         if (!fileStorage.isExist(securityService.getAuthUserId(), parentPath)) {

@@ -1,1 +1,6 @@
 rootProject.name = 'cloud-file-storage'
+buildCache {
+    local {
+        enabled = true
+    }
+}

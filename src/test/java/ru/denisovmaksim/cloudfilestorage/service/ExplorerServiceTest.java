@@ -18,6 +18,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -102,20 +104,35 @@ class ExplorerServiceTest {
     }
 
 
-
     @Test
     @DisplayName("Rename folder should rename all files.")
     void renameFolderSuccess() {
-        String currentPath = "docs/oldFolder/";
+        String currentPath = "docs/";
+        String newFolderName = "newDocs";
+        String newPath = "newDocs/";
+
+        when(fileStorage.isExist(USER_ID, newPath)).thenReturn(false);
+        when(fileStorage.copyObjects(any(), any(), any())).thenReturn(5);
+
+        explorerService.renameFolder(currentPath, newFolderName);
+
+        verify(fileStorage).copyObjects(eq(USER_ID), eq(currentPath), anyString());
+        verify(fileStorage).deleteObjects(eq(USER_ID), eq(currentPath));
+    }
+
+    @Test
+    @DisplayName("Rename empty folder.")
+    void renameEmptyFolderSuccess() {
+        String currentPath = "docs/";
         String newFolderName = "newFolder";
-        String newPath = "docs/newFolder/";
+        String newPath = "newFolder/";
 
         when(fileStorage.isExist(USER_ID, newPath)).thenReturn(false);
 
         explorerService.renameFolder(currentPath, newFolderName);
 
-        verify(fileStorage).copyObjects(USER_ID, currentPath, newPath);
-        verify(fileStorage).deleteObjects(USER_ID, currentPath);
+        verify(fileStorage).createPath(USER_ID, newPath);
+        verify(fileStorage).deleteObjects(eq(USER_ID), eq(currentPath));
     }
 
     @Test

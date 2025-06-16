@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -204,9 +205,10 @@ public class MinioFileStorage {
      * @param srcPath  the source directory
      * @param destPath the target directory
      */
-    public void copyObjects(Long userId, String srcPath, String destPath) {
+    public int copyObjects(Long userId, String srcPath, String destPath) {
         log.info("Copying all objects from path '{}' to path '{}' for userId={}", srcPath, destPath, userId);
         String srcMinioPath = resolver.resolveMinioPath(userId, srcPath);
+        AtomicInteger count = new AtomicInteger();
         MinioExceptionHandler.interceptMinioExceptions(() -> {
             List<Item> minioItems = getMinioItems(userId, srcPath, true)
                     .orElseThrow();
@@ -214,9 +216,11 @@ public class MinioFileStorage {
                 String fromPath = resolver.resolvePathFromMinioObjectName(userId, item.objectName());
                 String toPath = item.objectName()
                         .replaceFirst(srcMinioPath, destPath);
+                count.incrementAndGet();
                 copyOneObject(userId, fromPath, toPath);
             }
         });
+        return count.get();
     }
 
     /**

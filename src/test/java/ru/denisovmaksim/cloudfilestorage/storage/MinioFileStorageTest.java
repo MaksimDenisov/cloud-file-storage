@@ -200,12 +200,12 @@ class MinioFileStorageTest {
                 "text/plain", "First".getBytes());
         MultipartFile secondFile = new MockMultipartFile("secondFile.txt", "secondFile.txt",
                 "text/plain", "Second".getBytes());
-        fileStorage.saveObject(1L, "folder/", firstFile);
-        fileStorage.saveObject(1L, "folder/", secondFile);
+        fileStorage.saveObject(1L, "root/folder/", firstFile);
+        fileStorage.saveObject(1L, "root/folder/", secondFile);
 
-        fileStorage.copyObjects(1L, "folder/", "copiedFolder/");
+        fileStorage.copyObjects(1L, "root/folder/", "root/copiedFolder/");
 
-        List<FileObject> actual = fileStorage.getObjects(1L, "copiedFolder/");
+        List<FileObject> actual = fileStorage.getObjects(1L, "root/copiedFolder/");
 
         assertThat(actual).hasSize(2);
 
