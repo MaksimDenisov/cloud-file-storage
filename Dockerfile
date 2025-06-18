@@ -1,5 +1,5 @@
 # First stage, build the application
-FROM gradle:7.6.0-jdk17-alpine AS build
+FROM gradle:7.6.0-jdk17-alpine AS TEMP_BUILD_IMAGE
 WORKDIR /usr/app
 
 COPY build.gradle settings.gradle gradle.properties /usr/app/
