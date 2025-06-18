@@ -8,6 +8,14 @@ https://zhukovsd.github.io/java-backend-learning-course/projects/cloud-file-stor
 ### Deploy status:
 [![Deploy](https://github.com/MaksimDenisov/cloud-file-storage/actions/workflows/deploy.yml/badge.svg)](https://github.com/MaksimDenisov/cloud-file-storage/actions/workflows/deploy.yml)
 
+# Quality by Sonar Qube:
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=MaksimDenisov_cloud-file-storage)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=coverage)](https://sonarcloud.io/summary/new_code?id=MaksimDenisov_cloud-file-storage)
+[![Maintainability](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=MaksimDenisov_cloud-file-storage)
+![SonarCloud](https://github.com/MaksimDenisov/cloud-file-storage/actions/workflows/sonar.yml/badge.svg)
+
+
 ### Quality by Code Climate:
 [![Maintainability](https://api.codeclimate.com/v1/badges/d03079dc7c034b59a341/maintainability)](https://codeclimate.com/github/MaksimDenisov/cloud-file-storage/maintainability)
 
