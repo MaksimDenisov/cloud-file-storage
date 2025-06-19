@@ -74,5 +74,6 @@ sonar {
         property "sonar.projectKey", "MaksimDenisov_cloud-file-storage"
         property "sonar.organization", "maksimdenisov"
         property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
     }
 }
