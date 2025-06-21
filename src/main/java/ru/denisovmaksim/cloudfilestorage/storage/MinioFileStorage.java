@@ -21,8 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+    import java.util.stream.StreamSupport;
 
 /**
  * Component responsible for interacting with MinIO storage.
@@ -152,7 +151,7 @@ public class MinioFileStorage {
                                     .object(objectName)
                                     .build()));
                     return new FileObject(objectPath, objectInputStream);
-                }).collect(Collectors.toList());
+                }).toList();
     }
 
     /**
@@ -292,7 +291,7 @@ public class MinioFileStorage {
         return Optional.of(StreamSupport.stream(minioItems.spliterator(), false)
                 .map(item -> MinioExceptionHandler.interceptMinioExceptions(item::get))
                 .filter(item -> !minioPath.equals(item.objectName()))
-                .collect(Collectors.toList()));
+                .toList());
     }
 
     /**
