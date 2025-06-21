@@ -12,6 +12,7 @@
             <h5 class="card-title text-center">Sign in</h5>
             <span th:text="${error} ?: _"></span>
             <form action="/sign-in" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <!-- Login input -->
                 <div data-mdb-input-init class="form-outline mb-4">
                     <input type="text" id="username" name="username"  class="form-control" value="user"/>

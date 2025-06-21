@@ -38,6 +38,7 @@ import java.security.NoSuchAlgorithmException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
@@ -132,7 +133,8 @@ public class UserControllerE2ETest {
         mockMvc.perform(post(UserController.SIGN_UP)
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", NEW_USER.getName())
-                        .param("password", USER_PASS))
+                        .param("password", USER_PASS)
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/"));
         assertTrue(userRepository.findByName(NEW_USER.getName()).isPresent());
@@ -144,7 +146,8 @@ public class UserControllerE2ETest {
         mockMvc.perform(post(UserController.SIGN_UP)
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", EXIST_USER.getName())
-                        .param("password", "PASSWORD"))
+                        .param("password", "PASSWORD")
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(UserController.SIGN_UP))
                 .andExpect(flash().attributeExists("flashType", "flashMsg"))
@@ -157,7 +160,8 @@ public class UserControllerE2ETest {
         mockMvc.perform(post(UserController.SIGN_UP)
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "AA")
-                        .param("password", "PASSWORD"))
+                        .param("password", "PASSWORD")
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(UserController.SIGN_UP))
                 .andExpect(flash().attributeExists("flashType", "flashMsg"))
@@ -170,7 +174,8 @@ public class UserControllerE2ETest {
         mockMvc.perform(post(UserController.SIGN_UP)
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("name", "Name")
-                        .param("password", "123"))
+                        .param("password", "123")
+                        .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(UserController.SIGN_UP))
                 .andExpect(flash().attributeExists("flashType", "flashMsg"))

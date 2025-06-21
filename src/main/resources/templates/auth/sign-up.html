@@ -9,6 +9,7 @@
         <div class="card-body">
             <h5 class="card-title text-center">Sign up</h5>
             <form action="/sign-up" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <!-- Login input -->
                 <div data-mdb-input-init class="form-outline mb-4">
                     <input type="text" id="username" name="name" class="form-control"/>

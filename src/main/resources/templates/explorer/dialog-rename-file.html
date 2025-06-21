@@ -9,6 +9,7 @@
                 <div class="modal-body">
                     <form id="rename-file-form" action="/rename-file" method="post">
                         <div data-mdb-input-init class="form-outline mb-4">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="text" id="new-file-name" name="new-file-name" class="form-control"/>
                             <input id="current-file-name" type="hidden" name="current-file-name">
                             <input id="parent-path" type="hidden" name="parent-path">

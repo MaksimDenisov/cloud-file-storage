@@ -74,9 +74,11 @@ public class TransferService {
     }
 
     public void uploadFolder(@ValidPath(PathType.DIR) String path, List<MultipartFile> files) {
-        String[] folders = files.get(0)
-                .getOriginalFilename()
-                .split("/");
+        String filename = files.get(0).getOriginalFilename();
+        if (filename == null) {
+            throw new IllegalArgumentException();
+        }
+        String[] folders = filename.split("/");
         throwIfObjectExist(folders[0]);
         files.forEach(file -> fileStorage.saveObject(securityService.getAuthUserId(), path, file));
     }

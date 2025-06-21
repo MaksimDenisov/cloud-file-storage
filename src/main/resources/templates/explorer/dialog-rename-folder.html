@@ -17,6 +17,7 @@
                 <div class="modal-body">
                     <form id="rename-folder-form" action="/rename-folder" method="post">
                         <div data-mdb-input-init class="form-outline mb-4">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="text" id="folder-name" name="new-folder-name" class="form-control"/>
                             <input id="redirect-path" type="hidden" name="redirect-path">
                             <input id="current-folder-path" type="hidden" name="current-folder-path">

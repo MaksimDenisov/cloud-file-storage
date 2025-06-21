@@ -5,7 +5,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,12 +29,20 @@ public class UserController {
     private final AuthenticationService authenticationService;
 
     @GetMapping(SIGN_IN)
-    public String getSignInPage(RedirectAttributes attributes, @RequestParam(required = false) String error) {
+    public String getSignInPage(HttpServletRequest request,
+                                Model model,
+                                RedirectAttributes attributes,
+                                @RequestParam(required = false) String error) {
         log.info("GET: Sign in ");
+
         if (error != null) {
             attributes.addFlashAttribute("flashType", "danger");
             attributes.addFlashAttribute("flashMsg", "Incorrect login or password.");
             return "redirect:sign-in";
+        }
+        CsrfToken csrfToken = (CsrfToken) request.getAttribute("_csrf");
+        if (csrfToken != null) {
+            model.addAttribute("_csrf", csrfToken);
         }
         return "auth/sign-in";
 
