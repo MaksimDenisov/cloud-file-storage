@@ -9,31 +9,33 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @Slf4j
 public class CloudFileStorageApplication {
+    private static final String DEFAULT = " Default value";
+
     public static void main(String[] args) {
         if (System.getenv().getOrDefault("APP_ENV", "dev").equals("dev")) {
-            log.info("Environment Variables:");
-            log.info("JDBC_ROOT      = {}",
-                    System.getenv().getOrDefault("JDBC_ROOT", " Default value"));
-            log.info("JDBC_PASSWORD  = {}",
-                    System.getenv().getOrDefault("JDBC_PASSWORD", " Default value"));
-            log.info("JDBC_URL       = {}",
-                    System.getenv().getOrDefault("JDBC_URL", " Default value"));
-            log.info("REDIS_HOST     = {}",
-                    System.getenv().getOrDefault("REDIS_HOST", " Default value"));
-            log.info("REDIS_PORT     = {}",
-                    System.getenv().getOrDefault("REDIS_PORT", " Default value"));
-            log.info("REDIS_PASSWORD = {}",
-                    System.getenv().getOrDefault("REDIS_PASSWORD", " Default value"));
-            log.info("MINIO_URL      = {}",
-                    System.getenv().getOrDefault("MINIO_URL", " Default value"));
-            log.info("MINIO_USER     = {}",
-                    System.getenv().getOrDefault("MINIO_USER", " Default value"));
-            log.info("MINIO_PASSWORD = {}",
-                    System.getenv().getOrDefault("MINIO_PASSWORD", " Default value"));
-            log.info("MINIO_ROOT_USER     = {}",
-                    System.getenv().getOrDefault("MINIO_ROOT_USER", " Default value"));
-            log.info("MINIO_ROOT_PASSWORD = {}",
-                    System.getenv().getOrDefault("MINIO_ROOT_PASSWORD", " Default value"));
+            log.debug("Environment Variables:");
+            log.debug("JDBC_ROOT      = {}",
+                    System.getenv().getOrDefault("JDBC_ROOT", DEFAULT));
+            log.debug("JDBC_PASSWORD  = {}",
+                    System.getenv().getOrDefault("JDBC_PASSWORD", DEFAULT));
+            log.debug("JDBC_URL       = {}",
+                    System.getenv().getOrDefault("JDBC_URL", DEFAULT));
+            log.debug("REDIS_HOST     = {}",
+                    System.getenv().getOrDefault("REDIS_HOST", DEFAULT));
+            log.debug("REDIS_PORT     = {}",
+                    System.getenv().getOrDefault("REDIS_PORT", DEFAULT));
+            log.debug("REDIS_PASSWORD = {}",
+                    System.getenv().getOrDefault("REDIS_PASSWORD", DEFAULT));
+            log.debug("MINIO_URL      = {}",
+                    System.getenv().getOrDefault("MINIO_URL", DEFAULT));
+            log.debug("MINIO_USER     = {}",
+                    System.getenv().getOrDefault("MINIO_USER", DEFAULT));
+            log.debug("MINIO_PASSWORD = {}",
+                    System.getenv().getOrDefault("MINIO_PASSWORD", DEFAULT));
+            log.debug("MINIO_ROOT_USER     = {}",
+                    System.getenv().getOrDefault("MINIO_ROOT_USER", DEFAULT));
+            log.debug("MINIO_ROOT_PASSWORD = {}",
+                    System.getenv().getOrDefault("MINIO_ROOT_PASSWORD", DEFAULT));
         }
         new SpringApplicationBuilder(CloudFileStorageApplication.class)
                 .profiles(System.getenv().getOrDefault("APP_ENV", "dev"))
