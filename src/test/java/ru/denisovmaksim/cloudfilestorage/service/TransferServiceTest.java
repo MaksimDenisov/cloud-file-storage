@@ -6,10 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
+import ru.denisovmaksim.cloudfilestorage.service.archive.ZipArchiver;
 import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
 
@@ -32,6 +34,9 @@ class TransferServiceTest {
 
     @Mock
     private SecurityService securityService;
+
+    @Spy
+    private ZipArchiver zipArchiver;
 
     @InjectMocks
     private TransferService transferService;

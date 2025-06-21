@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
-import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
+import ru.denisovmaksim.cloudfilestorage.service.archive.ZipArchiver;
 import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
@@ -15,13 +15,9 @@ import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 @Service
 @Validated
@@ -32,6 +28,7 @@ public class TransferService {
 
     private final SecurityService securityService;
 
+    private final ZipArchiver zipArchiver;
 
     public void uploadFile(@ValidPath(PathType.DIR) String parentDirectory, MultipartFile file) {
         throwIfObjectExist(parentDirectory + file.getOriginalFilename());
@@ -48,28 +45,11 @@ public class TransferService {
     }
 
     public NamedStreamDTO getZipFolderAsStream(@ValidPath(PathType.DIR) String path) {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        List<FileObject> fileObjects = fileStorage.getObjects(securityService.getAuthUserId(), path);
-        try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
-            for (FileObject object : fileObjects) {
-                String objectPath = object.path().replaceFirst(path, "");
-                ZipEntry zipEntry = new ZipEntry(objectPath);
-                zipOutputStream.putNextEntry(zipEntry);
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                InputStream objectInputStream = object.stream();
-                while ((bytesRead = objectInputStream.read(buffer)) != -1) {
-                    zipOutputStream.write(buffer, 0, bytesRead);
-                }
-                zipOutputStream.closeEntry();
-            }
-        } catch (IOException e) {
-            throw new FileStorageException(e);
-        }
-        String[] pathElements = path.split("/");
-        String filename = pathElements[pathElements.length - 1] + ".zip";
+        String filename = PathUtil.getBaseName(path) + ".zip";
         String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8)
                 .replace("+", "%20");
+        List<FileObject> fileObjects = fileStorage.getObjects(securityService.getAuthUserId(), path);
+        ByteArrayOutputStream byteArrayOutputStream = zipArchiver.getByteArrayOutputStream(fileObjects, path);
         return new NamedStreamDTO(encodedFileName, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
     }
 
