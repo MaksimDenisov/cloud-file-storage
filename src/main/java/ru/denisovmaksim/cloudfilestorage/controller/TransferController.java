@@ -27,6 +27,9 @@ import java.util.List;
 @Slf4j
 @RequestMapping()
 public class TransferController {
+
+    private static final String REDIRECT_TO_ROOT = "redirect:/";
+
     private final TransferService transferService;
 
     @GetMapping("/download-folder")
@@ -58,11 +61,11 @@ public class TransferController {
         if (file.isEmpty()) {
             attributes.addFlashAttribute("flashType", "danger");
             attributes.addFlashAttribute("flashMsg", "Please select a file to upload.");
-            return "redirect:/";
+            return REDIRECT_TO_ROOT;
         }
         log.info("Upload file with name {}", file.getOriginalFilename());
         transferService.uploadFile(path, file);
-        return "redirect:/";
+        return REDIRECT_TO_ROOT;
     }
 
     @PostMapping("/upload-folder")
@@ -77,7 +80,7 @@ public class TransferController {
             log.info("Upload file: " + file.getOriginalFilename());
         }
         transferService.uploadFolder(path, files);
-        return "redirect:/";
+        return REDIRECT_TO_ROOT;
     }
 
     private ResponseEntity<InputStreamResource> createStreamResponse(NamedStreamDTO dto) {

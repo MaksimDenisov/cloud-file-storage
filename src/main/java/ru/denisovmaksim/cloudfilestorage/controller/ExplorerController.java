@@ -18,6 +18,9 @@ import ru.denisovmaksim.cloudfilestorage.service.ExplorerService;
 @AllArgsConstructor
 @Slf4j
 public class ExplorerController {
+
+    private static final String REDIRECT_TO_ROOT = "redirect:/";
+
     private final ExplorerService explorerService;
 
     @PostMapping("/add-folder")
@@ -29,7 +32,7 @@ public class ExplorerController {
         if (!path.isEmpty()) {
             redirectAttributes.addAttribute("path", path);
         }
-        return "redirect:/";
+        return REDIRECT_TO_ROOT;
     }
 
     @GetMapping("/")
@@ -52,7 +55,7 @@ public class ExplorerController {
         if (!parentPath.isEmpty()) {
             redirectAttributes.addAttribute("path", parentPath);
         }
-        return "redirect:/";
+        return REDIRECT_TO_ROOT;
     }
 
     @PostMapping("/delete-folder")
@@ -64,7 +67,7 @@ public class ExplorerController {
         if (!redirectPath.isEmpty()) {
             redirectAttributes.addAttribute("path", redirectPath);
         }
-        return "redirect:/";
+        return REDIRECT_TO_ROOT;
     }
 
     @PostMapping("/rename-file")
@@ -77,7 +80,7 @@ public class ExplorerController {
         if (!parentPath.isEmpty()) {
             redirectAttributes.addAttribute("path", parentPath);
         }
-        return "redirect:/";
+        return REDIRECT_TO_ROOT;
     }
 
     @PostMapping("/delete-file")
@@ -89,6 +92,6 @@ public class ExplorerController {
         if (!parentPath.isEmpty()) {
             redirectAttributes.addAttribute("path", parentPath);
         }
-        return "redirect:/";
+        return REDIRECT_TO_ROOT;
     }
 }

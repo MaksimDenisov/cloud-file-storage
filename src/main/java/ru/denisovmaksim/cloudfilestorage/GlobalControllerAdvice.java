@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GlobalControllerAdvice {
 
+    private static final String REDIRECT_TO_ROOT = "redirect:/";
+
     @Value("${MAX_FILE_SIZE:10MB}")
     private String maxFileSize;
 
@@ -32,18 +34,10 @@ public class GlobalControllerAdvice {
         return "redirect:" + UserController.SIGN_UP;
     }
 
-    @ExceptionHandler(ObjectAlreadyExistException.class)
-    public String handleObjectAlreadyExist(ObjectAlreadyExistException e, RedirectAttributes attributes) {
-        attributes.addFlashAttribute("flashType", "danger");
-        attributes.addFlashAttribute("flashMsg", e.getMessage());
-        return "redirect:/";
-    }
-
-    @ExceptionHandler(NotFoundException.class)
-    public String handleNotFoundException(NotFoundException e, RedirectAttributes attributes) {
-        attributes.addFlashAttribute("flashType", "danger");
-        attributes.addFlashAttribute("flashMsg", e.getMessage());
-        return "redirect:/";
+    @ExceptionHandler({ObjectAlreadyExistException.class, NotFoundException.class})
+    public String handleExistingException(NotFoundException e, RedirectAttributes attributes) {
+        setDangerMessage(e.getMessage(), attributes);
+        return REDIRECT_TO_ROOT;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -53,8 +47,7 @@ public class GlobalControllerAdvice {
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.joining(". "));
-        attributes.addFlashAttribute("flashType", "danger");
-        attributes.addFlashAttribute("flashMsg", errors);
+        setDangerMessage(errors, attributes);
         return "redirect:" + UserController.SIGN_UP;
     }
 
@@ -64,32 +57,31 @@ public class GlobalControllerAdvice {
                 .stream()
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining(". "));
-        attributes.addFlashAttribute("flashType", "danger");
-        attributes.addFlashAttribute("flashMsg", errors);
-        return "redirect:/";
+        setDangerMessage(errors, attributes);
+        return REDIRECT_TO_ROOT;
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public String handleMaxSizeException(MaxUploadSizeExceededException e, RedirectAttributes attributes) {
-        attributes.addFlashAttribute("flashType", "danger");
-        attributes.addFlashAttribute("flashMsg", String.format("File size exceeds %s!", maxFileSize));
-        return "redirect:/";
+        setDangerMessage(String.format("File size exceeds %s!", maxFileSize), attributes);
+        return REDIRECT_TO_ROOT;
     }
 
     @ExceptionHandler(FileStorageException.class)
     public String handleFileStorageException(FileStorageException e, RedirectAttributes attributes) {
-        attributes.addFlashAttribute("flashType", "danger");
-        attributes.addFlashAttribute("flashMsg",
-                "There’s a problem on our side. Please try again in a little while.");
-        return "redirect:/";
+        setDangerMessage("There’s a problem on our side. Please try again in a little while.", attributes);
+        return REDIRECT_TO_ROOT;
     }
 
     @ExceptionHandler(RuntimeException.class)
     public String handleCommonException(RuntimeException e, RedirectAttributes attributes) {
         log.debug(e.getMessage());
+        setDangerMessage("An error occurred. Something went wrong.", attributes);
+        return REDIRECT_TO_ROOT;
+    }
+
+    private void setDangerMessage(String message, RedirectAttributes attributes) {
         attributes.addFlashAttribute("flashType", "danger");
-        attributes.addFlashAttribute("flashMsg",
-                "An error occurred. Something went wrong.");
-        return "redirect:/";
+        attributes.addFlashAttribute("flashMsg", message);
     }
 }
