@@ -9,7 +9,11 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 @Slf4j
-class MinioExceptionHandler {
+final class MinioExceptionHandler {
+
+    private MinioExceptionHandler() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     static <T> T interceptMinioExceptions(MinioThrowingSupplier<T> supplier) {
         try {

@@ -2,7 +2,11 @@ package ru.denisovmaksim.cloudfilestorage.util;
 
 import java.util.regex.Pattern;
 
-public class PathUtil {
+public final class PathUtil {
+
+    private PathUtil() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     private static final Pattern PATTERN =
             Pattern.compile("^([\\p{L}0-9/._\\-, ])+$|^$");

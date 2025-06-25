@@ -5,8 +5,12 @@ import ru.denisovmaksim.cloudfilestorage.dto.LinkDTO;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PathLinksDTOMapper {
+public final class PathLinksDTOMapper {
     private static final String PATH_SEPARATOR = "/";
+
+    private PathLinksDTOMapper() {
+        throw new UnsupportedOperationException("Utility class");
+    }
 
     public static List<LinkDTO> toChainLinksFromPath(String path) {
         List<LinkDTO> links = new ArrayList<>();
