@@ -19,7 +19,7 @@ class PathValidatorTest {
             "folder/file.txt",
             "valid_folder/subfolder/file.txt",
             "Мирный, Шлюп/Чертеж.pdf"})
-    public void testValidFilePath(String directoryPath) {
+    void testValidFilePath(String directoryPath) {
         assertTrue(filepathValidator.isValid(directoryPath, null),
                 directoryPath + " expected valid directory path but got invalid");
     }
@@ -28,7 +28,7 @@ class PathValidatorTest {
     @ValueSource(strings = {
             "<", ">", ":", "\"", "\\", "|", "?", "*",
     })
-    public void testInvalidFilePath(String directoryPath) {
+    void testInvalidFilePath(String directoryPath) {
         assertFalse(filepathValidator.isValid(directoryPath, null),
                 directoryPath + " expected invalid directory path but got valid");
     }
@@ -36,7 +36,7 @@ class PathValidatorTest {
     @ParameterizedTest()
     @ValueSource(strings = {"файл",
             "file.txt"})
-    public void testValidFileName(String filename) {
+    void testValidFileName(String filename) {
         assertTrue(filenameValidator.isValid(filename, null),
                 filename + " expected valid file name but got invalid");
     }
@@ -46,7 +46,7 @@ class PathValidatorTest {
             "<", ">", ":", "\"", "\\", "/", "|", "?", "*",
             "folder/file.txt"
     })
-    public void testInvalidFileName(String filename) {
+    void testInvalidFileName(String filename) {
         assertFalse(filenameValidator.isValid(filename, null),
                 filename + " expected invalid file name but got valid");
     }
@@ -59,7 +59,7 @@ class PathValidatorTest {
             "valid_folder/subfolder/",
             "valid, folder/subfolder/",
             "Мирный, Шлюп/"})
-    public void testValidDirectoryPath(String directoryPath) {
+    void testValidDirectoryPath(String directoryPath) {
         assertTrue(dirValidator.isValid(directoryPath, null),
                 directoryPath + " expected valid directory path but got invalid");
     }
@@ -69,7 +69,7 @@ class PathValidatorTest {
             "<", ">", ":", "\"", "\\", "|", "?", "*",
             "folder_without_ending_slash",
     })
-    public void testInvalidDirectoryPath(String directoryPath) {
+    void testInvalidDirectoryPath(String directoryPath) {
         assertFalse(dirValidator.isValid(directoryPath, null),
                 directoryPath + " expected invalid directory path but got valid");
     }
