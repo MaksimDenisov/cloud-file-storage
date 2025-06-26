@@ -13,6 +13,7 @@ import static ru.denisovmaksim.cloudfilestorage.util.PathUtil.isDir;
 import static ru.denisovmaksim.cloudfilestorage.util.PathUtil.isRoot;
 import static ru.denisovmaksim.cloudfilestorage.util.PathUtil.isValid;
 import static ru.denisovmaksim.cloudfilestorage.util.PathUtil.normalize;
+import static ru.denisovmaksim.cloudfilestorage.util.PathUtil.ensureDirectoryPath;
 
 class PathUtilTest {
 
@@ -44,6 +45,15 @@ class PathUtilTest {
     void isValidShouldReturnFalseForPathWithIllegalCharacters(String path) {
         assertFalse(isValid(path),
                 path + " expected invalid path but got valid");
+    }
+
+    @ParameterizedTest()
+    @ValueSource(strings = {
+            "", "path"
+    })
+    void testTransformToDir(String path) {
+        String actualPath = ensureDirectoryPath(path);
+        assertTrue(isDir(actualPath));
     }
 
     @Test

@@ -4,6 +4,8 @@ import java.util.regex.Pattern;
 
 public final class PathUtil {
 
+    public static final String PATH_SEPARATOR = "/";
+
     private PathUtil() {
         throw new UnsupportedOperationException("Utility class");
     }
@@ -13,11 +15,11 @@ public final class PathUtil {
 
     public static String normalize(String path) {
         return path.trim()
-                .replaceAll("/{2,}", "/");
+                .replaceAll("/{2,}", PATH_SEPARATOR);
     }
 
     public static boolean isRoot(String path) {
-        return "".equals(path) || "/".equals(path);
+        return path.isEmpty() || PATH_SEPARATOR.equals(path);
     }
 
     public static boolean isValid(String path) {
@@ -26,20 +28,29 @@ public final class PathUtil {
     }
 
     public static boolean isDir(String path) {
-        return path.endsWith("/") || path.isEmpty();
+        return path.endsWith(PATH_SEPARATOR) || path.isEmpty();
     }
 
+
+    public static String ensureDirectoryPath(String path) {
+        if (!PathUtil.isDir(path)) {
+            path = path + PathUtil.PATH_SEPARATOR;
+        }
+        return path;
+    }
+
+
     public static String getBaseName(String path) {
-        if (path.endsWith("/")) {
-            return path.substring(path.lastIndexOf('/', path.length() - 2) + 1, path.length() - 1);
+        if (path.endsWith(PATH_SEPARATOR)) {
+            return path.substring(path.lastIndexOf(PATH_SEPARATOR, path.length() - 2) + 1, path.length() - 1);
         } else {
-            return path.substring(path.lastIndexOf('/') + 1);
+            return path.substring(path.lastIndexOf(PATH_SEPARATOR) + 1);
         }
     }
 
     public static String getParentDirName(String path) {
-        path = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
-        int lastSlashIndex = path.lastIndexOf('/');
-        return (lastSlashIndex == -1) ? "" : path.substring(0, lastSlashIndex) + "/";
+        path = path.endsWith(PATH_SEPARATOR) ? path.substring(0, path.length() - 1) : path;
+        int lastSlashIndex = path.lastIndexOf(PATH_SEPARATOR);
+        return (lastSlashIndex == -1) ? "" : path.substring(0, lastSlashIndex) + PATH_SEPARATOR;
     }
 }

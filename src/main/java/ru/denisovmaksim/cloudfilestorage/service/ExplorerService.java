@@ -29,19 +29,15 @@ public class ExplorerService {
 
     public void createDirectory(@ValidPath(PathType.DIR) String parentDirectory,
                                 @ValidPath(PathType.FILENAME) String directoryName) {
-        String newFolderPath = parentDirectory + directoryName;
-        if (!newFolderPath.endsWith("/")) {
-            newFolderPath = newFolderPath + "/";
-        }
-        throwIfObjectExist(newFolderPath);
-        fileStorage.createPath(securityService.getAuthUserId(), newFolderPath);
+        String newDirPath = PathUtil.ensureDirectoryPath(parentDirectory + directoryName);
+        throwIfObjectExist(newDirPath);
+        fileStorage.createPath(securityService.getAuthUserId(), newDirPath);
     }
 
     public List<StorageObjectDTO> getContentOfDirectory(@ValidPath(PathType.DIR) String directory) {
         Long userId = securityService.getAuthUserId();
         List<StorageObjectInfo> infos = fileStorage.listObjectInfo(userId, directory)
                 .orElseThrow(() -> new NotFoundException(directory));
-        //TODO add calculate size option probably extract another method
         for (StorageObjectInfo info : infos) {
             if (info.isDir()) {
                 info.setSize(fileStorage.getDirectChildCount(userId, info.getPath()));
@@ -66,9 +62,7 @@ public class ExplorerService {
     public void renameFolder(@ValidPath(PathType.DIR) String currentPath,
                              @ValidPath(PathType.FILENAME) String newFolderName) {
         String newPath = PathUtil.getParentDirName(currentPath) + newFolderName;
-        if (!newPath.endsWith("/")) {
-            newPath = newPath + "/";
-        }
+        newPath = PathUtil.ensureDirectoryPath(newPath);
         throwIfObjectExist(newPath);
         if (fileStorage.copyObjects(securityService.getAuthUserId(), currentPath, newPath) == 0) {
             fileStorage.createPath(securityService.getAuthUserId(), newPath);
