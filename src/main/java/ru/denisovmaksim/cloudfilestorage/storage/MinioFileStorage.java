@@ -263,9 +263,6 @@ public class MinioFileStorage {
                 .count();
     }
 
-
-    //TODO Add commonSize
-
     /**
      * Retrieves raw MinIO items from storage for the given path.
      *

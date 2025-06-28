@@ -15,6 +15,7 @@ import ru.denisovmaksim.cloudfilestorage.repository.UserRepository;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -32,7 +33,7 @@ class UserServiceTest {
 
     @Test
     @DisplayName("Create correct user.")
-    void createUser() throws Exception {
+    void createUser() {
         when(userRepository.save(Mockito.any(User.class)))
                 .thenReturn(USER);
         assertEquals(USER, userService.signUp("user", "password"));
@@ -40,9 +41,10 @@ class UserServiceTest {
 
     @Test
     @DisplayName("User with duplicated name should not be create.")
-    void createDuplicatedUser() throws Exception {
+    void createDuplicatedUser() {
         when(userRepository.findByName(any()))
                 .thenReturn(Optional.of(USER));
+        assertNotNull(userService);
         assertThrows(UserAlreadyExistException.class,
                 () -> userService.signUp(USER.getName(), USER.getPassword()));
     }
