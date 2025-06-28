@@ -117,7 +117,7 @@ class ExplorerServiceTest {
         explorerService.renameFolder(currentPath, newFolderName);
 
         verify(fileStorage).copyObjects(eq(USER_ID), eq(currentPath), anyString());
-        verify(fileStorage).deleteObjects(eq(USER_ID), eq(currentPath));
+        verify(fileStorage).deleteObjects(USER_ID, currentPath);
     }
 
     @Test
@@ -132,7 +132,7 @@ class ExplorerServiceTest {
         explorerService.renameFolder(currentPath, newFolderName);
 
         verify(fileStorage).createPath(USER_ID, newPath);
-        verify(fileStorage).deleteObjects(eq(USER_ID), eq(currentPath));
+        verify(fileStorage).deleteObjects(USER_ID, currentPath);
     }
 
     @Test
