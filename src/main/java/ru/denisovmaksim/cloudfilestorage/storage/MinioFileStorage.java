@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-    import java.util.stream.StreamSupport;
+import java.util.stream.StreamSupport;
 
 /**
  * Component responsible for interacting with MinIO storage.
@@ -69,14 +69,13 @@ public class MinioFileStorage {
      */
     public void createPath(Long userId, String path) {
         log.info("Create path '{}' for userId={}", path, userId);
-        MinioExceptionHandler.interceptMinioExceptions(() -> {
-                    minioClient.putObject(
-                            PutObjectArgs.builder()
-                                    .bucket(bucket)
-                                    .object(resolver.resolveMinioPath(userId, path))
-                                    .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
-                                    .build());
-                }
+        MinioExceptionHandler.interceptMinioExceptions(() ->
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(bucket)
+                                .object(resolver.resolveMinioPath(userId, path))
+                                .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
+                                .build())
         );
     }
 
@@ -163,16 +162,16 @@ public class MinioFileStorage {
      */
     public void saveObject(Long userId, String path, MultipartFile file) {
         log.info("Uploading file '{}' to path '{}' for userId={}", file.getOriginalFilename(), path, userId);
-        MinioExceptionHandler.interceptMinioExceptions(() -> {
-            minioClient.putObject(
-                    PutObjectArgs.builder()
-                            .bucket(bucket)
-                            .object(resolver.resolveMinioPath(userId, path) + file.getOriginalFilename())
-                            .stream(file.getInputStream(), file.getSize(), -1)
-                            .contentType(file.getContentType())
-                            .build()
-            );
-        });
+        MinioExceptionHandler.interceptMinioExceptions(() ->
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(bucket)
+                                .object(resolver.resolveMinioPath(userId, path) + file.getOriginalFilename())
+                                .stream(file.getInputStream(), file.getSize(), -1)
+                                .contentType(file.getContentType())
+                                .build()
+                )
+        );
     }
 
     /**
