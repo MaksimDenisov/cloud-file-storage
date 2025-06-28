@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -161,9 +162,9 @@ class MinioFileStorageTest {
                 .hasSize(2);
 
         fileStorage.deleteObjects(1L, "folder/");
-
-        assertThat(fileStorage.listObjectInfo(1L, "").get())
-                .hasSize(0);
+        Optional<List<StorageObjectInfo>> infos = fileStorage.listObjectInfo(1L, "");
+        assertThat(infos.isPresent()).isTrue();
+        assertThat(infos.get()).isEmpty();
     }
 
     @Test
