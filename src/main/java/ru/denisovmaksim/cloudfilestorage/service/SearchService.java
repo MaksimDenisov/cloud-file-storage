@@ -40,7 +40,6 @@ public class SearchService {
                     FileType type = (info.isDir())
                             ? FileType.FOLDER : FileType.UNKNOWN_FILE;
 
-                    //TODO add calculate size option probably extract another method
                     if (info.isDir()) {
                         info.setSize(fileStorage.getDirectChildCount(userId, info.getPath()));
                     }
