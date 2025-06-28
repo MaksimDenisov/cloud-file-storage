@@ -58,15 +58,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(SIGN_UP).permitAll()
                         .anyRequest().authenticated())
-                .formLogin((formLogin) ->
-                        formLogin
-                                .usernameParameter("username")
-                                .passwordParameter("password")
-                                .loginPage(SIGN_IN)
-                                .permitAll()
-                                .defaultSuccessUrl("/", true)
-                                .failureUrl(SIGN_IN + "?error")
-                                .loginProcessingUrl(SIGN_IN))
+                .formLogin(formLogin -> formLogin
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .loginPage(SIGN_IN)
+                        .permitAll()
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl(SIGN_IN + "?error")
+                        .loginProcessingUrl(SIGN_IN))
                 .logout(logout -> logout
                         .logoutUrl("/sign-out")
                         .deleteCookies("JSESSIONID"))
