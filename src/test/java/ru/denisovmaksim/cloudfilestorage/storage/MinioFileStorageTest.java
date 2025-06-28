@@ -163,7 +163,7 @@ class MinioFileStorageTest {
 
         fileStorage.deleteObjects(1L, "folder/");
         Optional<List<StorageObjectInfo>> infos = fileStorage.listObjectInfo(1L, "");
-        assertThat(infos.isPresent()).isTrue();
+        assertThat(infos).isPresent();
         assertThat(infos.get()).isEmpty();
     }
 

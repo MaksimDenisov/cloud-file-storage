@@ -1,5 +1,7 @@
 package ru.denisovmaksim.cloudfilestorage.service;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,8 +46,9 @@ class UserServiceTest {
     void createDuplicatedUser() {
         when(userRepository.findByName(any()))
                 .thenReturn(Optional.of(USER));
-        assertNotNull(userService);
+        String name = USER.getName();
+        String password = USER.getPassword();
         assertThrows(UserAlreadyExistException.class,
-                () -> userService.signUp(USER.getName(), USER.getPassword()));
+                () -> userService.signUp(name, password));
     }
 }
