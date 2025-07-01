@@ -1,5 +1,6 @@
 package ru.denisovmaksim.cloudfilestorage.storage;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -7,6 +8,7 @@ import lombok.ToString;
 
 @Getter
 @ToString
+@EqualsAndHashCode
 public final class StorageObjectInfo {
 
     private final String path;
