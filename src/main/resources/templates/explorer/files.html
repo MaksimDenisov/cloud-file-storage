@@ -50,6 +50,7 @@
                     </td>
                     <td>
                         <form action="/delete-folder" method="POST">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="hidden" name="redirect-path" th:value="${currentPath}">
                             <input type="hidden" name="folder-path" th:value="${item.getPath()}">
                             <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i>
@@ -85,6 +86,7 @@
                     </td>
                     <td>
                         <form action="/delete-file" method="POST">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                             <input type="hidden" name="parent-path" th:value="${currentPath}">
                             <input type="hidden" name="file-name" th:value="${item.getName()}">
                             <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i>
