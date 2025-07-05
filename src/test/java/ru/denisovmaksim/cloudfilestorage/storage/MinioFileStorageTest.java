@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Testcontainers
 class MinioFileStorageTest {
 
+    private static final Long USER_ID = 1L;
     private static final String BUCKET = "user-files";
 
     @Container
@@ -47,21 +48,19 @@ class MinioFileStorageTest {
             .withEnv("MINIO_ROOT_PASSWORD", "password")
             .withCommand("server /data");
 
+
     @TestConfiguration
     public static class MinioConfig {
         @Bean
         public MinioClient minioClient() {
             try {
-                String minioEndpoint = "http://"
-                        + MINIO_CONTAINER.getHost()
-                        + ":"
+                String minioEndpoint = "http://" + MINIO_CONTAINER.getHost() + ":"
                         + MINIO_CONTAINER.getMappedPort(9000);
 
-                MinioClient minioClient =
-                        MinioClient.builder()
-                                .endpoint(minioEndpoint)
-                                .credentials("user", "password")
-                                .build();
+                MinioClient minioClient = MinioClient.builder()
+                        .endpoint(minioEndpoint)
+                        .credentials("user", "password")
+                        .build();
                 boolean found =
                         minioClient.bucketExists(BucketExistsArgs.builder().bucket(BUCKET).build());
                 if (!found) {
@@ -102,11 +101,11 @@ class MinioFileStorageTest {
 
     @Test
     void createPath() {
-        fileStorage.createPath(1L, "folder/");
+        fileStorage.createPath(USER_ID, "folder/");
 
         StorageObjectInfo expectedObject = new StorageObjectInfo("folder/", "folder", true, 0);
 
-        List<StorageObjectInfo> actualObjects = fileStorage.listObjectInfo(1L, "").get();
+        List<StorageObjectInfo> actualObjects = fileStorage.listObjectInfo(USER_ID, "").get();
 
         assertThat(actualObjects)
                 .as("Count of objects")
@@ -119,7 +118,7 @@ class MinioFileStorageTest {
     @ValueSource(strings = {"..", "^", "*", "|", "\\", "&", "\"", ";"})
     void createNotValidPath(String notValidPath) {
         assertThrows(IllegalArgumentException.class, () ->
-                fileStorage.createPath(1L, notValidPath)
+                fileStorage.createPath(USER_ID, notValidPath)
         );
     }
 
@@ -127,7 +126,7 @@ class MinioFileStorageTest {
     void createVeryLongPath() {
         String veryLongPath = "a".repeat(1025);
         assertThrows(IllegalArgumentException.class, () ->
-                fileStorage.createPath(1L, veryLongPath)
+                fileStorage.createPath(USER_ID, veryLongPath)
         );
     }
 
@@ -135,9 +134,9 @@ class MinioFileStorageTest {
     void saveAndGetObject() throws IOException {
         MultipartFile file = new MockMultipartFile("file.txt", "file.txt", "text/plain", "Hello".getBytes());
 
-        fileStorage.saveObject(1L, "folder/", file);
+        fileStorage.saveObject(USER_ID, "folder/", file);
 
-        FileObject actual = fileStorage.getObject(1L, "folder/file.txt");
+        FileObject actual = fileStorage.getObject(USER_ID, "folder/file.txt");
 
         try (InputStream actualStream = actual.stream()) {
             byte[] actualBytes = actualStream.readAllBytes();
@@ -146,8 +145,8 @@ class MinioFileStorageTest {
                     .isEqualTo(file.getBytes());
         }
 
-        assertTrue(fileStorage.isExist(1L, "folder/"));
-        assertTrue(fileStorage.isExist(1L, "folder/file.txt"));
+        assertTrue(fileStorage.isExist(USER_ID, "folder/"));
+        assertTrue(fileStorage.isExist(USER_ID, "folder/file.txt"));
         assertThat(actual.path())
                 .as("Match path")
                 .isEqualTo("folder/file.txt");
@@ -156,13 +155,13 @@ class MinioFileStorageTest {
     @Test
     void saveAndDeleteObjects() {
         MultipartFile file = new MockMultipartFile("file.txt", "file.txt", "text/plain", "Hello".getBytes());
-        fileStorage.saveObject(1L, "folder/subFolder1", file);
-        fileStorage.saveObject(1L, "folder/subFolder2", file);
-        assertThat(fileStorage.listObjectInfo(1L, "folder/").get())
+        fileStorage.saveObject(USER_ID, "folder/subFolder1", file);
+        fileStorage.saveObject(USER_ID, "folder/subFolder2", file);
+        assertThat(fileStorage.listObjectInfo(USER_ID, "folder/").get())
                 .hasSize(2);
 
-        fileStorage.deleteObjects(1L, "folder/");
-        Optional<List<StorageObjectInfo>> infos = fileStorage.listObjectInfo(1L, "");
+        fileStorage.deleteObjects(USER_ID, "folder/");
+        Optional<List<StorageObjectInfo>> infos = fileStorage.listObjectInfo(USER_ID, "");
         assertThat(infos).isPresent();
         assertThat(infos.get()).isEmpty();
     }
@@ -173,10 +172,10 @@ class MinioFileStorageTest {
                 "text/plain", "First".getBytes());
         MultipartFile secondFile = new MockMultipartFile("secondFile.txt", "secondFile.txt",
                 "text/plain", "Second".getBytes());
-        fileStorage.saveObject(1L, "folder/", firstFile);
-        fileStorage.saveObject(1L, "folder/", secondFile);
+        fileStorage.saveObject(USER_ID, "folder/", firstFile);
+        fileStorage.saveObject(USER_ID, "folder/", secondFile);
 
-        List<FileObject> actual = fileStorage.getObjects(1L, "folder/");
+        List<FileObject> actual = fileStorage.getObjects(USER_ID, "folder/");
 
         assertThat(actual).hasSize(2);
 
@@ -201,12 +200,12 @@ class MinioFileStorageTest {
                 "text/plain", "First".getBytes());
         MultipartFile secondFile = new MockMultipartFile("secondFile.txt", "secondFile.txt",
                 "text/plain", "Second".getBytes());
-        fileStorage.saveObject(1L, "root/folder/", firstFile);
-        fileStorage.saveObject(1L, "root/folder/", secondFile);
+        fileStorage.saveObject(USER_ID, "root/folder/", firstFile);
+        fileStorage.saveObject(USER_ID, "root/folder/", secondFile);
 
-        fileStorage.copyObjects(1L, "root/folder/", "root/copiedFolder/");
+        fileStorage.copyObjects(USER_ID, "root/folder/", "root/copiedFolder/");
 
-        List<FileObject> actual = fileStorage.getObjects(1L, "root/copiedFolder/");
+        List<FileObject> actual = fileStorage.getObjects(USER_ID, "root/copiedFolder/");
 
         assertThat(actual).hasSize(2);
 
@@ -227,29 +226,29 @@ class MinioFileStorageTest {
 
     @Test
     void getStorageObjectsByNotExistPath() {
-        assertFalse(fileStorage.isExist(1L, "not-exist-path"));
-        assertFalse(fileStorage.listObjectInfo(1L, "not-exist-path").isPresent());
+        assertFalse(fileStorage.isExist(USER_ID, "not-exist-path"));
+        assertFalse(fileStorage.listObjectInfo(USER_ID, "not-exist-path").isPresent());
     }
 
     @Test
     void getStorageObjectsByRoot() {
-        assertTrue(fileStorage.listObjectInfo(1L, "").isPresent());
+        assertTrue(fileStorage.listObjectInfo(USER_ID, "").isPresent());
     }
 
     @Test
     void shouldNotDeleteRootFolder() {
-        fileStorage.deleteObjects(1L, "");
-        assertTrue(fileStorage.listObjectInfo(1L, "").isPresent());
+        fileStorage.deleteObjects(USER_ID, "");
+        assertTrue(fileStorage.listObjectInfo(USER_ID, "").isPresent());
     }
 
     @Test
     void copyObject() throws IOException {
         MultipartFile file = new MockMultipartFile("file.txt", "file.txt", "text/plain", "Hello".getBytes());
-        fileStorage.saveObject(1L, "folder/", file);
+        fileStorage.saveObject(USER_ID, "folder/", file);
 
-        fileStorage.copyOneObject(1L, "folder/file.txt", "folder/copy-file.txt");
+        fileStorage.copyOneObject(USER_ID, "folder/file.txt", "folder/copy-file.txt");
 
-        FileObject actual = fileStorage.getObject(1L, "folder/copy-file.txt");
+        FileObject actual = fileStorage.getObject(USER_ID, "folder/copy-file.txt");
 
         try (InputStream actualStream = actual.stream()) {
             byte[] actualBytes = actualStream.readAllBytes();
@@ -261,5 +260,48 @@ class MinioFileStorageTest {
         assertThat(actual.path())
                 .as("Match path")
                 .isEqualTo("folder/copy-file.txt");
+    }
+
+    @Test
+    void shouldReturnDirectChildCount() {
+        MultipartFile firstFile = new MockMultipartFile("firstFile.txt", "firstFile.txt",
+                "text/plain", "First".getBytes());
+        MultipartFile secondFile = new MockMultipartFile("secondFile.txt", "secondFile.txt",
+                "text/plain", "Second".getBytes());
+        MultipartFile rootFile = new MockMultipartFile("rootFile.txt", "rootFile.txt",
+                "text/plain", "Root".getBytes());
+
+        fileStorage.saveObject(USER_ID, "", rootFile);
+        fileStorage.saveObject(USER_ID, "folder/", firstFile);
+        fileStorage.saveObject(USER_ID, "folder/", secondFile);
+        fileStorage.createPath(USER_ID, "emptyFolder/");
+
+        Long rootCount = fileStorage.getDirectChildCount(USER_ID, "");
+        Long folderCount = fileStorage.getDirectChildCount(USER_ID, "folder/");
+        Long emptyCount = fileStorage.getDirectChildCount(USER_ID, "emptyFolder/");
+
+        assertThat(rootCount).isEqualTo(3L);
+        assertThat(folderCount).isEqualTo(2L);
+        assertThat(emptyCount).isZero();
+    }
+
+    @Test
+    void shouldSearchObjects() {
+        MultipartFile firstFile = new MockMultipartFile("firstFile.txt", "firstFile.txt",
+                "text/plain", "First".getBytes());
+        MultipartFile secondFile = new MockMultipartFile("secondFile.txt", "secondFile.txt",
+                "text/plain", "Second".getBytes());
+        MultipartFile rootFile = new MockMultipartFile("root.txt", "root.txt",
+                "text/plain", "Root".getBytes());
+
+        fileStorage.saveObject(USER_ID, "", rootFile);
+        fileStorage.saveObject(USER_ID, "root/folder/", firstFile);
+        fileStorage.saveObject(USER_ID, "root/folder/", secondFile);
+        fileStorage.createPath(USER_ID, "File/");
+        fileStorage.createPath(USER_ID, "NotContain/FolderName/");
+
+        List<StorageObjectInfo> infos = fileStorage.searchObjectInfo(USER_ID, "", "File");
+
+        assertThat(infos).hasSize(3);
     }
 }
