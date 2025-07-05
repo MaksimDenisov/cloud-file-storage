@@ -28,11 +28,6 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Not found user with 'username': " + username));
     }
 
-    public User getUserByName(String userName) {
-        return userRepository.findByName(userName)
-                .orElseThrow();
-    }
-
     private UserDetails buildSpringUser(final User user) {
         return new org.springframework.security.core.userdetails.User(
                 user.getName(),

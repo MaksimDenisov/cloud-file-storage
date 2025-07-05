@@ -13,16 +13,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.DefaultCsrfToken;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -30,7 +32,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import ru.denisovmaksim.cloudfilestorage.model.User;
 import ru.denisovmaksim.cloudfilestorage.repository.UserRepository;
-import ru.denisovmaksim.cloudfilestorage.service.ExplorerService;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -39,10 +40,13 @@ import java.security.NoSuchAlgorithmException;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -57,9 +61,12 @@ public class UserControllerE2ETest {
 
     @Autowired
     private UserRepository userRepository;
-
+/*
     @MockBean
-    private ExplorerService explorerService;
+    private ExplorerService explorerService;*/
+
+    private static final String SIGN_IN = "/sign-in";
+    private static final String SIGN_UP = "/sign-up";
 
     @Container
     private static final MySQLContainer MY_SQL_CONTAINER = new MySQLContainer("mysql:8:0:26")
@@ -180,5 +187,38 @@ public class UserControllerE2ETest {
                 .andExpect(redirectedUrl(UserController.SIGN_UP))
                 .andExpect(flash().attributeExists("flashType", "flashMsg"))
                 .andReturn();
+    }
+
+    // Помощник для добавления CSRF токена в запрос
+    private RequestPostProcessor csrfToken() {
+        return request -> {
+            CsrfToken csrfToken = new DefaultCsrfToken("X-CSRF-TOKEN", "_csrf", "dummy-token");
+            request.setAttribute("_csrf", csrfToken);
+            return request;
+        };
+    }
+
+    @Test
+    void getSignInPageWithoutErrorShouldReturnSignInViewWithCsrf() throws Exception {
+        mockMvc.perform(get(SIGN_IN).with(csrfToken()))
+                .andExpect(status().isOk())
+                .andExpect(view().name("auth/sign-in"))
+                .andExpect(model().attributeExists("_csrf"));
+    }
+
+    @Test
+    void getSignInPageWithErrorShouldRedirectWithFlashAttributes() throws Exception {
+        mockMvc.perform(get(SIGN_IN).param("error", "true"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("sign-in"))
+                .andExpect(flash().attribute("flashType", "danger"))
+                .andExpect(flash().attribute("flashMsg", "Incorrect login or password."));
+    }
+
+    @Test
+    void getSignUpPageShouldReturnSignUpView() throws Exception {
+        mockMvc.perform(get(SIGN_UP))
+                .andExpect(status().isOk())
+                .andExpect(view().name("auth/sign-up"));
     }
 }
