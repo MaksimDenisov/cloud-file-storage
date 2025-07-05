@@ -20,7 +20,7 @@ public final class StorageObjectInfo {
     @Setter
     private long size;
 
-    StorageObjectInfo(String path, String name, boolean isDir, long size) {
+    public StorageObjectInfo(String path, String name, boolean isDir, long size) {
         this.path = path;
         this.name = name;
         this.dir = isDir;
