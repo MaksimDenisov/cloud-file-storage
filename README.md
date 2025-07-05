@@ -1,20 +1,25 @@
 # Project "Cloud File Storage"
+[![Deploy](https://github.com/MaksimDenisov/cloud-file-storage/actions/workflows/deploy.yml/badge.svg)](https://github.com/MaksimDenisov/cloud-file-storage/actions/workflows/deploy.yml)
 
 A multi-user file cloud. Service users can use it to upload and store files.
 
 *Technical Specifications:*
 https://zhukovsd.github.io/java-backend-learning-course/projects/cloud-file-storage/
-----------------------------
-### Deploy status:
-[![Deploy](https://github.com/MaksimDenisov/cloud-file-storage/actions/workflows/deploy.yml/badge.svg)](https://github.com/MaksimDenisov/cloud-file-storage/actions/workflows/deploy.yml)
 
 ### Quality by Sonar Qube:
-![SonarCloud](https://github.com/MaksimDenisov/cloud-file-storage/actions/workflows/sonar.yml/badge.svg)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=MaksimDenisov_cloud-file-storage)
+[![SonarQube Cloud](https://sonarcloud.io/images/project_badges/sonarcloud-light.svg)](https://sonarcloud.io/summary/new_code?id=MaksimDenisov_cloud-file-storage)
 
-[![Maintainability](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=MaksimDenisov_cloud-file-storage)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=coverage)](https://sonarcloud.io/summary/new_code?id=MaksimDenisov_cloud-file-storage)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=alert_status)](https://sonarcloud.io/dashboard?id=MaksimDenisov_cloud-file-storage)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=coverage)](https://sonarcloud.io/dashboard?id=MaksimDenisov_cloud-file-storage)
 
+[![Maintainability](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=sqale_rating)](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=мaintainability)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=bugs)](https://sonarcloud.io/dashboard?id=MaksimDenisov_cloud-file-storage)
+
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=code_smells)](https://sonarcloud.io/dashboard?id=MaksimDenisov_cloud-file-storage)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=MaksimDenisov_cloud-file-storage)
+
+[![Duplicated Lines](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=MaksimDenisov_cloud-file-storage)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=MaksimDenisov_cloud-file-storage&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=MaksimDenisov_cloud-file-storage)
 ### This project used:
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat&logo=spring&logoColor=white)
 ![Thymeleaf](https://img.shields.io/badge/Thymeleaf-005F0F?style=flat&logo=thymeleaf&logoColor=white)
