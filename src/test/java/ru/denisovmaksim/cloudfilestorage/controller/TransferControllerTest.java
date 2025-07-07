@@ -14,6 +14,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.RequestUploadFileDTO;
 import ru.denisovmaksim.cloudfilestorage.service.TransferService;
 
 import java.io.ByteArrayInputStream;
@@ -21,6 +22,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -72,7 +75,7 @@ class TransferControllerTest {
         String path = "/folder";
         MultipartFile file = new MockMultipartFile("file", "", "text/plain", new byte[0]);
 
-        Mockito.when(redirectAttributes.addAttribute(Mockito.eq("path"), Mockito.anyString()))
+        Mockito.when(redirectAttributes.addAttribute(eq("path"), Mockito.anyString()))
                 .thenReturn(redirectAttributes);
 
         String result = transferController.uploadFile(path, file, redirectAttributes);
@@ -87,13 +90,13 @@ class TransferControllerTest {
         String path = "/folder";
         MultipartFile file = new MockMultipartFile("file", "name.txt", "text/plain", "data".getBytes());
 
-        Mockito.when(redirectAttributes.addAttribute(Mockito.eq("path"), Mockito.anyString()))
+        Mockito.when(redirectAttributes.addAttribute(eq("path"), Mockito.anyString()))
                 .thenReturn(redirectAttributes);
 
         String result = transferController.uploadFile(path, file, redirectAttributes);
 
         assertEquals("redirect:/", result);
-        Mockito.verify(transferService).uploadFile(path, file);
+        Mockito.verify(transferService).uploadFile(eq(path), any(RequestUploadFileDTO.class));
     }
 
     @Test
@@ -104,7 +107,7 @@ class TransferControllerTest {
                 new MockMultipartFile("files", "f2.txt", "text/plain", "2".getBytes())
         );
 
-        Mockito.when(redirectAttributes.addAttribute(Mockito.eq("path"), Mockito.anyString()))
+        Mockito.when(redirectAttributes.addAttribute(eq("path"), Mockito.anyString()))
                 .thenReturn(redirectAttributes);
 
         String result = transferController.uploadFolder(path, files, redirectAttributes);

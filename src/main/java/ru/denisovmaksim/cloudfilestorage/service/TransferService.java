@@ -1,10 +1,12 @@
 package ru.denisovmaksim.cloudfilestorage.service;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.RequestUploadFileDTO;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.service.archive.ZipArchiver;
 import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
@@ -30,9 +32,10 @@ public class TransferService {
 
     private final ZipArchiver zipArchiver;
 
-    public void uploadFile(@ValidPath(PathType.DIR) String parentDirectory, MultipartFile file) {
-        throwIfObjectExist(parentDirectory + file.getOriginalFilename());
-        fileStorage.saveObject(securityService.getAuthUserId(), parentDirectory, file);
+    public void uploadFile(@ValidPath(PathType.DIR) String parentDirectory, @Valid RequestUploadFileDTO file) {
+        throwIfObjectExist(parentDirectory + file.getFilename());
+        MultipartFile multipartFile = file.getMultipartFile();
+        fileStorage.saveObject(securityService.getAuthUserId(), parentDirectory, multipartFile);
     }
 
 

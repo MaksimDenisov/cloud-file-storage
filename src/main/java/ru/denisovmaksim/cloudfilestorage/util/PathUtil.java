@@ -11,7 +11,7 @@ public final class PathUtil {
     }
 
     private static final Pattern PATTERN =
-            Pattern.compile("^([\\p{L}0-9/._\\-, ])+$|^$");
+            Pattern.compile("^([\\p{L}0-9/(),-.^_`!$№ ])+$|^$");
 
     public static String normalize(String path) {
         return path.trim()
