@@ -35,7 +35,7 @@ public class GlobalControllerAdvice {
     }
 
     @ExceptionHandler({ObjectAlreadyExistException.class, NotFoundException.class})
-    public String handleExistingException(NotFoundException e, RedirectAttributes attributes) {
+    public String handleExistingException(Exception e, RedirectAttributes attributes) {
         setDangerMessage(e.getMessage(), attributes);
         return REDIRECT_TO_ROOT;
     }
