@@ -18,84 +18,79 @@
         </tr>
         </thead>
         <tbody>
-        <div th:insert="~{explorer/dialog-rename-folder}"></div>
-        <div th:insert="~{explorer/dialog-rename-file}"></div>
-        <tr th:each="item : ${storageObjects}">
-            <th:block th:switch="${#strings.toString(item.getType())}">
-                <div th:case="'FOLDER'">
-                    <td>
-                        <i class="bi bi-folder h5 text-secondary"></i>
-                    </td>
-                    <td class="text-start">
-                        <a th:href="@{/(path=${item.getPath()})}" th:text="${item.getName()}"></a>
-                    </td>
-                    <td>
-                        <i th:text="${item.getSize()==0?'Empty':item.getSize() + (item.getSize()==1?' object':' objects')}"></i>
-                    </td>
-                    <td>
-                        <a th:href="@{download-folder(path=${item.getPath()})}">
-                            <button type="button" class="btn btn-light text-success">
-                                <i class="bi bi-save"></i>
-                            </button>
-                        </a>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-light"
-                                th:data-bs-name="${item.getName()}"
-                                th:data-bs-current-path="${item.getPath()}"
-                                th:data-bs-redirect-path="${currentPath}"
-                                data-bs-toggle="modal" data-bs-target="#rename-folder">
-                            <i class="bi bi-pencil-square text-primary"></i>
-                        </button>
-                    </td>
-                    <td>
-                        <form action="/delete-folder" method="POST">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <input type="hidden" name="redirect-path" th:value="${currentPath}">
-                            <input type="hidden" name="folder-path" th:value="${item.getPath()}">
-                            <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i>
-                            </button>
-                        </form>
-                    </td>
-                </div>
+        <!-- @thymesVar id="item" type="ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO" -->
+        <tr th:each="item : ${storageObjects}" th:switch="${#strings.toString(item.getType())}">
+            <!-- Icon -->
+            <td th:switch="${item.getType().name()}">
+                <i th:case="'FOLDER'" class="bi bi-folder h5 text-secondary"></i>
+                <i th:case="*" class="bi bi-file-binary h5 text-secondary"></i>
+            </td>
 
-                <div th:case="*">
-                    <td>
-                        <i class="bi bi-file-binary h5 text-secondary"></i>
-                    </td>
-                    <td class="text-start">
-                        <a th:href="@{download(path=${item.getPath()})}" th:text="${item.getName()}"></a>
-                    </td>
-                    <td>
-                        <i th:text="${item.getSize() / 1024}  + ' KB'"></i>
-                    </td>
-                    <td>
-                        <a th:href="@{download(path=${item.getPath()})}">
-                            <button type="button" class="btn btn-light text-success">
-                                <i class="bi bi-cloud-download"></i>
-                            </button>
-                        </a>
-                    </td>
-                    <td>
-                        <button type="button" class="btn btn-light"
-                                th:data-bs-name="${item.getName()}"
-                                th:data-bs-parent-path="${currentPath}"
-                                data-bs-toggle="modal" data-bs-target="#rename-file">
-                            <i class="bi bi-pencil-square text-primary"></i>
-                        </button>
-                    </td>
-                    <td>
-                        <form action="/delete-file" method="POST">
-                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                            <input type="hidden" name="parent-path" th:value="${currentPath}">
-                            <input type="hidden" name="file-name" th:value="${item.getName()}">
-                            <button type="submit" class="btn btn-light"><i class="bi bi-trash-fill text-danger"></i>
-                            </button>
-                        </form>
-                    </td>
-                </div>
-            </th:block>
+            <!-- Name -->
+            <td class="text-start" th:switch="${item.getType().name()}">
+                <a th:case="'FOLDER'" th:href="@{/(path=${item.getParentDir()})}" th:text="${item.getName()}"></a>
+                <a th:case="*" th:href="@{download(path=${item.getParentDir()})}" th:text="${item.getName()}"></a>
+            </td>
+
+            <!-- Size -->
+            <td th:switch="${item.getType().name()}">
+                <i th:case="'FOLDER'" th:text="${item.getSize() == 0 ? 'Empty' : item.getSize() + (item.getSize() == 1 ? ' object' : ' objects')}"></i>
+                <i th:case="*" th:text="${item.getSize() / 1024} + ' KB'"></i>
+            </td>
+
+            <!-- Download button -->
+            <td th:switch="${item.getType().name()}">
+                <a th:case="'FOLDER'" th:href="@{download-folder(path=${item.getParentDir()})}">
+                    <button type="button" class="btn btn-light text-success">
+                        <i class="bi bi-save"></i>
+                    </button>
+                </a>
+                <a th:case="*" th:href="@{download(path=${item.getParentDir()})}">
+                    <button type="button" class="btn btn-light text-success">
+                        <i class="bi bi-cloud-download"></i>
+                    </button>
+                </a>
+            </td>
+
+            <!-- Rename button -->
+            <td th:switch="${item.getType().name()}">
+                <button th:case="'FOLDER'" type="button" class="btn btn-light"
+                        th:data-bs-name="${item.getName()}"
+                        th:data-bs-current-path="${item.getParentDir()}"
+                        th:data-bs-redirect-path="${currentPath}"
+                        data-bs-toggle="modal" data-bs-target="#rename-folder">
+                    <i class="bi bi-pencil-square text-primary"></i>
+                </button>
+                <button th:case="*" type="button" class="btn btn-light"
+                        th:data-bs-name="${item.getName()}"
+                        th:data-bs-parent-path="${currentPath}"
+                        data-bs-toggle="modal" data-bs-target="#rename-file">
+                    <i class="bi bi-pencil-square text-primary"></i>
+                </button>
+            </td>
+
+            <!-- Delete Button -->
+            <td th:switch="${item.getType().name()}">
+                <form th:case="'FOLDER'" action="/delete-folder" method="POST">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" name="redirect-path" th:value="${currentPath}" />
+                    <input type="hidden" name="folder-path" th:value="${item.getParentDir()}" />
+                    <button type="submit" class="btn btn-light">
+                        <i class="bi bi-trash-fill text-danger"></i>
+                    </button>
+                </form>
+                <form th:case="*" action="/delete-file" method="POST">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="hidden" name="parent-path" th:value="${currentPath}" />
+                    <input type="hidden" name="file-name" th:value="${item.getName()}" />
+                    <button type="submit" class="btn btn-light">
+                        <i class="bi bi-trash-fill text-danger"></i>
+                    </button>
+                </form>
+            </td>
         </tr>
         </tbody>
+        <div th:insert="~{explorer/dialog-rename-folder}"></div>
+        <div th:insert="~{explorer/dialog-rename-file}"></div>
     </table>
 </div>

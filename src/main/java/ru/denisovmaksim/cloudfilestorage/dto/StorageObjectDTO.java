@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public class StorageObjectDTO {
 
-    private final String path;
+    private final String parentDir;
 
     private final String name;
 
