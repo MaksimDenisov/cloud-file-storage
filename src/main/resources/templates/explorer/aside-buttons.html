@@ -1,0 +1,33 @@
+<!-- Один набор кнопок, не содержит классов d-none и т.п. -->
+<div th:fragment="aside-buttons" class="d-flex flex-column">
+    <div class="d-flex align-items-center justify-content-center bg-light rounded-circle"
+         style="width: 128px; height: 128px;">
+        <i class="bi bi-cloud fs-4 text-primary ms-auto"></i><i class="ms-auto" th:text="${username}"></i>
+    </div>
+    <button type="button" class="btn aside-btn mb-2" data-bs-toggle="modal" data-bs-target="#dialog-upload-file">
+        <i class="bi bi-upload me-2"></i> Upload file
+    </button>
+    <button type="button" class="btn aside-btn" data-bs-toggle="modal" data-bs-target="#add-folder">
+        <i class="bi bi-folder me-2"></i> Create folder
+    </button>
+    <button id="button-upload-folder" type="button" class="btn aside-btn mb-2" data-bs-toggle="modal"
+            data-bs-target="#dialog-upload-folder">
+        <i class="bi bi-folder-plus me-2"></i> Upload folder
+    </button>
+    <style>
+        .drop-area {
+            width: 80%;
+            height: 80%;
+            margin: 20px auto;
+            padding: 40px;
+            border: 2px dashed #007bff;
+            border-radius: 10px;
+            background: #f8f9fa;
+            text-align: center;
+            cursor: pointer;
+        }
+    </style>
+    <div id="drop-area" class="drop-area">
+        <p>Drop files and folders here.</p>
+    </div>
+</div>

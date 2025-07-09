@@ -42,7 +42,7 @@ public class ExplorerController {
         model.addAttribute("breadcrumbs", PathLinksDTOMapper.toChainLinksFromPath(path));
         model.addAttribute("storageObjects", explorerService.getContentOfDirectory(path));
         model.addAttribute("currentPath", path);
-        return "explorer/file-explorer";
+        return "explorer/main";
     }
 
     @PostMapping("/rename-folder")

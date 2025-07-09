@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/decoration-layout.html}">
+<section layout:fragment="content">
+    <!-- Desktop table (visible only ≥lg) -->
+    <div class="container-fluid px-0 m-0">
+        <div class="row g-0 m-0">
+            <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileAside">
+                <div class="offcanvas-header">
+                    <h5 class="offcanvas-title">Menu</h5>
+                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+                </div>
+                <div class="offcanvas-body d-flex flex-column"
+                     th:insert="~{explorer/aside-buttons::aside-buttons}"></div>
+            </div>
+
+            <nav class="col-md-2 d-none d-md-block vh-100 bg-light shadow-sm border-end">
+                <div class="offcanvas-body d-flex flex-column"
+                     th:insert="~{explorer/aside-buttons::aside-buttons}"></div>
+            </nav>
+
+            <div class="col-md-10 bg-light">
+                <div th:replace="~{explorer/breadcrumbs-path :: breadcrumbs-path (${breadcrumbs})}"></div>
+                <table class="table p-4 table-bordered table-striped text-center d-none d-lg-table ">
+                    <thead class="table-header-group">
+                    <tr>
+                        <th>Icon</th>
+                        <th class="text-start">Name</th>
+                        <th>Size</th>
+                        <th>Download</th>
+                        <th>Rename</th>
+                        <th>Delete</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="item : ${storageObjects}" th:switch="${#strings.toString(item.getType())}">
+                        <!-- @thymesVar id="item" type="ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO" -->
+                        <!-- Icon -->
+                        <td th:switch="${item.getType().name()}">
+                            <i th:case="'FOLDER'" class="bi bi-folder h5 text-secondary"></i>
+                            <i th:case="*" class="bi bi-file-binary h5 text-secondary"></i>
+                        </td>
+
+                        <!-- Name -->
+                        <td class="text-start" th:switch="${item.getType().name()}">
+                            <a th:case="'FOLDER'" th:href="@{/(path=${item.getParentDir()})}"
+                               th:text="${item.getName()}"></a>
+                            <a th:case="*" th:href="@{download(path=${item.getParentDir()})}"
+                               th:text="${item.getName()}"></a>
+                        </td>
+
+                        <!-- Size -->
+                        <td th:switch="${item.getType().name()}">
+                            <i th:case="'FOLDER'"
+                               th:text="${item.getSize() == 0 ? 'Empty' : item.getSize() + (item.getSize() == 1 ? ' object' : ' objects')}"></i>
+                            <i th:case="*" th:text="${item.getSize() / 1024} + ' KB'"></i>
+                        </td>
+
+                        <!-- Download button -->
+                        <td th:switch="${item.getType().name()}">
+                            <a th:case="'FOLDER'" th:href="@{download-folder(path=${item.getParentDir()})}">
+                                <button type="button" class="btn btn-light text-success">
+                                    <i class="bi bi-save"></i>
+                                </button>
+                            </a>
+                            <a th:case="*" th:href="@{download(path=${item.getParentDir()})}">
+                                <button type="button" class="btn btn-light text-success">
+                                    <i class="bi bi-cloud-download"></i>
+                                </button>
+                            </a>
+                        </td>
+
+                        <!-- Rename button -->
+                        <td th:switch="${item.getType().name()}">
+                            <button th:case="'FOLDER'" type="button" class="btn btn-light"
+                                    th:data-bs-name="${item.getName()}"
+                                    th:data-bs-current-path="${item.getParentDir()}"
+                                    th:data-bs-redirect-path="${currentPath}"
+                                    data-bs-toggle="modal" data-bs-target="#rename-folder">
+                                <i class="bi bi-pencil-square text-primary"></i>
+                            </button>
+                            <button th:case="*" type="button" class="btn btn-light"
+                                    th:data-bs-name="${item.getName()}"
+                                    th:data-bs-parent-path="${currentPath}"
+                                    data-bs-toggle="modal" data-bs-target="#rename-file">
+                                <i class="bi bi-pencil-square text-primary"></i>
+                            </button>
+                        </td>
+
+                        <!-- Delete Button -->
+                        <td th:switch="${item.getType().name()}">
+                            <form th:case="'FOLDER'" action="/delete-folder" method="POST">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <input type="hidden" name="redirect-path" th:value="${currentPath}"/>
+                                <input type="hidden" name="folder-path" th:value="${item.getParentDir()}"/>
+                                <button type="submit" class="btn btn-light">
+                                    <i class="bi bi-trash-fill text-danger"></i>
+                                </button>
+                            </form>
+                            <form th:case="*" action="/delete-file" method="POST">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <input type="hidden" name="parent-path" th:value="${currentPath}"/>
+                                <input type="hidden" name="file-name" th:value="${item.getName()}"/>
+                                <button type="submit" class="btn btn-light">
+                                    <i class="bi bi-trash-fill text-danger"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile cards (visible only <lg) -->
+    <div class="d-lg-none">
+        <div th:each="item : ${storageObjects}" class="card mb-2 shadow-sm">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i th:if="${item.type.name() == 'FOLDER'}" class="bi bi-folder text-secondary h5 me-2"></i>
+                        <i th:if="${item.type.name() != 'FOLDER'}" class="bi bi-file-binary text-secondary h5 me-2"></i>
+                        <span th:text="${item.name}" class="fw-bold"></span>
+                    </div>
+                    <div class="text-end small text-muted">
+                        <span th:text="${item.type.name() == 'FOLDER' ? (item.size == 0 ? 'Empty' : item.size + ' objs') : item.size / 1024 + ' KB'}"></span>
+                    </div>
+                </div>
+                <div class="mt-2 d-flex justify-content-end gap-2">
+                    <a th:href="@{download(path=${item.parentDir})}" class="btn btn-sm btn-light text-success">
+                        <i class="bi bi-cloud-download"></i>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-light text-primary"
+                            th:data-bs-name="${item.name}"
+                            th:data-bs-parent-path="${currentPath}"
+                            data-bs-toggle="modal" data-bs-target="#rename-file">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <form th:action="@{/delete-file}" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <input type="hidden" name="file-name" th:value="${item.name}"/>
+                        <input type="hidden" name="parent-path" th:value="${currentPath}"/>
+                        <button type="submit" class="btn btn-sm btn-light text-danger">
+                            <i class="bi bi-trash-fill"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:insert="~{dialogs/create-folder}"></div>
+    <div th:insert="~{dialogs/upload-file}"></div>
+    <div th:insert="~{dialogs/upload-folder}"></div>
+    <div th:insert="~{dialogs/rename-folder}"></div>
+    <div th:insert="~{dialogs/rename-file}"></div>
+</section>
+</html>

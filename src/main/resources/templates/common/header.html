@@ -4,22 +4,48 @@
 </head>
 <body>
 <div th:fragment="authenticated (user)">
-    <div class="navbar navbar-dark bg-dark shadow-sm mb-3">
+    <nav class="navbar navbar-dark bg-dark shadow-sm">
         <div class="container-fluid d-flex justify-content-between">
-            <p class="h3 text-start text-white px-5" th:text="${user} + '\'s files.'"></p>
-            <form class="form-inline my-2 my-lg-0 text-end d-flex align-items-center ms-auto"
-                  action="/search" method="get">
-                <input class="form-control mr-sm-2" type="search" name = "query" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-            </form>
-            <div class="col-md-3 text-end">
-                <form id="add-folder-form" action="/sign-out" method="post">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <button type = "submit" class="btn btn-outline-danger" th:text="'Sign out    ' + ${user}"></button>
-                </form>
-            </div>
-        </div>
+            <!-- Кнопка для открытия меню -->
+            <button class="btn btn-outline-light d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileAside">
+                <i class="bi bi-list"></i>
+            </button>
+            <!-- Левая часть: заголовок -->
+            <p class="h4 text-white m-0" th:text="${user} + '\'s files.'"></p>
 
+            <!-- Мобильные иконки -->
+            <div class="d-flex d-md-none">
+                <!-- Поиск (лупа) -->
+                <button class="btn btn-outline-light me-2" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSearch">
+                    <i class="bi bi-search"></i>
+                </button>
+
+                <!-- Меню (бургер) -->
+                <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+                    <i class="bi bi-box-arrow-right fs-3"></i>
+                </button>
+            </div>
+
+            <!-- Форма поиска: только для десктопа -->
+            <form class="d-none d-md-flex ms-auto me-3" action="/search" method="get">
+                <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search">
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+
+            <!-- Sign out: только для десктопа -->
+            <form class="d-none d-md-block" action="/sign-out" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <button type="submit" class="btn btn-outline-danger" th:text="'Sign out ' + ${user}"></button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Collapse поиск (моб.) -->
+    <div class="collapse d-md-none px-3" id="mobileSearch">
+        <form class="d-flex mb-3" action="/search" method="get">
+            <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
     </div>
 </div>
 

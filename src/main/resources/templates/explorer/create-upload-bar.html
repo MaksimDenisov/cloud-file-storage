@@ -1,5 +1,82 @@
 <div th:fragment="create-upload-bar">
     <div class="row">
+
+        <aside class="d-none d-md-block position-fixed top-0 start-0 vh-100 bg-light shadow-sm border-end" style="width: 200px; z-index: 1030;">
+            <div class="d-flex flex-column h-100">
+                <button type="button" class="btn aside-btn" data-bs-toggle="modal" data-bs-target="#dialog-drop-area">
+                    <i class="bi bi-box-arrow-in-down me-2"></i> Drop zone
+                </button>
+                <hr class="my-0">
+                <button type="button" class="btn aside-btn" data-bs-toggle="modal" data-bs-target="#dialog-upload-file">
+                    <i class="bi bi-upload me-2"></i> Upload file
+                </button>
+                <hr class="my-0">
+                <button id="button-upload-folder" type="button" class="btn aside-btn" data-bs-toggle="modal" data-bs-target="#dialog-upload-folder">
+                    <i class="bi bi-folder-plus me-2"></i> Upload folder
+                </button>
+                <hr class="my-0">
+                <button type="button" class="btn aside-btn" data-bs-toggle="modal" data-bs-target="#add-folder">
+                    <i class="bi bi-folder me-2"></i> Create folder
+                </button>
+            </div>
+        </aside>
+
+        <!-- Мобильная FAB кнопка -->
+        <div class="d-md-none">
+            <div style="position: fixed; bottom: 20px; right: 20px; z-index: 1050;">
+                <div class="btn-group dropup">
+                    <button type="button" class="btn btn-primary rounded-circle shadow-lg" data-bs-toggle="dropdown" aria-expanded="false" style="width: 60px; height: 60px;">
+                        <i class="bi bi-plus-lg fs-4"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end text-center">
+                        <li>
+                            <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#dialog-upload-file">
+                                <i class="bi bi-upload"></i> Upload file
+                            </button>
+                        </li>
+                        <li>
+                            <button class="dropdown-item" id="fab-upload-folder" data-bs-toggle="modal" data-bs-target="#dialog-upload-folder">
+                                <i class="bi bi-folder-plus"></i> Upload folder
+                            </button>
+                        </li>
+                        <li>
+                            <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#add-folder">
+                                <i class="bi bi-folder"></i> Create folder
+                            </button>
+                        </li>
+                        <li>
+                            <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#dialog-drop-area">
+                                <i class="bi bi-box-arrow-in-down"></i> Drop zone
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальные окна -->
+    <div th:replace="~{explorer/dialog-create-folder :: dialog-create-folder (${currentPath})}"></div>
+    <div th:replace="~{explorer/dialog-upload-file :: dialog-upload-file (${currentPath})}"></div>
+    <div th:replace="~{explorer/dialog-upload-folder :: dialog-upload-folder (${currentPath})}"></div>
+    <div th:replace="~{explorer/dialog-drop-area :: dialog-drop-area (${currentPath})}"></div>
+
+    <!-- Firefox fix -->
+    <script>
+        var isFirefox = /Firefox/.test(navigator.userAgent);
+        if (isFirefox) {
+            var fileInput = document.getElementById('button-upload-folder');
+            var fabInput = document.getElementById('fab-upload-folder');
+            if (fileInput) fileInput.hidden = true;
+            if (fabInput) fabInput.hidden = true;
+        }
+    </script>
+</div>
+
+
+<!--
+<div th:fragment="create-upload-bar">
+    <div class="row">
         <div class="float-end">
             <button type="button" class="btn btn-warning col-1 m-3 float-end" data-bs-toggle="modal"
                     data-bs-target="#dialog-drop-area">
@@ -32,4 +109,4 @@
         }
     </script>
 
-</div>
+</div>-->

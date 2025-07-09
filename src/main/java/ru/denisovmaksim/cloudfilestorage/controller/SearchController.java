@@ -23,7 +23,7 @@ public class SearchController {
                              @RequestParam("query") String query) {
         model.addAttribute("username", authentication.getName());
         model.addAttribute("storageObjects", searchService.search(query));
-        return "search/search";
+        return "search/main";
     }
 
 }
