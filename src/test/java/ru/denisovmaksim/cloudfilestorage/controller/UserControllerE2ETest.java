@@ -58,12 +58,8 @@ public class UserControllerE2ETest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private UserRepository userRepository;
-/*
-    @MockBean
-    private ExplorerService explorerService;*/
 
     private static final String SIGN_IN = "/sign-in";
     private static final String SIGN_UP = "/sign-up";
