@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.dto.FileType;
@@ -33,9 +32,6 @@ class ExplorerControllerTest {
     @Mock
     private Model model;
 
-    @Mock
-    private Authentication authentication;
-
     @Test
     void addFolderShouldCreateDirectoryAndRedirect() {
         String path = "/test";
@@ -54,7 +50,6 @@ class ExplorerControllerTest {
     @Test
     void getObjectsShouldAddModelAttributesAndReturnView() {
         String path = "/test";
-        String username = "user";
         StorageObjectDTO firstDTO =
                 new StorageObjectDTO("file1.txt", "file1.txt", FileType.UNKNOWN_FILE, 100L);
         StorageObjectDTO secondDTO =
@@ -62,13 +57,11 @@ class ExplorerControllerTest {
 
         List<StorageObjectDTO> mockResults = List.of(firstDTO, secondDTO);
 
-        Mockito.when(authentication.getName()).thenReturn(username);
         Mockito.when(explorerService.getContentOfDirectory(path)).thenReturn(mockResults);
 
-        String viewName = explorerController.getObjects(model, authentication, path);
+        String viewName = explorerController.getObjects(model, path);
 
-        assertEquals("explorer/file-explorer", viewName);
-        Mockito.verify(model).addAttribute("username", username);
+        assertEquals("explorer/main", viewName);
         Mockito.verify(model).addAttribute("breadcrumbs", PathLinksDTOMapper.toChainLinksFromPath(path));
         Mockito.verify(model).addAttribute("storageObjects", mockResults);
         Mockito.verify(model).addAttribute("currentPath", path);

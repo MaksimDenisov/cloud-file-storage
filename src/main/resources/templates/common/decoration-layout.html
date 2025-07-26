@@ -13,8 +13,13 @@
             href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 <body>
+    <th:block th:if="${username != null}">
+        <div th:replace="~{common/header::authenticated(${username})}"></div>
+    </th:block>
 
-<div th:replace="~{common/header::authenticated(${username})}"></div>
+    <th:block th:if="${username == null}">
+        <div th:replace="~{common/header::anonymous}"></div>
+    </th:block>
 
 <div th:replace="~{common/flash-message::flash-message (type=${flashType}, message=${flashMsg})}"></div>
 <div id="content" class="container-fluid px-0">

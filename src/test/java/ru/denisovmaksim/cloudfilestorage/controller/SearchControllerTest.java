@@ -43,13 +43,11 @@ class SearchControllerTest {
 
         List<StorageObjectDTO> mockResults = List.of(firstDTO, secondDTO);
 
-        Mockito.when(authentication.getName()).thenReturn(username);
         Mockito.when(searchService.search(query)).thenReturn(mockResults);
 
-        String viewName = searchController.getObjects(model, authentication, query);
+        String viewName = searchController.getObjects(model, query);
 
-        assertEquals("search/search", viewName);
-        Mockito.verify(model).addAttribute("username", username);
+        assertEquals("search/main", viewName);
         Mockito.verify(model).addAttribute("storageObjects", mockResults);
         Mockito.verify(searchService).search(query);
     }

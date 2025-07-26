@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/decoration-layout.html}">
 <section layout:fragment="content">
-
-    <div th:insert="~{common/header::anonymous}"></div>
-
-
-    <div th:insert="~{common/flash-message::flash-message (type=${flashType}, message=${flashMsg})}"></div>
-
     <div class="card col-8 offset-2">
         <div class="card-body">
             <h5 class="card-title text-center">Sign in</h5>

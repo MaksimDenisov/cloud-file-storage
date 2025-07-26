@@ -1,46 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-</head>
-<body>
 <div th:fragment="authenticated (user)">
     <nav class="navbar navbar-dark bg-dark shadow-sm">
         <div class="container-fluid d-flex justify-content-between">
-            <!-- Кнопка для открытия меню -->
-            <button class="btn btn-outline-light d-md-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileAside">
+            <!-- Menu mobile -->
+            <button class="btn btn-outline-light d-md-none" type="button" data-bs-toggle="offcanvas"
+                    data-bs-target="#mobileAside">
                 <i class="bi bi-list"></i>
             </button>
-            <!-- Левая часть: заголовок -->
+
             <p class="h4 text-white m-0" th:text="${user} + '\'s files.'"></p>
 
-            <!-- Мобильные иконки -->
+            <!-- Mobile icons -->
             <div class="d-flex d-md-none">
-                <!-- Поиск (лупа) -->
-                <button class="btn btn-outline-light me-2" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSearch">
+                <button class="btn btn-outline-light me-2" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#mobileSearch">
                     <i class="bi bi-search"></i>
                 </button>
 
-                <!-- Меню (бургер) -->
-                <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+                <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas"
+                        onclick="document.getElementById('signOutForm').submit()">
                     <i class="bi bi-box-arrow-right fs-3"></i>
                 </button>
             </div>
 
-            <!-- Форма поиска: только для десктопа -->
+            <!-- Search: desktop -->
             <form class="d-none d-md-flex ms-auto me-3" action="/search" method="get">
                 <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search">
                 <button class="btn btn-outline-success" type="submit">Search</button>
             </form>
 
-            <!-- Sign out: только для десктопа -->
-            <form class="d-none d-md-block" action="/sign-out" method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <button type="submit" class="btn btn-outline-danger" th:text="'Sign out ' + ${user}"></button>
-            </form>
+            <!-- Sign out: desktop -->
+            <button type="submit" class="d-none btn btn-outline-danger" th:text="'Sign out ' + ${user}"
+                    onclick="document.getElementById('signOutForm').submit()"></button>
         </div>
+
+        <form id="signOutForm" action="/sign-out" method="post" style="display:none;">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        </form>
     </nav>
 
-    <!-- Collapse поиск (моб.) -->
+    <!-- Collapse search mobile -->
     <div class="collapse d-md-none px-3" id="mobileSearch">
         <form class="d-flex mb-3" action="/search" method="get">
             <input class="form-control me-2" type="search" name="query" placeholder="Search" aria-label="Search">
@@ -60,5 +58,3 @@
         </div>
     </div>
 </div>
-</body>
-</html>

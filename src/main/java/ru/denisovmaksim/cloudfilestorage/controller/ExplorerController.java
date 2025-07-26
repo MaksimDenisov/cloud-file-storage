@@ -2,7 +2,6 @@ package ru.denisovmaksim.cloudfilestorage.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,9 +35,7 @@ public class ExplorerController {
     }
 
     @GetMapping("/")
-    public String getObjects(Model model, Authentication authentication,
-                             @RequestParam(required = false, defaultValue = "") String path) {
-        model.addAttribute("username", authentication.getName());
+    public String getObjects(Model model, @RequestParam(required = false, defaultValue = "") String path) {
         model.addAttribute("breadcrumbs", PathLinksDTOMapper.toChainLinksFromPath(path));
         model.addAttribute("storageObjects", explorerService.getContentOfDirectory(path));
         model.addAttribute("currentPath", path);
