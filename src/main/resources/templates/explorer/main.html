@@ -4,14 +4,14 @@
     <!-- Desktop table (visible only ≥lg) -->
     <div class="container-fluid px-0 m-0">
         <div class="row g-0 m-0">
-            <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileAside">
-                <div class="offcanvas-header">
-                    <h5 class="offcanvas-title">Menu</h5>
-                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+                <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileAside">
+                    <div class="offcanvas-header">
+                        <h5 class="offcanvas-title">Menu</h5>
+                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+                    </div>
+                    <div class="offcanvas-body d-flex flex-column"
+                         th:insert="~{explorer/aside-buttons::aside-buttons}"></div>
                 </div>
-                <div class="offcanvas-body d-flex flex-column"
-                     th:insert="~{explorer/aside-buttons::aside-buttons}"></div>
-            </div>
 
             <nav class="col-md-2 d-none d-md-block vh-100 bg-light shadow-sm border-end">
                 <div class="offcanvas-body d-flex flex-column"
@@ -121,7 +121,10 @@
                     <div>
                         <i th:if="${item.type.name() == 'FOLDER'}" class="bi bi-folder text-secondary h5 me-2"></i>
                         <i th:if="${item.type.name() != 'FOLDER'}" class="bi bi-file-binary text-secondary h5 me-2"></i>
-                        <span th:text="${item.name}" class="fw-bold"></span>
+                        <a th:if="${item.type.name() == 'FOLDER'}" th:href="@{/(path=${item.getParentDir()})}"
+                           th:text="${item.getName()}"></a>
+                        <a th:if="${item.type.name() != 'FOLDER'}" th:href="@{download(path=${item.getParentDir()})}"
+                           th:text="${item.getName()}"></a>
                     </div>
                     <div class="text-end small text-muted">
                         <span th:text="${item.type.name() == 'FOLDER' ? (item.size == 0 ? 'Empty' : item.size + ' objs') : item.size / 1024 + ' KB'}"></span>
