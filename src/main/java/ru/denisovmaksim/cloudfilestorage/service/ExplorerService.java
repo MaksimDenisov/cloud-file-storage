@@ -27,14 +27,14 @@ public class ExplorerService {
 
     private final SecurityService securityService;
 
-    public void createDirectory(@ValidPath(PathType.DIR) String parentDirectory,
-                                @ValidPath(PathType.FILENAME) String directoryName) {
-        String newDirPath = PathUtil.ensureDirectoryPath(parentDirectory + directoryName);
+    public void createFolder(@ValidPath(PathType.DIR) String parentDirectory,
+                             @ValidPath(PathType.FILENAME) String folderName) {
+        String newDirPath = PathUtil.ensureDirectoryPath(parentDirectory + folderName);
         throwIfObjectExist(newDirPath);
         fileStorage.createPath(securityService.getAuthUserId(), newDirPath);
     }
 
-    public List<StorageObjectDTO> getContentOfDirectory(@ValidPath(PathType.DIR) String directory) {
+    public List<StorageObjectDTO> getFolder(@ValidPath(PathType.DIR) String directory) {
         Long userId = securityService.getAuthUserId();
         List<StorageObjectInfo> infos = fileStorage.listObjectInfo(userId, directory)
                 .orElseThrow(() -> new NotFoundException(directory));
@@ -49,39 +49,40 @@ public class ExplorerService {
                 .collect(Collectors.toList());
     }
 
-    public void renameFile(@ValidPath(PathType.DIR) String parentPath,
+    public void renameFile(@ValidPath(PathType.DIR) String parentDirectory,
                            @ValidPath(PathType.FILENAME) String currentFileName,
                            @ValidPath(PathType.FILENAME) String newFileName) {
-        String dstPath = parentPath + newFileName;
-        String srcPath = parentPath + currentFileName;
+        String dstPath = parentDirectory + newFileName;
+        String srcPath = parentDirectory + currentFileName;
         throwIfObjectExist(dstPath);
         fileStorage.copyOneObject(securityService.getAuthUserId(), srcPath, dstPath);
         fileStorage.deleteObjects(securityService.getAuthUserId(), srcPath);
     }
 
-    public void renameFolder(@ValidPath(PathType.DIR) String currentPath,
+    public void renameFolder(@ValidPath(PathType.DIR) String directory,
                              @ValidPath(PathType.FILENAME) String newFolderName) {
-        String newPath = PathUtil.getParentDirName(currentPath) + newFolderName;
+        String newPath = PathUtil.getParentDirName(directory) + newFolderName;
         newPath = PathUtil.ensureDirectoryPath(newPath);
         throwIfObjectExist(newPath);
-        if (fileStorage.copyObjects(securityService.getAuthUserId(), currentPath, newPath) == 0) {
+        if (fileStorage.copyObjects(securityService.getAuthUserId(), directory, newPath) == 0) {
             fileStorage.createPath(securityService.getAuthUserId(), newPath);
         }
-        fileStorage.deleteObjects(securityService.getAuthUserId(), currentPath);
+        fileStorage.deleteObjects(securityService.getAuthUserId(), directory);
     }
 
-    public void deleteFolder(@ValidPath(PathType.DIR) String path) {
-        String parentPath = PathUtil.getParentDirName(path);
-        fileStorage.deleteObjects(securityService.getAuthUserId(), path);
+    public void deleteFolder(@ValidPath(PathType.DIR) String directory) {
+        String parentPath = PathUtil.getParentDirName(directory);
+        fileStorage.deleteObjects(securityService.getAuthUserId(), directory);
         if (!fileStorage.isExist(securityService.getAuthUserId(), parentPath)) {
             fileStorage.createPath(securityService.getAuthUserId(), parentPath);
         }
     }
 
-    public void deleteFile(@ValidPath(PathType.DIR) String parentPath, @ValidPath(PathType.FILENAME) String fileName) {
-        fileStorage.deleteObjects(securityService.getAuthUserId(), parentPath + fileName);
-        if (!fileStorage.isExist(securityService.getAuthUserId(), parentPath)) {
-            fileStorage.createPath(securityService.getAuthUserId(), parentPath);
+    public void deleteFile(@ValidPath(PathType.DIR) String parentDirectory,
+                           @ValidPath(PathType.FILENAME) String fileName) {
+        fileStorage.deleteObjects(securityService.getAuthUserId(), parentDirectory + fileName);
+        if (!fileStorage.isExist(securityService.getAuthUserId(), parentDirectory)) {
+            fileStorage.createPath(securityService.getAuthUserId(), parentDirectory);
         }
     }
 

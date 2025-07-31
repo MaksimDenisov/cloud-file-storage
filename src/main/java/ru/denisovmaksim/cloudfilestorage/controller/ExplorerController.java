@@ -27,7 +27,7 @@ public class ExplorerController {
                             @ModelAttribute("path") String path,
                             RedirectAttributes redirectAttributes) {
         log.info("Add folder with name {}", folderName);
-        explorerService.createDirectory(path, folderName);
+        explorerService.createFolder(path, folderName);
         if (!path.isEmpty()) {
             redirectAttributes.addAttribute("path", path);
         }
@@ -37,7 +37,7 @@ public class ExplorerController {
     @GetMapping("/")
     public String getObjects(Model model, @RequestParam(required = false, defaultValue = "") String path) {
         model.addAttribute("breadcrumbs", PathLinksDTOMapper.toChainLinksFromPath(path));
-        model.addAttribute("storageObjects", explorerService.getContentOfDirectory(path));
+        model.addAttribute("storageObjects", explorerService.getFolder(path));
         model.addAttribute("currentPath", path);
         return "explorer/main";
     }

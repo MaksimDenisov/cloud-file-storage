@@ -43,7 +43,7 @@ class ExplorerControllerTest {
         String result = explorerController.addFolder(folderName, path, redirectAttributes);
 
         assertEquals("redirect:/", result);
-        Mockito.verify(explorerService).createDirectory(path, folderName);
+        Mockito.verify(explorerService).createFolder(path, folderName);
         Mockito.verify(redirectAttributes).addAttribute("path", path);
     }
 
@@ -57,7 +57,7 @@ class ExplorerControllerTest {
 
         List<StorageObjectDTO> mockResults = List.of(firstDTO, secondDTO);
 
-        Mockito.when(explorerService.getContentOfDirectory(path)).thenReturn(mockResults);
+        Mockito.when(explorerService.getFolder(path)).thenReturn(mockResults);
 
         String viewName = explorerController.getObjects(model, path);
 

@@ -48,7 +48,7 @@ class ExplorerServiceTest {
     void createDirectory() {
         when(fileStorage.isExist(USER_ID, "dir/")).thenReturn(false);
 
-        explorerService.createDirectory("", "dir/");
+        explorerService.createFolder("", "dir/");
 
         verify(fileStorage).createPath(USER_ID, "dir/");
     }
@@ -59,7 +59,7 @@ class ExplorerServiceTest {
         when(fileStorage.isExist(USER_ID, "dir/")).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class, () ->
-                explorerService.createDirectory("", "dir/")
+                explorerService.createFolder("", "dir/")
         );
     }
 
@@ -68,7 +68,7 @@ class ExplorerServiceTest {
     void getContentOfDirectory() {
         when(fileStorage.listObjectInfo(USER_ID, "dir/")).thenReturn(Optional.of(List.of()));
 
-        List<StorageObjectDTO> result = explorerService.getContentOfDirectory("dir/");
+        List<StorageObjectDTO> result = explorerService.getFolder("dir/");
         assertNotNull(result);
     }
 
@@ -77,7 +77,7 @@ class ExplorerServiceTest {
     void getContentOfNotExistDirectoryShouldThrowNotFound() {
         when(fileStorage.listObjectInfo(USER_ID, "dir/")).thenReturn(Optional.empty());
 
-        assertThrows(NotFoundException.class, () -> explorerService.getContentOfDirectory("dir/"));
+        assertThrows(NotFoundException.class, () -> explorerService.getFolder("dir/"));
     }
 
 
