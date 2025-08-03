@@ -80,7 +80,7 @@ class TransferServiceTest {
         InputStream stream = new ByteArrayInputStream("test".getBytes());
 
         when(fileStorage.getObject(USER_ID, "dir/file.txt"))
-                .thenReturn(new FileObject("dir/file.txt", stream));
+                .thenReturn(new FileObject("dir/file.txt", "test".getBytes().length, stream));
 
         NamedStreamDTO result = transferService.getFileAsStream("dir/file.txt");
         assertEquals("file.txt", java.net.URLDecoder.decode(result.getName(), java.nio.charset.StandardCharsets.UTF_8));
@@ -92,7 +92,7 @@ class TransferServiceTest {
         InputStream stream = new ByteArrayInputStream("test".getBytes());
 
         when(fileStorage.getObjects(USER_ID, "dir/")).thenReturn(List.of(
-                new FileObject("dir/file.txt", stream)
+                new FileObject("dir/file.txt", "test".getBytes().length, stream)
         ));
 
         NamedStreamDTO result = transferService.getZipFolderAsStream("dir/");

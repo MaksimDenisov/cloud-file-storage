@@ -1,0 +1,41 @@
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{common/decoration-layout.html}">
+<!-- Один набор кнопок, не содержит классов d-none и т.п. -->
+<div th:fragment="aside-buttons" class="d-flex flex-column">
+    <div class="d-flex align-items-center justify-content-center bg-light rounded-circle"
+         style="width: 128px; height: 128px;">
+        <i class="bi bi-cloud fs-4 text-primary ms-auto"></i><i class="ms-auto" th:text="${username}"></i>
+    </div>
+</div>
+<section layout:fragment="content">
+    <div class="row">
+        <main class="overflow-auto px-4">
+
+            <!-- Desktop table (visible only ≥lg) -->
+            <div class="container-fluid px-0 m-0">
+                <div class="row g-0 m-0">
+                    <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileAside">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title">Menu</h5>
+                            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
+                        </div>
+                        <div class="offcanvas-body d-flex flex-column" th:insert="~{::aside-buttons}"></div>
+                    </div>
+
+                    <nav class="col-md-2 d-none d-md-block vh-100 bg-light shadow-sm border-end">
+                        <div class="offcanvas-body d-flex flex-column" th:insert="~{::aside-buttons}"></div>
+                    </nav>
+
+                    <div class="col-md-10 bg-secondary d-flex justify-content-center align-items-center" style="height: 100vh;">
+                        <p class="text-white" th:text="${filename}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile (visible only <lg) -->
+            <div class="d-lg-none">
+
+            </div>
+        </main>
+    </div>
+</section>
+</html>

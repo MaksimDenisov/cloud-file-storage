@@ -9,5 +9,6 @@ import java.io.InputStream;
 @Getter
 public class NamedStreamDTO {
     private final String name;
+    private final long length;
     private final InputStream stream;
 }

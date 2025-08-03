@@ -43,7 +43,7 @@ class TransferControllerTest {
         String path = "/folder";
         String fileName = "folder.zip";
         InputStream stream = new ByteArrayInputStream("data".getBytes());
-        NamedStreamDTO dto = new NamedStreamDTO(fileName, stream);
+        NamedStreamDTO dto = new NamedStreamDTO(fileName, 0, stream);
 
         Mockito.when(transferService.getZipFolderAsStream(path)).thenReturn(dto);
 
@@ -59,7 +59,7 @@ class TransferControllerTest {
         String path = "/file.txt";
         String fileName = "file.txt";
         InputStream stream = new ByteArrayInputStream("file-content".getBytes());
-        NamedStreamDTO dto = new NamedStreamDTO(fileName, stream);
+        NamedStreamDTO dto = new NamedStreamDTO(fileName, 0, stream);
 
         Mockito.when(transferService.getFileAsStream(path)).thenReturn(dto);
 
