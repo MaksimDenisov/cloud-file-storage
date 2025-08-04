@@ -47,12 +47,12 @@ public class PreviewController {
         InputStream stream = dto.getStream();
 
         String contentType = detectMimeType(filepath);
-      //  long contentLength = object.size();
+        long contentLength = dto.getLength();
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + dto.getName() + "\"")
                 .contentType(MediaType.parseMediaType(contentType))
-        //        .contentLength(contentLength)
+                .contentLength(contentLength)
                 .body(new InputStreamResource(stream));
     }
 

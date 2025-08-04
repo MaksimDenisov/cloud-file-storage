@@ -8,6 +8,7 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.Result;
+import io.minio.StatObjectArgs;
 import io.minio.messages.Item;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,7 @@ import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -123,11 +125,16 @@ public class MinioFileStorage {
     public FileObject getObject(Long userId, String path) {
         log.info("Downloading object at path '{}' for userId={}", path, userId);
         return MinioExceptionHandler.interceptMinioExceptions(() -> {
+            String minioPath = resolver.resolveMinioPath(userId, path);
+            long size = minioClient.statObject(StatObjectArgs.builder()
+                    .bucket(bucket)
+                    .object(minioPath)
+                    .build()).size();
             InputStream objectInputStream = minioClient.getObject(GetObjectArgs.builder()
                     .bucket(bucket)
-                    .object(resolver.resolveMinioPath(userId, path))
+                    .object(minioPath)
                     .build());
-            return new FileObject(path, objectInputStream);
+            return new FileObject(path, size, objectInputStream);
         });
     }
 
@@ -140,17 +147,23 @@ public class MinioFileStorage {
      */
     public List<FileObject> getObjects(Long userId, String path) {
         List<Item> minioItems = getMinioItems(userId, path, true).orElseThrow();
-        return minioItems.stream()
-                .map(item -> {
-                    String objectName = item.objectName();
-                    String objectPath = resolver.resolvePathFromMinioObjectName(userId, objectName);
-                    InputStream objectInputStream = MinioExceptionHandler
-                            .interceptMinioExceptions(() -> minioClient.getObject(GetObjectArgs.builder()
-                                    .bucket(bucket)
-                                    .object(objectName)
-                                    .build()));
-                    return new FileObject(objectPath, objectInputStream);
-                }).toList();
+        List<FileObject> fileObjects = new ArrayList<>();
+        for (Item item : minioItems) {
+            String objectName = item.objectName();
+            String objectPath = resolver.resolvePathFromMinioObjectName(userId, objectName);
+            long size = MinioExceptionHandler
+                    .interceptMinioExceptions(() -> minioClient.statObject(StatObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(objectName)
+                            .build()).size());
+            InputStream objectInputStream = MinioExceptionHandler
+                    .interceptMinioExceptions(() -> minioClient.getObject(GetObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(objectName)
+                            .build()));
+            fileObjects.add(new FileObject(objectPath, size, objectInputStream));
+        }
+        return fileObjects;
     }
 
     /**

@@ -89,13 +89,14 @@ public class TransferController {
     private ResponseEntity<InputStreamResource> createStreamResponse(NamedStreamDTO dto) {
         InputStream inputStream = dto.getStream();
         InputStreamResource resource = new InputStreamResource(inputStream);
+        long contentLength = dto.getLength();
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s", dto.getName()));
 
         return ResponseEntity.ok()
                 .headers(headers)
-                .contentLength(-1) // or specify the length if known
+                .contentLength(contentLength)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
     }

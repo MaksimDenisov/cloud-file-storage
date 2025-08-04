@@ -44,7 +44,7 @@ public class TransferService {
         String baseName = PathUtil.getBaseName(filepath);
         String encodedFileName = URLEncoder.encode(baseName, StandardCharsets.UTF_8)
                 .replace("+", "%20");
-        return new NamedStreamDTO(encodedFileName, fileObject.stream());
+        return new NamedStreamDTO(encodedFileName, fileObject.size(), fileObject.stream());
     }
 
     public NamedStreamDTO getZipFolderAsStream(@ValidPath(PathType.DIR) String path) {
@@ -53,7 +53,8 @@ public class TransferService {
                 .replace("+", "%20");
         List<FileObject> fileObjects = fileStorage.getObjects(securityService.getAuthUserId(), path);
         ByteArrayOutputStream byteArrayOutputStream = zipArchiver.getByteArrayOutputStream(fileObjects, path);
-        return new NamedStreamDTO(encodedFileName, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+        return new NamedStreamDTO(encodedFileName, byteArrayOutputStream.size(),
+                new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
     }
 
     public void uploadFolder(@ValidPath(PathType.DIR) String path, List<MultipartFile> files) {

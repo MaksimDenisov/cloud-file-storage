@@ -27,6 +27,6 @@ public class PreviewService {
         String baseName = PathUtil.getBaseName(filepath);
         String encodedFileName = URLEncoder.encode(baseName, StandardCharsets.UTF_8)
                 .replace("+", "%20");
-        return new NamedStreamDTO(encodedFileName, fileObject.stream());
+        return new NamedStreamDTO(encodedFileName, fileObject.size(), fileObject.stream());
     }
 }
