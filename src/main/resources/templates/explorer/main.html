@@ -42,10 +42,10 @@
 
                         <!-- Name -->
                         <td class="text-start" th:switch="${item.getType().name()}">
-                            <a th:case="'FOLDER'" th:href="@{/(path=${item.getParentDir()})}"
+                            <a th:case="'FOLDER'" th:href="@{/(path=${item.getPath()})}"
                                th:text="${item.getName()}"></a>
                             <a th:case="*"
-                               th:href="@{/preview(filepath=${item.getFilePath()})}"
+                               th:href="@{/preview(filepath=${item.getPath()})}"
                                th:text="${item.getName()}"></a>
                         </td>
 
@@ -58,12 +58,12 @@
 
                         <!-- Download button -->
                         <td th:switch="${item.getType().name()}">
-                            <a th:case="'FOLDER'" th:href="@{download-folder(path=${item.getParentDir()})}">
+                            <a th:case="'FOLDER'" th:href="@{download-folder(path=${item.getPath()})}">
                                 <button type="button" class="btn btn-light text-success">
                                     <i class="bi bi-save"></i>
                                 </button>
                             </a>
-                            <a th:case="*" th:href="@{download(path=${item.getParentDir()})}">
+                            <a th:case="*" th:href="@{download(path=${item.getPath()})}">
                                 <button type="button" class="btn btn-light text-success">
                                     <i class="bi bi-cloud-download"></i>
                                 </button>
@@ -74,7 +74,7 @@
                         <td th:switch="${item.getType().name()}">
                             <button th:case="'FOLDER'" type="button" class="btn btn-light"
                                     th:data-bs-name="${item.getName()}"
-                                    th:data-bs-current-path="${item.getParentDir()}"
+                                    th:data-bs-current-path="${item.getPath()}"
                                     th:data-bs-redirect-path="${currentPath}"
                                     data-bs-toggle="modal" data-bs-target="#rename-folder">
                                 <i class="bi bi-pencil-square text-primary"></i>
@@ -92,7 +92,7 @@
                             <form th:case="'FOLDER'" action="/delete-folder" method="POST">
                                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                 <input type="hidden" name="redirect-path" th:value="${currentPath}"/>
-                                <input type="hidden" name="folder-path" th:value="${item.getParentDir()}"/>
+                                <input type="hidden" name="folder-path" th:value="${item.getPath()}"/>
                                 <button type="submit" class="btn btn-light">
                                     <i class="bi bi-trash-fill text-danger"></i>
                                 </button>
@@ -122,10 +122,10 @@
                     <div>
                         <i th:if="${item.type.name() == 'FOLDER'}" class="bi bi-folder text-secondary h5 me-2"></i>
                         <i th:if="${item.type.name() != 'FOLDER'}" class="bi bi-file-binary text-secondary h5 me-2"></i>
-                        <a th:if="${item.type.name() == 'FOLDER'}" th:href="@{/(path=${item.getParentDir()})}"
+                        <a th:if="${item.type.name() == 'FOLDER'}" th:href="@{/(path=${item.getPath()})}"
                            th:text="${item.getName()}"></a>
                         <a th:if="${item.type.name() != 'FOLDER'}"
-                           th:href="@{/preview(filepath=${item.getFilePath()})}"
+                           th:href="@{/preview(filepath=${item.getPath()})}"
                            th:text="${item.getName()}"></a>
                     </div>
                     <div class="text-end small text-muted">
@@ -133,7 +133,7 @@
                     </div>
                 </div>
                 <div class="mt-2 d-flex justify-content-end gap-2">
-                    <a th:href="@{download(path=${item.parentDir})}" class="btn btn-sm btn-light text-success">
+                    <a th:href="@{download(path=${item.getPath()})}" class="btn btn-sm btn-light text-success">
                         <i class="bi bi-cloud-download"></i>
                     </a>
                     <button type="button" class="btn btn-sm btn-light text-primary"
@@ -154,9 +154,9 @@
             </div>
         </div>
     </div>
-    <div th:insert="~{dialogs/create-folder}"></div>
-    <div th:insert="~{dialogs/upload-file}"></div>
-    <div th:insert="~{dialogs/upload-folder}"></div>
+    <div th:insert="~{dialogs/create-folder::dialog-create-folder(${currentPath})}"></div>
+    <div th:insert="~{dialogs/upload-file::upload-file (${currentPath})}"></div>
+    <div th:insert="~{dialogs/upload-folder::dialog-upload-folder(${currentPath})}"></div>
     <div th:insert="~{dialogs/rename-folder}"></div>
     <div th:insert="~{dialogs/rename-file}"></div>
 </section>

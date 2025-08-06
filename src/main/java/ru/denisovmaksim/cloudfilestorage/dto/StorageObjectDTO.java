@@ -8,15 +8,11 @@ import ru.denisovmaksim.cloudfilestorage.model.FileType;
 @Getter
 public class StorageObjectDTO {
 
-    private final String parentDir;
+    private final String path;
 
     private final String name;
 
     private final FileType type;
 
     private final Long size;
-
-    public String getFilePath() {
-        return parentDir;
-    }
 }
