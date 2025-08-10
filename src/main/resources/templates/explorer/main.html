@@ -3,6 +3,8 @@
 <section layout:fragment="content">
     <!-- Desktop table (visible only ≥lg) -->
     <div class="container-fluid px-0 m-0">
+        <div class="offcanvas-body d-flex flex-column"
+             th:insert="~{explorer/dialogs::dialogs (${currentPath})}"></div>
         <div class="row g-0 m-0">
             <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="mobileAside">
                 <div class="offcanvas-header">
@@ -10,12 +12,12 @@
                     <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
                 </div>
                 <div class="offcanvas-body d-flex flex-column"
-                     th:insert="~{explorer/aside-buttons::aside-buttons}"></div>
+                     th:insert="~{explorer/left-panel::aside-buttons (${currentPath})}"></div>
             </div>
 
             <nav class="col-md-2 d-none d-md-block vh-100 bg-light shadow-sm border-end">
                 <div class="offcanvas-body d-flex flex-column"
-                     th:insert="~{explorer/aside-buttons::aside-buttons}"></div>
+                     th:insert="~{explorer/left-panel::aside-buttons(${currentPath})}"></div>
             </nav>
 
             <div class="col-md-10 bg-light">
@@ -154,10 +156,5 @@
             </div>
         </div>
     </div>
-    <div th:insert="~{dialogs/create-folder::dialog-create-folder(${currentPath})}"></div>
-    <div th:insert="~{dialogs/upload-file::upload-file (${currentPath})}"></div>
-    <div th:insert="~{dialogs/upload-folder::dialog-upload-folder(${currentPath})}"></div>
-    <div th:insert="~{dialogs/rename-folder}"></div>
-    <div th:insert="~{dialogs/rename-file}"></div>
 </section>
 </html>

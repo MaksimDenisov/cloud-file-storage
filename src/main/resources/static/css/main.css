@@ -1,0 +1,11 @@
+.drop-area {
+    width: 80%;
+    height: 80%;
+    margin: 20px auto;
+    padding: 40px;
+    border: 2px dashed #007bff;
+    border-radius: 10px;
+    background: #f8f9fa;
+    text-align: center;
+    cursor: pointer;
+}
