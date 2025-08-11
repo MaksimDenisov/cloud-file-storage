@@ -25,15 +25,21 @@
                         <div class="offcanvas-body d-flex flex-column" th:insert="~{::aside-buttons}"></div>
                     </nav>
 
-                    <div class="col-md-10 bg-secondary d-flex justify-content-center align-items-center" style="height: 100vh;">
-                        <p class="text-white" th:text="${filename}"></p>
+                    <div class="col-md-10 bg-secondary d-flex justify-content-center align-items-center"
+                         style="height: 100vh;">
+
+                        <div class="col-12 col-md-8">
+                            <img th:src="@{/preview/image(filepath=${filepath})}"
+                                 class="img-fluid  w-100 rounded shadow"
+                                 alt="Предпросмотр">
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Mobile (visible only <lg) -->
-            <div class="d-lg-none">
+                <!-- Mobile (visible only <lg) -->
+                <div class="d-lg-none">
 
+                </div>
             </div>
         </main>
     </div>

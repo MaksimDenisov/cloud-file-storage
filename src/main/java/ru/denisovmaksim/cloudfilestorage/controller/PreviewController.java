@@ -56,6 +56,21 @@ public class PreviewController {
                 .body(new InputStreamResource(stream));
     }
 
+    @GetMapping("/image")
+    public ResponseEntity<Resource> getPreviewImage(@RequestParam() String filepath) {
+        NamedStreamDTO dto = previewService.getImage(filepath);
+        InputStream stream = dto.getStream();
+
+        String contentType = detectMimeType(filepath);
+        long contentLength = dto.getLength();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + dto.getName() + "\"")
+                .contentType(MediaType.parseMediaType(contentType))
+                .contentLength(contentLength)
+                .body(new InputStreamResource(stream));
+    }
+
     private String detectMimeType(String path) {
         try {
             return Files.probeContentType(Path.of(path));
