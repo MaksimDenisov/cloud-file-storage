@@ -1,0 +1,55 @@
+<div th:fragment="modal (currentpath)">
+    <div class="modal fade" id="rename-file" tabindex="-1" role="dialog" aria-labelledby="rename-file-label"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rename-file-label">Rename file</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="rename-file-form" action="/rename-file" method="post">
+                        <div data-mdb-input-init class="form-outline mb-4">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <input type="hidden" id="rename-file-path" name="filepath">
+                            <input type="text" class="form-control" id="new-file-name" name="name">
+                            <label class="form-label" for="new-file-name">New name of file</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary"
+                            onclick="$('#rename-file-form').submit();">Rename file
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="rename-folder" tabindex="-1" role="dialog" aria-labelledby="add-folder-label"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rename-folder-label">Rename folder</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="rename-folder-form" action="/rename-folder" method="post">
+                        <div data-mdb-input-init class="form-outline mb-4">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <input type="hidden" id="rename-folder-path" name="folder-path">
+                            <input type="text" class="form-control" id="new-folder-name" name="new-folder-name">
+                            <label class="form-label" for="new-folder-name">New name of folder</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary"
+                            onclick="$('#rename-folder-form').submit();">Rename folder
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

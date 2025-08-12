@@ -22,7 +22,7 @@ public class PathValidator implements ConstraintValidator<ValidPath, String> {
     public boolean isValid(String value, ConstraintValidatorContext context) {
         boolean isValid = switch (pathType) {
             case DIR -> PathUtil.isValid(value) && PathUtil.isDir(value);
-            case FILEPATH -> PathUtil.isValid(value);
+            case FILEPATH -> PathUtil.isValid(value) && !PathUtil.isDir(value);
             case FILENAME -> PathUtil.isValid(value) && PathUtil.getBaseName(value).equals(value);
         };
 

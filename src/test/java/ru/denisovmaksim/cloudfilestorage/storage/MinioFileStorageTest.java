@@ -115,7 +115,7 @@ class MinioFileStorageTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"..", "^", "*", "|", "\\", "&", "\"", ";"})
+    @ValueSource(strings = {"..", "*", "|", "\\", "\"", ";"})
     void createNotValidPath(String notValidPath) {
         assertThrows(IllegalArgumentException.class, () ->
                 fileStorage.createPath(USER_ID, notValidPath)
@@ -132,7 +132,8 @@ class MinioFileStorageTest {
 
     @Test
     void saveAndGetObject() throws IOException {
-        MultipartFile file = new MockMultipartFile("file.txt", "file.txt", "text/plain", "Hello".getBytes());
+        MultipartFile file = new MockMultipartFile("file.txt", "file.txt",
+                "text/plain", "Hello".getBytes());
 
         fileStorage.saveObject(USER_ID, "folder/", file);
 

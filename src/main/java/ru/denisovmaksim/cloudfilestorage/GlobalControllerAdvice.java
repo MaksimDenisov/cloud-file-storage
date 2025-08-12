@@ -83,7 +83,7 @@ public class GlobalControllerAdvice {
 
     @ExceptionHandler(RuntimeException.class)
     public String handleCommonException(RuntimeException e, RedirectAttributes attributes) {
-        log.debug(e.getMessage());
+        log.error(e.getMessage());
         setDangerMessage("An error occurred. Something went wrong.", attributes);
         return REDIRECT_TO_ROOT;
     }

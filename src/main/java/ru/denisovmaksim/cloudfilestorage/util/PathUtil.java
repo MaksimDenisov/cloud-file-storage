@@ -5,13 +5,13 @@ import java.util.regex.Pattern;
 public final class PathUtil {
 
     public static final String PATH_SEPARATOR = "/";
-
+    public static final String AVAILABLE_CHARS = "( ) , - . ^ _ ` ! $ № + = @ &";
     private PathUtil() {
         throw new UnsupportedOperationException("Utility class");
     }
 
     private static final Pattern PATTERN =
-            Pattern.compile("^([\\p{L}0-9/(),-.^_`!$№ ])+$|^$");
+            Pattern.compile("^([\\p{L}0-9/(),-.^_`!$№ +=@&])+$|^$");
 
     public static String normalize(String path) {
         return path.trim()

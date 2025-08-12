@@ -46,7 +46,7 @@ class PathValidatorTest {
     @ParameterizedTest()
     @ValueSource(strings = {
             "<", ">", ":", "\"", "\\", "/", "|", "?", "*",
-            "#", "%", "&", "+", "=", "@", "[", "]", "{", "}", "~", "'", "\"", ";"
+            "#", "%", "[", "]", "{", "}", "~", "'", "\"", ";"
     })
     void testInvalidFileName(String filename) {
         assertFalse(filenameValidator.isValid(filename, null),

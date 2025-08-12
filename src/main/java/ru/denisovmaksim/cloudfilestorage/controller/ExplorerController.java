@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.mapper.PathLinksDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.service.ExplorerService;
+import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 
 
 @Controller
@@ -39,56 +40,47 @@ public class ExplorerController {
         model.addAttribute("breadcrumbs", PathLinksDTOMapper.toChainLinksFromPath(path));
         model.addAttribute("storageObjects", explorerService.getFolder(path));
         model.addAttribute("currentPath", path);
-        return "explorer/main";
+        return "explorer/content";
     }
 
     @PostMapping("/rename-folder")
-    public String renameFolder(@ModelAttribute("redirect-path") String parentPath,
-                               @ModelAttribute("current-folder-path") String currentFolderPath,
+    public String renameFolder(@ModelAttribute("folder-path") String folderPath,
                                @ModelAttribute("new-folder-name") String newFolderName,
                                RedirectAttributes redirectAttributes) {
-        log.info("Rename folder with path {} to {}", currentFolderPath, newFolderName);
-        explorerService.renameFolder(currentFolderPath, newFolderName);
-        if (!parentPath.isEmpty()) {
-            redirectAttributes.addAttribute("path", parentPath);
-        }
+        String parentPath = PathUtil.getParentDirName(folderPath);
+        log.info("Rename folder with path {} to {}", folderPath, parentPath + newFolderName);
+        explorerService.renameFolder(folderPath, newFolderName);
+        redirectAttributes.addAttribute("path", parentPath);
         return REDIRECT_TO_ROOT;
     }
 
     @PostMapping("/delete-folder")
-    public String deleteFolder(@ModelAttribute("redirect-path") String redirectPath,
-                               @ModelAttribute("folder-path") String folderPath,
+    public String deleteFolder(@ModelAttribute("folder-path") String folderPath,
                                RedirectAttributes redirectAttributes) {
         log.info("Delete folder with path {}", folderPath);
+        String redirectPath = PathUtil.getParentDirName(folderPath);
         explorerService.deleteFolder(folderPath);
-        if (!redirectPath.isEmpty()) {
-            redirectAttributes.addAttribute("path", redirectPath);
-        }
+        redirectAttributes.addAttribute("path", redirectPath);
         return REDIRECT_TO_ROOT;
     }
 
     @PostMapping("/rename-file")
-    public String renameFile(@ModelAttribute("parent-path") String parentPath,
-                             @ModelAttribute("current-file-name") String currentFileName,
-                             @ModelAttribute("new-file-name") String newFileName,
+    public String renameFile(@ModelAttribute("filepath") String path,
+                             @ModelAttribute("name") String newFileName,
                              RedirectAttributes redirectAttributes) {
-        log.info("Rename file folder {} form {} to {}", parentPath, currentFileName, newFileName);
-        explorerService.renameFile(parentPath, currentFileName, newFileName);
-        if (!parentPath.isEmpty()) {
-            redirectAttributes.addAttribute("path", parentPath);
-        }
+        String parentPath = PathUtil.getParentDirName(path);
+        log.info("Rename file from {} to {}", path, parentPath + newFileName);
+        explorerService.renameFile(path, newFileName);
+        redirectAttributes.addAttribute("path", parentPath);
         return REDIRECT_TO_ROOT;
     }
 
     @PostMapping("/delete-file")
-    public String deleteFile(@ModelAttribute("parent-path") String parentPath,
-                             @ModelAttribute("file-name") String fileName,
-                             RedirectAttributes redirectAttributes) {
-        log.info("Delete file with path {}", fileName);
-        explorerService.deleteFile(parentPath, fileName);
-        if (!parentPath.isEmpty()) {
-            redirectAttributes.addAttribute("path", parentPath);
-        }
+    public String deleteFile(@ModelAttribute("filepath") String filepath, RedirectAttributes redirectAttributes) {
+        log.info("Delete file with path {}", filepath);
+        String redirectPath = PathUtil.getParentDirName(filepath);
+        explorerService.deleteFile(filepath);
+        redirectAttributes.addAttribute("path", redirectPath);
         return REDIRECT_TO_ROOT;
     }
 }

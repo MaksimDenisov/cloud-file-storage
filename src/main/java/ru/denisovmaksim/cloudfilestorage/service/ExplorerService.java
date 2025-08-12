@@ -51,15 +51,14 @@ public class ExplorerService {
                 .collect(Collectors.toList());
     }
 
-    public void renameFile(@ValidPath(PathType.DIR) String parentDirectory,
-                           @ValidPath(PathType.FILENAME) String currentFileName,
+    public void renameFile(@ValidPath(PathType.FILEPATH) String filepath,
                            @ValidPath(PathType.FILENAME) String newFileName) {
         Long authUserId = securityService.getAuthUserId();
+        String parentDirectory = PathUtil.getParentDirName(filepath);
         String dstPath = parentDirectory + newFileName;
-        String srcPath = parentDirectory + currentFileName;
         throwIfObjectExist(dstPath);
-        fileStorage.copyOneObject(authUserId, srcPath, dstPath);
-        fileStorage.deleteObjects(authUserId, srcPath);
+        fileStorage.copyOneObject(authUserId, filepath, dstPath);
+        fileStorage.deleteObjects(authUserId, filepath);
     }
 
     public void renameFolder(@ValidPath(PathType.DIR) String directory,
@@ -86,10 +85,10 @@ public class ExplorerService {
         }
     }
 
-    public void deleteFile(@ValidPath(PathType.DIR) String parentDirectory,
-                           @ValidPath(PathType.FILENAME) String fileName) {
+    public void deleteFile(@ValidPath(PathType.FILEPATH) String filePath) {
         Long authUserId = securityService.getAuthUserId();
-        fileStorage.deleteObjects(authUserId, parentDirectory + fileName);
+        String parentDirectory = PathUtil.getParentDirName(filePath);
+        fileStorage.deleteObjects(authUserId, filePath);
         if (!fileStorage.isExist(authUserId, parentDirectory)) {
             fileStorage.createPath(authUserId, parentDirectory);
         }

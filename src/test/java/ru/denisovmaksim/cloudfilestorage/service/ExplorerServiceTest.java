@@ -86,7 +86,7 @@ class ExplorerServiceTest {
     void renameFileShouldCopyAndDeleteWhenNewNotExists() {
         when(fileStorage.isExist(USER_ID, "dir/new.txt")).thenReturn(false);
 
-        explorerService.renameFile("dir/", "old.txt", "new.txt");
+        explorerService.renameFile("dir/old.txt", "new.txt");
 
         verify(fileStorage).copyOneObject(USER_ID, "dir/old.txt", "dir/new.txt");
         verify(fileStorage).deleteObjects(USER_ID, "dir/old.txt");
@@ -97,7 +97,7 @@ class ExplorerServiceTest {
     void deleteFileShouldDeleteAndCreateParentFolderIfMissing() {
         when(fileStorage.isExist(USER_ID, "dir/")).thenReturn(false);
 
-        explorerService.deleteFile("dir/", "file.txt");
+        explorerService.deleteFile("dir/file.txt");
 
         verify(fileStorage).deleteObjects(USER_ID, "dir/file.txt");
         verify(fileStorage).createPath(USER_ID, "dir/");

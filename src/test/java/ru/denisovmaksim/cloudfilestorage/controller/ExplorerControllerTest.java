@@ -61,7 +61,7 @@ class ExplorerControllerTest {
 
         String viewName = explorerController.getObjects(model, path);
 
-        assertEquals("explorer/main", viewName);
+        assertEquals("explorer/content", viewName);
         Mockito.verify(model).addAttribute("breadcrumbs", PathLinksDTOMapper.toChainLinksFromPath(path));
         Mockito.verify(model).addAttribute("storageObjects", mockResults);
         Mockito.verify(model).addAttribute("currentPath", path);
@@ -69,14 +69,14 @@ class ExplorerControllerTest {
 
     @Test
     void renameFolderShouldCallServiceAndRedirect() {
-        String parentPath = "/parent";
+        String parentPath = "/parent/";
         String currentPath = "/parent/old";
         String newName = "new";
 
         Mockito.when(redirectAttributes.addAttribute(Mockito.eq("path"), Mockito.anyString()))
                 .thenReturn(redirectAttributes);
 
-        String result = explorerController.renameFolder(parentPath, currentPath, newName, redirectAttributes);
+        String result = explorerController.renameFolder(currentPath, newName, redirectAttributes);
 
         assertEquals("redirect:/", result);
         Mockito.verify(explorerService).renameFolder(currentPath, newName);
@@ -85,13 +85,13 @@ class ExplorerControllerTest {
 
     @Test
     void deleteFolderShouldCallServiceAndRedirect() {
-        String redirectPath = "/parent";
+        String redirectPath = "/parent/";
         String folderPath = "/parent/child";
 
         Mockito.when(redirectAttributes.addAttribute(Mockito.eq("path"), Mockito.anyString()))
                 .thenReturn(redirectAttributes);
 
-        String result = explorerController.deleteFolder(redirectPath, folderPath, redirectAttributes);
+        String result = explorerController.deleteFolder(folderPath, redirectAttributes);
 
         assertEquals("redirect:/", result);
         Mockito.verify(explorerService).deleteFolder(folderPath);
@@ -100,32 +100,29 @@ class ExplorerControllerTest {
 
     @Test
     void renameFileShouldCallServiceAndRedirect() {
-        String parentPath = "/parent";
-        String oldName = "file1.txt";
+        String filepath = "/parent/file1.txt";
         String newName = "file2.txt";
 
         Mockito.when(redirectAttributes.addAttribute(Mockito.eq("path"), Mockito.anyString()))
                 .thenReturn(redirectAttributes);
 
-        String result = explorerController.renameFile(parentPath, oldName, newName, redirectAttributes);
+        String result = explorerController.renameFile(filepath, newName, redirectAttributes);
 
         assertEquals("redirect:/", result);
-        Mockito.verify(explorerService).renameFile(parentPath, oldName, newName);
-        Mockito.verify(redirectAttributes).addAttribute("path", parentPath);
+        Mockito.verify(explorerService).renameFile(filepath, newName);
+        Mockito.verify(redirectAttributes).addAttribute("path", "/parent/");
     }
 
     @Test
     void deleteFileShouldCallServiceAndRedirect() {
-        String parentPath = "/parent";
-        String fileName = "file.txt";
+        String filePath = "/parent/file.txt";
 
         Mockito.when(redirectAttributes.addAttribute(Mockito.eq("path"), Mockito.anyString()))
                 .thenReturn(redirectAttributes);
 
-        String result = explorerController.deleteFile(parentPath, fileName, redirectAttributes);
+        String result = explorerController.deleteFile(filePath, redirectAttributes);
 
         assertEquals("redirect:/", result);
-        Mockito.verify(explorerService).deleteFile(parentPath, fileName);
-        Mockito.verify(redirectAttributes).addAttribute("path", parentPath);
+        Mockito.verify(explorerService).deleteFile(filePath);
     }
 }

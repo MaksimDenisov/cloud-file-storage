@@ -179,7 +179,7 @@ public class MinioFileStorage {
                 minioClient.putObject(
                         PutObjectArgs.builder()
                                 .bucket(bucket)
-                                .object(resolver.resolveMinioPath(userId, path) + file.getOriginalFilename())
+                                .object(resolver.resolveMinioPath(userId, path + file.getOriginalFilename()))
                                 .stream(file.getInputStream(), file.getSize(), -1)
                                 .contentType(file.getContentType())
                                 .build()
