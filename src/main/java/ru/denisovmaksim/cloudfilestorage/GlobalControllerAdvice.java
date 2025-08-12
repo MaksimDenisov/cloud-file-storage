@@ -14,6 +14,7 @@ import ru.denisovmaksim.cloudfilestorage.controller.UserController;
 import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
+import ru.denisovmaksim.cloudfilestorage.exception.RootFolderModificationException;
 import ru.denisovmaksim.cloudfilestorage.exception.UserAlreadyExistException;
 
 import java.util.stream.Collectors;
@@ -71,6 +72,13 @@ public class GlobalControllerAdvice {
     public String handleFileStorageException(FileStorageException e, RedirectAttributes attributes) {
         setDangerMessage("There’s a problem on our side. Please try again in a little while.", attributes);
         return REDIRECT_TO_ROOT;
+    }
+
+    @ExceptionHandler(RootFolderModificationException.class)
+    public String handleUserAlreadyExist(RootFolderModificationException e, RedirectAttributes attributes) {
+        attributes.addFlashAttribute("flashType", "danger");
+        attributes.addFlashAttribute("flashMsg", e.getMessage());
+        return "redirect:" + UserController.SIGN_UP;
     }
 
     @ExceptionHandler(RuntimeException.class)

@@ -6,6 +6,7 @@ import org.springframework.validation.annotation.Validated;
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
+import ru.denisovmaksim.cloudfilestorage.exception.RootFolderModificationException;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
@@ -63,6 +64,7 @@ public class ExplorerService {
 
     public void renameFolder(@ValidPath(PathType.DIR) String directory,
                              @ValidPath(PathType.FILENAME) String newFolderName) {
+        throwIfRootModification(directory);
         String newPath = PathUtil.getParentDirName(directory) + newFolderName;
         newPath = PathUtil.ensureDirectoryPath(newPath);
         throwIfObjectExist(newPath);
@@ -75,6 +77,7 @@ public class ExplorerService {
     }
 
     public void deleteFolder(@ValidPath(PathType.DIR) String directory) {
+        throwIfRootModification(directory);
         Long authUserId = securityService.getAuthUserId();
         String parentPath = PathUtil.getParentDirName(directory);
         fileStorage.deleteObjects(authUserId, directory);
@@ -96,6 +99,12 @@ public class ExplorerService {
         Long authUserId = securityService.getAuthUserId();
         if (fileStorage.isExist(authUserId, path)) {
             throw new ObjectAlreadyExistException(String.format("Path %s already exist", path));
+        }
+    }
+
+    private void throwIfRootModification(String path) {
+        if (PathUtil.isRoot(path)) {
+            throw new RootFolderModificationException("The root folder cannot be modified");
         }
     }
 }
