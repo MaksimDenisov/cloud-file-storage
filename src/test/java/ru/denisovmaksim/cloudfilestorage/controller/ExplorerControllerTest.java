@@ -43,7 +43,7 @@ class ExplorerControllerTest {
         String result = explorerController.addFolder(folderName, path, redirectAttributes);
 
         assertEquals("redirect:/", result);
-        Mockito.verify(explorerService).createFolder(path, folderName);
+        Mockito.verify(explorerService).createFolder(path + folderName);
         Mockito.verify(redirectAttributes).addAttribute("path", path);
     }
 

@@ -28,10 +28,9 @@ public class ExplorerService {
 
     private final SecurityService securityService;
 
-    public void createFolder(@ValidPath(PathType.DIR) String parentDirectory,
-                             @ValidPath(PathType.FILENAME) String folderName) {
+    public void createFolder(@ValidPath(PathType.DIR) String path) {
         Long authUserId = securityService.getAuthUserId();
-        String newDirPath = PathUtil.ensureDirectoryPath(parentDirectory + folderName);
+        String newDirPath = PathUtil.ensureDirectoryPath(path);
         throwIfObjectExist(newDirPath);
         fileStorage.createPath(authUserId, newDirPath);
     }

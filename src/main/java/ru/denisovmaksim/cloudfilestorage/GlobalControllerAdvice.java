@@ -1,5 +1,6 @@
 package ru.denisovmaksim.cloudfilestorage;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -53,11 +54,16 @@ public class GlobalControllerAdvice {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public String handleDBValidationException(ConstraintViolationException e, RedirectAttributes attributes) {
+    public String handleDBValidationException(ConstraintViolationException e,
+                                              HttpServletRequest request, RedirectAttributes attributes) {
         String errors = e.getConstraintViolations()
                 .stream()
                 .map(ConstraintViolation::getMessage)
                 .collect(Collectors.joining(". "));
+        String path = request.getParameter("path");
+        if (path != null && !path.isEmpty()) {
+            attributes.addAttribute("path", path);
+        }
         setDangerMessage(errors, attributes);
         return REDIRECT_TO_ROOT;
     }
@@ -81,7 +87,7 @@ public class GlobalControllerAdvice {
         return "redirect:" + UserController.SIGN_UP;
     }
 
-    @ExceptionHandler(RuntimeException.class)
+    @ExceptionHandler(Exception.class)
     public String handleCommonException(RuntimeException e, RedirectAttributes attributes) {
         log.error(e.getMessage());
         setDangerMessage("An error occurred. Something went wrong.", attributes);

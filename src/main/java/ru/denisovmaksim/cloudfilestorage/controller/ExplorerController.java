@@ -28,10 +28,10 @@ public class ExplorerController {
                             @ModelAttribute("path") String path,
                             RedirectAttributes redirectAttributes) {
         log.info("Add folder with name {}", folderName);
-        explorerService.createFolder(path, folderName);
         if (!path.isEmpty()) {
             redirectAttributes.addAttribute("path", path);
         }
+        explorerService.createFolder(path + folderName);
         return REDIRECT_TO_ROOT;
     }
 
@@ -49,8 +49,8 @@ public class ExplorerController {
                                RedirectAttributes redirectAttributes) {
         String parentPath = PathUtil.getParentDirName(folderPath);
         log.info("Rename folder with path {} to {}", folderPath, parentPath + newFolderName);
-        explorerService.renameFolder(folderPath, newFolderName);
         redirectAttributes.addAttribute("path", parentPath);
+        explorerService.renameFolder(folderPath, newFolderName);
         return REDIRECT_TO_ROOT;
     }
 
@@ -59,8 +59,8 @@ public class ExplorerController {
                                RedirectAttributes redirectAttributes) {
         log.info("Delete folder with path {}", folderPath);
         String redirectPath = PathUtil.getParentDirName(folderPath);
-        explorerService.deleteFolder(folderPath);
         redirectAttributes.addAttribute("path", redirectPath);
+        explorerService.deleteFolder(folderPath);
         return REDIRECT_TO_ROOT;
     }
 
@@ -70,8 +70,8 @@ public class ExplorerController {
                              RedirectAttributes redirectAttributes) {
         String parentPath = PathUtil.getParentDirName(path);
         log.info("Rename file from {} to {}", path, parentPath + newFileName);
-        explorerService.renameFile(path, newFileName);
         redirectAttributes.addAttribute("path", parentPath);
+        explorerService.renameFile(path, newFileName);
         return REDIRECT_TO_ROOT;
     }
 
@@ -79,8 +79,8 @@ public class ExplorerController {
     public String deleteFile(@ModelAttribute("filepath") String filepath, RedirectAttributes redirectAttributes) {
         log.info("Delete file with path {}", filepath);
         String redirectPath = PathUtil.getParentDirName(filepath);
-        explorerService.deleteFile(filepath);
         redirectAttributes.addAttribute("path", redirectPath);
+        explorerService.deleteFile(filepath);
         return REDIRECT_TO_ROOT;
     }
 }

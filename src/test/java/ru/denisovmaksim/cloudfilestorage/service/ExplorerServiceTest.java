@@ -48,7 +48,7 @@ class ExplorerServiceTest {
     void createDirectory() {
         when(fileStorage.isExist(USER_ID, "dir/")).thenReturn(false);
 
-        explorerService.createFolder("", "dir/");
+        explorerService.createFolder("dir/");
 
         verify(fileStorage).createPath(USER_ID, "dir/");
     }
@@ -59,7 +59,7 @@ class ExplorerServiceTest {
         when(fileStorage.isExist(USER_ID, "dir/")).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class, () ->
-                explorerService.createFolder("", "dir/")
+                explorerService.createFolder("dir/")
         );
     }
 
