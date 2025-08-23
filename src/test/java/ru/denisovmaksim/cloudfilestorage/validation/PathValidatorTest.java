@@ -35,8 +35,8 @@ class PathValidatorTest {
 
     @ParameterizedTest()
     @ValueSource(strings = {"файл",
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!$(),-.^_` ",
-            "!", "$", "(", ")", ",", "-", ".", "^", "_", "`",  " ",
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!$(),-.^_` ",
+            "!", "$", "(", ")", ",", "-", ".", "^", "_", "`", " ",
             "file.txt"})
     void testValidFileName(String filename) {
         assertTrue(filenameValidator.isValid(filename, null),
@@ -69,6 +69,7 @@ class PathValidatorTest {
     @ParameterizedTest()
     @ValueSource(strings = {
             "<", ">", ":", "\"", "\\", "|", "?", "*",
+            "../", "/../", "/..",
             "folder_without_ending_slash",
     })
     void testInvalidDirectoryPath(String directoryPath) {

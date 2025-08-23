@@ -24,7 +24,8 @@ public final class PathUtil {
 
     public static boolean isValid(String path) {
         return path != null
-                && PATTERN.matcher(path).matches();
+                && PATTERN.matcher(path).matches()
+                && !(path.contains("/../") || path.startsWith("../") || path.endsWith("/.."));
     }
 
     public static boolean isDir(String path) {
