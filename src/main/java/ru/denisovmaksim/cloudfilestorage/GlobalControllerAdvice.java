@@ -31,19 +31,37 @@ public class GlobalControllerAdvice {
 
     @ExceptionHandler(UserAlreadyExistException.class)
     public String handleUserAlreadyExist(UserAlreadyExistException e, RedirectAttributes attributes) {
+        log.error("User already exist: {}", e.getMessage());
         attributes.addFlashAttribute("flashType", "danger");
-        attributes.addFlashAttribute("flashMsg", e.getMessage());
+        attributes.addFlashAttribute("flashMsg", "User already exist");
         return "redirect:" + UserController.SIGN_UP;
     }
 
-    @ExceptionHandler({ObjectAlreadyExistException.class, NotFoundException.class})
-    public String handleExistingException(Exception e, RedirectAttributes attributes) {
-        setDangerMessage(e.getMessage(), attributes);
+    @ExceptionHandler(ObjectAlreadyExistException.class)
+    public String handleExistingException(Exception e, HttpServletRequest request, RedirectAttributes attributes) {
+        log.error("Object already exist: {}", e.getMessage());
+        String path = request.getParameter("path");
+        if (path != null && !path.isEmpty()) {
+            attributes.addAttribute("path", path);
+        }
+        setDangerMessage("Object already exist", attributes);
+        return REDIRECT_TO_ROOT;
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public String handleNotFoundException(Exception e, HttpServletRequest request, RedirectAttributes attributes) {
+        log.error("Object not exist: {}", e.getMessage());
+        String path = request.getParameter("path");
+        if (path != null && !path.isEmpty()) {
+            attributes.addAttribute("path", path);
+        }
+        setDangerMessage("Object already exist", attributes);
         return REDIRECT_TO_ROOT;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public String handleValidatorException(MethodArgumentNotValidException e, RedirectAttributes attributes) {
+        log.error("Method Argument Not Valid: {}", e.getMessage(), e);
         String errors = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -56,6 +74,7 @@ public class GlobalControllerAdvice {
     @ExceptionHandler(ConstraintViolationException.class)
     public String handleDBValidationException(ConstraintViolationException e,
                                               HttpServletRequest request, RedirectAttributes attributes) {
+        log.error("Validation failed: {}", e.getConstraintViolations(), e);
         String errors = e.getConstraintViolations()
                 .stream()
                 .map(ConstraintViolation::getMessage)
@@ -70,26 +89,29 @@ public class GlobalControllerAdvice {
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public String handleMaxSizeException(MaxUploadSizeExceededException e, RedirectAttributes attributes) {
+        log.error("File size exceeds {} : {}", maxFileSize, e.getMessage());
         setDangerMessage(String.format("File size exceeds %s!", maxFileSize), attributes);
         return REDIRECT_TO_ROOT;
     }
 
     @ExceptionHandler(FileStorageException.class)
     public String handleFileStorageException(FileStorageException e, RedirectAttributes attributes) {
+        log.error("File storage exception: {}", e.getMessage());
         setDangerMessage("There’s a problem on our side. Please try again in a little while.", attributes);
         return REDIRECT_TO_ROOT;
     }
 
     @ExceptionHandler(RootFolderModificationException.class)
     public String handleUserAlreadyExist(RootFolderModificationException e, RedirectAttributes attributes) {
+        log.error("Root folder modification: {}", e.getMessage());
         attributes.addFlashAttribute("flashType", "danger");
-        attributes.addFlashAttribute("flashMsg", e.getMessage());
+        attributes.addFlashAttribute("flashMsg", "Not success");
         return "redirect:" + UserController.SIGN_UP;
     }
 
     @ExceptionHandler(Exception.class)
     public String handleCommonException(RuntimeException e, RedirectAttributes attributes) {
-        log.error(e.getMessage());
+        log.error("Unexpected error occurred", e);
         setDangerMessage("An error occurred. Something went wrong.", attributes);
         return REDIRECT_TO_ROOT;
     }
