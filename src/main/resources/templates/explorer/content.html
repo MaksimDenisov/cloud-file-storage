@@ -61,7 +61,9 @@
 
                         <!-- Download button -->
                         <td th:switch="${item.getType().name()}">
-                            <a th:case="'FOLDER'" th:href="@{download-folder(path=${item.getPath()})}">
+                            <a th:case="'FOLDER'"
+                               th:if="${item.getSize() > 0}"
+                               th:href="@{download-folder(path=${item.getPath()})}">
                                 <button type="button" class="btn btn-light text-success">
                                     <i class="bi bi-save"></i>
                                 </button>

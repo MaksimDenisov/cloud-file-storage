@@ -34,7 +34,7 @@ class ExplorerControllerTest {
 
     @Test
     void addFolderShouldCreateDirectoryAndRedirect() {
-        String path = "/test";
+        String path = "/test/";
         String folderName = "new-folder";
 
         Mockito.when(redirectAttributes.addAttribute(Mockito.eq("path"), Mockito.anyString()))
@@ -43,7 +43,7 @@ class ExplorerControllerTest {
         String result = explorerController.addFolder(folderName, path, redirectAttributes);
 
         assertEquals("redirect:/", result);
-        Mockito.verify(explorerService).createFolder(path + folderName);
+        Mockito.verify(explorerService).createFolder("/test/new-folder/");
         Mockito.verify(redirectAttributes).addAttribute("path", path);
     }
 

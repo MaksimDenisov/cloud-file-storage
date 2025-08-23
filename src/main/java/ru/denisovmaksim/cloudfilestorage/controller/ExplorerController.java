@@ -31,7 +31,7 @@ public class ExplorerController {
         if (!path.isEmpty()) {
             redirectAttributes.addAttribute("path", path);
         }
-        explorerService.createFolder(path + folderName);
+        explorerService.createFolder(PathUtil.ensureDirectoryPath(path + folderName));
         return REDIRECT_TO_ROOT;
     }
 
