@@ -38,7 +38,11 @@
 
                 <!-- Mobile (visible only <lg) -->
                 <div class="d-lg-none">
-
+                    <div class="col-12 col-md-8">
+                        <img th:src="@{/preview/image(filepath=${filepath})}"
+                             class="img-fluid  w-100 rounded shadow"
+                             alt="Предпросмотр">
+                    </div>
                 </div>
             </div>
         </main>

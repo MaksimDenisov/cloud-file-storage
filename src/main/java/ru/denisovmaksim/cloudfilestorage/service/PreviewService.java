@@ -4,12 +4,16 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
+import ru.denisovmaksim.cloudfilestorage.exception.ImageProcessingException;
+import ru.denisovmaksim.cloudfilestorage.service.processing.ImageResizer;
 import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
+import ru.denisovmaksim.cloudfilestorage.util.FileTypeResolver;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 import ru.denisovmaksim.cloudfilestorage.validation.PathType;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -41,11 +45,14 @@ public class PreviewService {
         String encodedFileName = URLEncoder.encode(baseName, StandardCharsets.UTF_8)
                 .replace("+", "%20");
         InputStream resizedStream = null;
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
         try {
-            resizedStream = imageResizer.resizeKeepAspectRatioAndStream(fileObject.stream(), IMAGE_WIDTH);
+            resizedStream = imageResizer.shrinkIfWiderThan(fileObject.stream(),
+                    FileTypeResolver.getExtension(baseName),
+                    IMAGE_WIDTH, os);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new ImageProcessingException(e);
         }
-        return new NamedStreamDTO(encodedFileName, fileObject.size(), resizedStream);
+        return new NamedStreamDTO(encodedFileName, os.size(), resizedStream);
     }
 }

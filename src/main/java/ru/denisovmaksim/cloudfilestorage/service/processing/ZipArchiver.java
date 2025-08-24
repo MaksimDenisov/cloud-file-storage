@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.service.archive;
+package ru.denisovmaksim.cloudfilestorage.service.processing;
 
 import org.springframework.stereotype.Component;
 import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;

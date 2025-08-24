@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.controller.UserController;
 import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
+import ru.denisovmaksim.cloudfilestorage.exception.ImageProcessingException;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.exception.RootFolderModificationException;
@@ -109,8 +110,15 @@ public class GlobalControllerAdvice {
         return "redirect:" + UserController.SIGN_UP;
     }
 
+    @ExceptionHandler(ImageProcessingException.class)
+    public String handleImageProcessingException(ImageProcessingException e, RedirectAttributes attributes) {
+        log.error("Image Processing Exception", e);
+        setDangerMessage("This file can’t be previewed. Please download it to open.", attributes);
+        return REDIRECT_TO_ROOT;
+    }
+
     @ExceptionHandler(Exception.class)
-    public String handleCommonException(RuntimeException e, RedirectAttributes attributes) {
+    public String handleCommonException(Exception e, RedirectAttributes attributes) {
         log.error("Unexpected error occurred", e);
         setDangerMessage("An error occurred. Something went wrong.", attributes);
         return REDIRECT_TO_ROOT;

@@ -40,6 +40,7 @@
                         <!-- Icon -->
                         <td th:switch="${item.getType().name()}">
                             <i th:case="'FOLDER'" class="bi bi-folder h5 text-secondary"></i>
+                            <i th:case="'IMAGE'" class="bi bi-image h5 text-secondary"></i>
                             <i th:case="*" class="bi bi-file-binary h5 text-secondary"></i>
                         </td>
 

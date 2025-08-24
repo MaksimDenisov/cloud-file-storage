@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.dto.RequestUploadFileDTO;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
-import ru.denisovmaksim.cloudfilestorage.service.archive.ZipArchiver;
+import ru.denisovmaksim.cloudfilestorage.service.processing.ZipArchiver;
 import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
