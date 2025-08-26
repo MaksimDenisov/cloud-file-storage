@@ -117,13 +117,6 @@ public class GlobalControllerAdvice {
         return REDIRECT_TO_ROOT;
     }
 
-    @ExceptionHandler(Exception.class)
-    public String handleCommonException(Exception e, RedirectAttributes attributes) {
-        log.error("Unexpected error occurred", e);
-        setDangerMessage("An error occurred. Something went wrong.", attributes);
-        return REDIRECT_TO_ROOT;
-    }
-
     private void setDangerMessage(String message, RedirectAttributes attributes) {
         attributes.addFlashAttribute("flashType", "danger");
         attributes.addFlashAttribute("flashMsg", message);

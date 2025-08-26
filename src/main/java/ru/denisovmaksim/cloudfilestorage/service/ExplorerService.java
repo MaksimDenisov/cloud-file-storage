@@ -50,6 +50,11 @@ public class ExplorerService {
                 .collect(Collectors.toList());
     }
 
+    public Long getSize(@ValidPath(PathType.FILEPATH) String filepath) {
+        Long authUserId = securityService.getAuthUserId();
+        return fileStorage.getSize(authUserId, filepath);
+    }
+
     public void renameFile(@ValidPath(PathType.FILEPATH) String filepath,
                            @ValidPath(PathType.FILENAME) String newFileName) {
         Long authUserId = securityService.getAuthUserId();

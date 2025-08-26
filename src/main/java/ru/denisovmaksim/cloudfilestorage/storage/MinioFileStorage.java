@@ -64,6 +64,26 @@ public class MinioFileStorage {
     }
 
     /**
+     * Gets the size of an object in MinIO for the given user and path.
+     *
+     * @param userId user identifier
+     * @param path   relative object path
+     * @return object size in bytes, or {@code -1} if the object does not exist
+     */
+    public long getSize(Long userId, String path) {
+        log.info("Check exist path '{}' for userId={}", path, userId);
+        if (!isExist(userId, path)) {
+            return -1;
+        }
+        return MinioExceptionHandler.interceptMinioExceptions(() ->
+                minioClient.statObject(
+                        StatObjectArgs.builder()
+                                .bucket(bucket)
+                                .object(resolver.resolveMinioPath(userId, path))
+                                .build()).size());
+    }
+
+    /**
      * Creates an empty folder object in the storage for the specified user and path.
      *
      * @param userId the ID of the user
@@ -126,16 +146,33 @@ public class MinioFileStorage {
         log.info("Downloading object at path '{}' for userId={}", path, userId);
         return MinioExceptionHandler.interceptMinioExceptions(() -> {
             String minioPath = resolver.resolveMinioPath(userId, path);
-            long size = minioClient.statObject(StatObjectArgs.builder()
-                    .bucket(bucket)
-                    .object(minioPath)
-                    .build()).size();
+            long size = getSize(userId, path);
             InputStream objectInputStream = minioClient.getObject(GetObjectArgs.builder()
                     .bucket(bucket)
                     .object(minioPath)
                     .build());
             return new FileObject(path, size, objectInputStream);
         });
+    }
+
+    /**
+     * Retrieves a byte range of an object from MinIO as an input stream.
+     *
+     * @param userId        user identifier
+     * @param path          relative object path
+     * @param rangeStart    starting byte offset
+     * @param contentLength number of bytes to read
+     * @return input stream of the requested object range
+     */
+    public InputStream getRangeOfObject(Long userId, String path, Long rangeStart, Long contentLength) {
+        String minioPath = resolver.resolveMinioPath(userId, path);
+        return MinioExceptionHandler.interceptMinioExceptions(() -> minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket(bucket)
+                        .object(minioPath)
+                        .offset(rangeStart)
+                        .length(contentLength)
+                        .build()));
     }
 
     /**

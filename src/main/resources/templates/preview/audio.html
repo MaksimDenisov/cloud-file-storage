@@ -27,7 +27,7 @@
                          style="height: 100vh;">
                         <div class="text-center d-flex flex-column align-items-center gap-3">
                             <p class="text-white mb-0" th:text="${filepath}"></p>
-                            <audio controls th:src="@{/preview/music(filepath=${filepath})}">
+                            <audio controls th:src="@{/stream(filepath=${filepath})}">
                                 Your browser does not support the audio element.
                             </audio>
                         </div>
@@ -39,7 +39,7 @@
             <div class="d-lg-none bg-secondary">
                 <div class="text-center d-flex flex-column align-items-center gap-3">
                     <p class="text-white mb-0" th:text="${filepath}"></p>
-                    <audio controls th:src="@{/preview/music(filepath=${filepath})}">
+                    <audio controls th:src="@{/stream(filepath=${filepath})}">
                         Your browser does not support the audio element.
                     </audio>
                 </div>

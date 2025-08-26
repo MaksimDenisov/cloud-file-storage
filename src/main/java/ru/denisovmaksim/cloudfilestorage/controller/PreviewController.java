@@ -16,11 +16,9 @@ import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.model.FileType;
 import ru.denisovmaksim.cloudfilestorage.service.PreviewService;
 import ru.denisovmaksim.cloudfilestorage.util.FileTypeResolver;
+import ru.denisovmaksim.cloudfilestorage.util.FilesUtil;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 @Controller
 @AllArgsConstructor
@@ -37,23 +35,9 @@ public class PreviewController {
             case FOLDER -> "redirect:/";
             case UNKNOWN_FILE -> "preview/unknown";
             case IMAGE -> "preview/image";
-            case MUSIC -> "preview/music";
+            case MUSIC -> "preview/audio";
             case TEXT -> "preview/text";
         };
-    }
-    @GetMapping("/music")
-    public ResponseEntity<Resource> getPreviewMusic(@RequestParam() String filepath) {
-        NamedStreamDTO dto = previewService.getMusic(filepath);
-        InputStream stream = dto.getStream();
-
-        String contentType = detectMimeType(filepath);
-        long contentLength = dto.getLength();
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + dto.getName() + "\"")
-                .contentType(MediaType.parseMediaType(contentType))
-                .contentLength(contentLength)
-                .body(new InputStreamResource(stream));
     }
 
     @GetMapping("/image")
@@ -61,7 +45,7 @@ public class PreviewController {
         NamedStreamDTO dto = previewService.getImage(filepath);
         InputStream stream = dto.getStream();
 
-        String contentType = detectMimeType(filepath);
+        String contentType =  FilesUtil.detectMimeType(filepath);
         long contentLength = dto.getLength();
 
         return ResponseEntity.ok()
@@ -69,13 +53,5 @@ public class PreviewController {
                 .contentType(MediaType.parseMediaType(contentType))
                 .contentLength(contentLength)
                 .body(new InputStreamResource(stream));
-    }
-
-    private String detectMimeType(String path) {
-        try {
-            return Files.probeContentType(Path.of(path));
-        } catch (IOException e) {
-            return MediaType.APPLICATION_OCTET_STREAM_VALUE;
-        }
     }
 }
