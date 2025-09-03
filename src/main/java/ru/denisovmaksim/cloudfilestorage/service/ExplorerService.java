@@ -8,7 +8,8 @@ import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.exception.RootFolderModificationException;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
+import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 import ru.denisovmaksim.cloudfilestorage.validation.PathType;
@@ -24,7 +25,9 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ExplorerService {
 
-    private final MinioFileStorage fileStorage;
+    private final MinioMetadataAccessor minioMetadataAccessor;
+
+    private final MinioDataAccessor minioDataAccessor;
 
     private final SecurityService securityService;
 
@@ -32,16 +35,16 @@ public class ExplorerService {
         Long authUserId = securityService.getAuthUserId();
         String newDirPath = PathUtil.ensureDirectoryPath(path);
         throwIfObjectExist(newDirPath);
-        fileStorage.createPath(authUserId, newDirPath);
+        minioDataAccessor.createPath(authUserId, newDirPath);
     }
 
     public List<StorageObjectDTO> getFolder(@ValidPath(PathType.DIR) String directory) {
         Long authUserId = securityService.getAuthUserId();
-        List<StorageObjectInfo> infos = fileStorage.listObjectInfo(authUserId, directory)
+        List<StorageObjectInfo> infos = minioMetadataAccessor.listObjectInfo(authUserId, directory)
                 .orElseThrow(() -> new NotFoundException(directory));
         for (StorageObjectInfo info : infos) {
             if (info.isDir()) {
-                info.setSize(fileStorage.getDirectChildCount(authUserId, info.getPath()));
+                info.setSize(minioMetadataAccessor.getDirectChildCount(authUserId, info.getPath()));
             }
         }
         return infos.stream()
@@ -52,7 +55,7 @@ public class ExplorerService {
 
     public Long getSize(@ValidPath(PathType.FILEPATH) String filepath) {
         Long authUserId = securityService.getAuthUserId();
-        return fileStorage.getSize(authUserId, filepath);
+        return minioMetadataAccessor.getSize(authUserId, filepath);
     }
 
     public void renameFile(@ValidPath(PathType.FILEPATH) String filepath,
@@ -61,8 +64,8 @@ public class ExplorerService {
         String parentDirectory = PathUtil.getParentDirName(filepath);
         String dstPath = parentDirectory + newFileName;
         throwIfObjectExist(dstPath);
-        fileStorage.copyOneObject(authUserId, filepath, dstPath);
-        fileStorage.deleteObjects(authUserId, filepath);
+        minioDataAccessor.copyOneObject(authUserId, filepath, dstPath);
+        minioDataAccessor.deleteObjects(authUserId, filepath);
     }
 
     public void renameFolder(@ValidPath(PathType.DIR) String directory,
@@ -73,34 +76,34 @@ public class ExplorerService {
         throwIfObjectExist(newPath);
 
         Long authUserId = securityService.getAuthUserId();
-        if (fileStorage.copyObjects(authUserId, directory, newPath) == 0) {
-            fileStorage.createPath(authUserId, newPath);
+        if (minioDataAccessor.copyObjects(authUserId, directory, newPath) == 0) {
+            minioDataAccessor.createPath(authUserId, newPath);
         }
-        fileStorage.deleteObjects(authUserId, directory);
+        minioDataAccessor.deleteObjects(authUserId, directory);
     }
 
     public void deleteFolder(@ValidPath(PathType.DIR) String directory) {
         throwIfRootModification(directory);
         Long authUserId = securityService.getAuthUserId();
         String parentPath = PathUtil.getParentDirName(directory);
-        fileStorage.deleteObjects(authUserId, directory);
-        if (!fileStorage.isExist(authUserId, parentPath)) {
-            fileStorage.createPath(authUserId, parentPath);
+        minioDataAccessor.deleteObjects(authUserId, directory);
+        if (!minioMetadataAccessor.isExist(authUserId, parentPath)) {
+            minioDataAccessor.createPath(authUserId, parentPath);
         }
     }
 
     public void deleteFile(@ValidPath(PathType.FILEPATH) String filePath) {
         Long authUserId = securityService.getAuthUserId();
         String parentDirectory = PathUtil.getParentDirName(filePath);
-        fileStorage.deleteObjects(authUserId, filePath);
-        if (!fileStorage.isExist(authUserId, parentDirectory)) {
-            fileStorage.createPath(authUserId, parentDirectory);
+        minioDataAccessor.deleteObjects(authUserId, filePath);
+        if (!minioMetadataAccessor.isExist(authUserId, parentDirectory)) {
+            minioDataAccessor.createPath(authUserId, parentDirectory);
         }
     }
 
     private void throwIfObjectExist(String path) {
         Long authUserId = securityService.getAuthUserId();
-        if (fileStorage.isExist(authUserId, path)) {
+        if (minioMetadataAccessor.isExist(authUserId, path)) {
             throw new ObjectAlreadyExistException(String.format("Path %s already exist", path));
         }
     }

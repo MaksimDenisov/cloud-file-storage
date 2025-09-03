@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.denisovmaksim.cloudfilestorage.model.FileType;
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
+import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SearchService {
 
-    private final MinioFileStorage fileStorage;
+    private final MinioMetadataAccessor fileStorage;
 
     private final SecurityService securityService;
 

@@ -2,7 +2,7 @@ package ru.denisovmaksim.cloudfilestorage.service.processing;
 
 import org.springframework.stereotype.Component;
 import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
-import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,10 +14,10 @@ import java.util.zip.ZipOutputStream;
 
 @Component
 public class ZipArchiver {
-    public ByteArrayOutputStream getByteArrayOutputStream(List<FileObject> fileObjects, String basePath) {
+    public ByteArrayOutputStream getByteArrayOutputStream(List<StorageObject> fileObjects, String basePath) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
-            for (FileObject object : fileObjects) {
+            for (StorageObject object : fileObjects) {
                 String objectPath = object.path().replaceFirst(Pattern.quote(basePath), "");
                 ZipEntry zipEntry = new ZipEntry(objectPath);
                 zipOutputStream.putNextEntry(zipEntry);

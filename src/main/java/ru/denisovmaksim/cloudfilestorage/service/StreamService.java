@@ -3,7 +3,7 @@ package ru.denisovmaksim.cloudfilestorage.service;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
+import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.validation.PathType;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
@@ -13,7 +13,7 @@ import java.io.InputStream;
 @Service
 @AllArgsConstructor
 public class StreamService {
-    private final MinioFileStorage fileStorage;
+    private final MinioDataAccessor dataAccessor;
     private final SecurityService securityService;
 
     public StreamingResponseBody getRange(@ValidPath(PathType.FILEPATH) String filepath,
@@ -27,7 +27,7 @@ public class StreamService {
             long current = start;
             while (current <= end) {
                 long bytesToRead = Math.min(chunkSize, end - current + 1);
-                try (InputStream chunkStream = fileStorage.getRangeOfObject(userId, filepath, current, bytesToRead)) {
+                try (InputStream chunkStream = dataAccessor.getRangeOfObject(userId, filepath, current, bytesToRead)) {
                     chunkStream.transferTo(outputStream);
                 } catch (IOException e) {
                     if (e.getMessage() != null && e.getMessage().contains("Connection reset by peer")) {

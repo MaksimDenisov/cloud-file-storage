@@ -10,7 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
+import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +29,9 @@ import static org.mockito.Mockito.when;
 class ExplorerServiceTest {
 
     @Mock
-    private MinioFileStorage fileStorage;
+    private MinioMetadataAccessor minioMetadataAccessor;
+    @Mock
+    private MinioDataAccessor minioDataAccessor;
 
     @Mock
     private SecurityService securityService;
@@ -46,17 +49,17 @@ class ExplorerServiceTest {
     @Test
     @DisplayName("Create directory.")
     void createDirectory() {
-        when(fileStorage.isExist(USER_ID, "dir/")).thenReturn(false);
+        when(minioMetadataAccessor.isExist(USER_ID, "dir/")).thenReturn(false);
 
         explorerService.createFolder("dir/");
 
-        verify(fileStorage).createPath(USER_ID, "dir/");
+        verify(minioDataAccessor).createPath(USER_ID, "dir/");
     }
 
     @Test
     @DisplayName("Should throw exception if directory exist.")
     void createDuplicateDirectory() {
-        when(fileStorage.isExist(USER_ID, "dir/")).thenReturn(true);
+        when(minioMetadataAccessor.isExist(USER_ID, "dir/")).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class, () ->
                 explorerService.createFolder("dir/")
@@ -66,7 +69,7 @@ class ExplorerServiceTest {
     @Test
     @DisplayName("If directory exist should return list.")
     void getContentOfDirectory() {
-        when(fileStorage.listObjectInfo(USER_ID, "dir/")).thenReturn(Optional.of(List.of()));
+        when(minioMetadataAccessor.listObjectInfo(USER_ID, "dir/")).thenReturn(Optional.of(List.of()));
 
         List<StorageObjectDTO> result = explorerService.getFolder("dir/");
         assertNotNull(result);
@@ -75,7 +78,7 @@ class ExplorerServiceTest {
     @Test
     @DisplayName("If directory not exist should throw exception.")
     void getContentOfNotExistDirectoryShouldThrowNotFound() {
-        when(fileStorage.listObjectInfo(USER_ID, "dir/")).thenReturn(Optional.empty());
+        when(minioMetadataAccessor.listObjectInfo(USER_ID, "dir/")).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> explorerService.getFolder("dir/"));
     }
@@ -84,23 +87,23 @@ class ExplorerServiceTest {
     @Test
     @DisplayName("Rename file should copy and delete.")
     void renameFileShouldCopyAndDeleteWhenNewNotExists() {
-        when(fileStorage.isExist(USER_ID, "dir/new.txt")).thenReturn(false);
+        when(minioMetadataAccessor.isExist(USER_ID, "dir/new.txt")).thenReturn(false);
 
         explorerService.renameFile("dir/old.txt", "new.txt");
 
-        verify(fileStorage).copyOneObject(USER_ID, "dir/old.txt", "dir/new.txt");
-        verify(fileStorage).deleteObjects(USER_ID, "dir/old.txt");
+        verify(minioDataAccessor).copyOneObject(USER_ID, "dir/old.txt", "dir/new.txt");
+        verify(minioDataAccessor).deleteObjects(USER_ID, "dir/old.txt");
     }
 
     @Test
     @DisplayName("If file last in folder and parent folder not exist should create it.")
     void deleteFileShouldDeleteAndCreateParentFolderIfMissing() {
-        when(fileStorage.isExist(USER_ID, "dir/")).thenReturn(false);
+        when(minioMetadataAccessor.isExist(USER_ID, "dir/")).thenReturn(false);
 
         explorerService.deleteFile("dir/file.txt");
 
-        verify(fileStorage).deleteObjects(USER_ID, "dir/file.txt");
-        verify(fileStorage).createPath(USER_ID, "dir/");
+        verify(minioDataAccessor).deleteObjects(USER_ID, "dir/file.txt");
+        verify(minioDataAccessor).createPath(USER_ID, "dir/");
     }
 
 
@@ -111,13 +114,13 @@ class ExplorerServiceTest {
         String newFolderName = "newDocs";
         String newPath = "newDocs/";
 
-        when(fileStorage.isExist(USER_ID, newPath)).thenReturn(false);
-        when(fileStorage.copyObjects(any(), any(), any())).thenReturn(5);
+        when(minioMetadataAccessor.isExist(USER_ID, newPath)).thenReturn(false);
+        when(minioDataAccessor.copyObjects(any(), any(), any())).thenReturn(5);
 
         explorerService.renameFolder(currentPath, newFolderName);
 
-        verify(fileStorage).copyObjects(eq(USER_ID), eq(currentPath), anyString());
-        verify(fileStorage).deleteObjects(USER_ID, currentPath);
+        verify(minioDataAccessor).copyObjects(eq(USER_ID), eq(currentPath), anyString());
+        verify(minioDataAccessor).deleteObjects(USER_ID, currentPath);
     }
 
     @Test
@@ -127,12 +130,12 @@ class ExplorerServiceTest {
         String newFolderName = "newFolder";
         String newPath = "newFolder/";
 
-        when(fileStorage.isExist(USER_ID, newPath)).thenReturn(false);
+        when(minioMetadataAccessor.isExist(USER_ID, newPath)).thenReturn(false);
 
         explorerService.renameFolder(currentPath, newFolderName);
 
-        verify(fileStorage).createPath(USER_ID, newPath);
-        verify(fileStorage).deleteObjects(USER_ID, currentPath);
+        verify(minioDataAccessor).createPath(USER_ID, newPath);
+        verify(minioDataAccessor).deleteObjects(USER_ID, currentPath);
     }
 
     @Test
@@ -142,14 +145,14 @@ class ExplorerServiceTest {
         String newFolderName = "existingFolder";
         String newPath = "docs/existingFolder/";
 
-        when(fileStorage.isExist(USER_ID, newPath)).thenReturn(true);
+        when(minioMetadataAccessor.isExist(USER_ID, newPath)).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class, () ->
                 explorerService.renameFolder(currentPath, newFolderName)
         );
 
-        verify(fileStorage, never()).copyObjects(any(), any(), any());
-        verify(fileStorage, never()).deleteObjects(any(), any());
+        verify(minioDataAccessor, never()).copyObjects(any(), any(), any());
+        verify(minioDataAccessor, never()).deleteObjects(any(), any());
     }
 
     @Test
@@ -158,12 +161,12 @@ class ExplorerServiceTest {
         String path = "docs/folder/";
         String parentPath = "docs/";
 
-        when(fileStorage.isExist(USER_ID, parentPath)).thenReturn(false);
+        when(minioMetadataAccessor.isExist(USER_ID, parentPath)).thenReturn(false);
 
         explorerService.deleteFolder(path);
 
-        verify(fileStorage).deleteObjects(USER_ID, path);
-        verify(fileStorage).createPath(USER_ID, parentPath);
+        verify(minioDataAccessor).deleteObjects(USER_ID, path);
+        verify(minioDataAccessor).createPath(USER_ID, parentPath);
     }
 
     @Test
@@ -172,11 +175,11 @@ class ExplorerServiceTest {
         String path = "photos/events/";
         String parentPath = "photos/";
 
-        when(fileStorage.isExist(USER_ID, parentPath)).thenReturn(true);
+        when(minioMetadataAccessor.isExist(USER_ID, parentPath)).thenReturn(true);
 
         explorerService.deleteFolder(path);
 
-        verify(fileStorage).deleteObjects(USER_ID, path);
-        verify(fileStorage, never()).createPath(any(), any());
+        verify(minioDataAccessor).deleteObjects(USER_ID, path);
+        verify(minioDataAccessor, never()).createPath(any(), any());
     }
 }
