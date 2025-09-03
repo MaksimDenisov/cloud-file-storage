@@ -7,7 +7,7 @@ import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
 import ru.denisovmaksim.cloudfilestorage.exception.ImageProcessingException;
 import ru.denisovmaksim.cloudfilestorage.service.processing.ImageResizer;
 import ru.denisovmaksim.cloudfilestorage.storage.FileObject;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
+import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.util.FileTypeResolver;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 import ru.denisovmaksim.cloudfilestorage.validation.PathType;
@@ -25,14 +25,14 @@ public class PreviewService {
 
     private static final int IMAGE_WIDTH = 800;
 
-    private final MinioFileStorage fileStorage;
+    private final MinioDataAccessor dataAccessor;
 
     private final SecurityService securityService;
 
     private final ImageResizer imageResizer;
 
     public NamedStreamDTO getMusic(@ValidPath(PathType.FILEPATH) String filepath) {
-        FileObject fileObject = fileStorage.getObject(securityService.getAuthUserId(), filepath);
+        FileObject fileObject = dataAccessor.getObject(securityService.getAuthUserId(), filepath);
         String baseName = PathUtil.getBaseName(filepath);
         String encodedFileName = URLEncoder.encode(baseName, StandardCharsets.UTF_8)
                 .replace("+", "%20");
@@ -40,7 +40,7 @@ public class PreviewService {
     }
 
     public NamedStreamDTO getImage(String filepath) {
-        FileObject fileObject = fileStorage.getObject(securityService.getAuthUserId(), filepath);
+        FileObject fileObject = dataAccessor.getObject(securityService.getAuthUserId(), filepath);
         String baseName = PathUtil.getBaseName(filepath);
         String encodedFileName = URLEncoder.encode(baseName, StandardCharsets.UTF_8)
                 .replace("+", "%20");

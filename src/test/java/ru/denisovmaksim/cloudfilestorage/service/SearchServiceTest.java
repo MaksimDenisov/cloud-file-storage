@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.denisovmaksim.cloudfilestorage.model.FileType;
 import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioFileStorage;
+import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 
 import java.util.List;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 class SearchServiceTest {
 
     @Mock
-    private MinioFileStorage fileStorage;
+    private MinioMetadataAccessor minioMetadataAccessor;
 
     @Mock
     private SecurityService securityService;
@@ -49,8 +49,8 @@ class SearchServiceTest {
         );
 
         when(securityService.getAuthUserId()).thenReturn(userId);
-        when(fileStorage.getDirectChildCount(userId, "documents/reports/")).thenReturn(2L);
-        when(fileStorage.searchObjectInfo(userId, "", query)).thenReturn(mockInfos);
+        when(minioMetadataAccessor.getDirectChildCount(userId, "documents/reports/")).thenReturn(2L);
+        when(minioMetadataAccessor.searchObjectInfo(userId, "", query)).thenReturn(mockInfos);
 
         List<StorageObjectDTO> actual = searchService.search(query);
 
