@@ -8,6 +8,7 @@ import io.minio.RemoveObjectArgs;
 import io.minio.Result;
 import io.minio.errors.MinioException;
 import io.minio.messages.Item;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -110,7 +111,7 @@ public class MinioDataAccessorTest {
 
         List<StorageObjectInfo> actualObjects = minioMetadataAccessor.listObjectInfo(USER_ID, "").get();
 
-        assertThat(actualObjects)
+        Assertions.assertThat(actualObjects)
                 .as("Count of objects")
                 .hasSize(1)
                 .usingRecursiveFieldByFieldElementComparator()
@@ -144,14 +145,14 @@ public class MinioDataAccessorTest {
 
         try (InputStream actualStream = actual.stream()) {
             byte[] actualBytes = actualStream.readAllBytes();
-            assertThat(actualBytes)
+            Assertions.assertThat(actualBytes)
                     .as("Match file content")
                     .isEqualTo(file.getBytes());
         }
 
         assertTrue(minioMetadataAccessor.isExist(USER_ID, "folder/"));
         assertTrue(minioMetadataAccessor.isExist(USER_ID, "folder/file.txt"));
-        assertThat(actual.path())
+        Assertions.assertThat(actual.path())
                 .as("Match path")
                 .isEqualTo("folder/file.txt");
     }
@@ -161,13 +162,13 @@ public class MinioDataAccessorTest {
         MultipartFile file = new MockMultipartFile("file.txt", "file.txt", "text/plain", "Hello".getBytes());
         minioDataAccessor.saveObject(USER_ID, "folder/subFolder1", file);
         minioDataAccessor.saveObject(USER_ID, "folder/subFolder2", file);
-        assertThat(minioMetadataAccessor.listObjectInfo(USER_ID, "folder/").get())
+        Assertions.assertThat(minioMetadataAccessor.listObjectInfo(USER_ID, "folder/").get())
                 .hasSize(2);
 
         minioDataAccessor.deleteObjects(USER_ID, "folder/");
         Optional<List<StorageObjectInfo>> infos = minioMetadataAccessor.listObjectInfo(USER_ID, "");
-        assertThat(infos).isPresent();
-        assertThat(infos.get()).isEmpty();
+        Assertions.assertThat(infos).isPresent();
+        Assertions.assertThat(infos.get()).isEmpty();
     }
 
     @Test
@@ -181,18 +182,18 @@ public class MinioDataAccessorTest {
 
         List<StorageObject> actual = minioDataAccessor.getObjects(USER_ID, "folder/");
 
-        assertThat(actual).hasSize(2);
+        Assertions.assertThat(actual).hasSize(2);
 
         try (InputStream actualStream = actual.get(0).stream()) {
             byte[] actualBytes = actualStream.readAllBytes();
-            assertThat(actualBytes)
+            Assertions.assertThat(actualBytes)
                     .as("Match first file content")
                     .isEqualTo(firstFile.getBytes());
         }
 
         try (InputStream actualStream = actual.get(1).stream()) {
             byte[] actualBytes = actualStream.readAllBytes();
-            assertThat(actualBytes)
+            Assertions.assertThat(actualBytes)
                     .as("Match second file content")
                     .isEqualTo(secondFile.getBytes());
         }
@@ -211,18 +212,18 @@ public class MinioDataAccessorTest {
 
         List<StorageObject> actual = minioDataAccessor.getObjects(USER_ID, "root/copiedFolder/");
 
-        assertThat(actual).hasSize(2);
+        Assertions.assertThat(actual).hasSize(2);
 
         try (InputStream actualStream = actual.get(0).stream()) {
             byte[] actualBytes = actualStream.readAllBytes();
-            assertThat(actualBytes)
+            Assertions.assertThat(actualBytes)
                     .as("Match first file content")
                     .isEqualTo(firstFile.getBytes());
         }
 
         try (InputStream actualStream = actual.get(1).stream()) {
             byte[] actualBytes = actualStream.readAllBytes();
-            assertThat(actualBytes)
+            Assertions.assertThat(actualBytes)
                     .as("Match second file content")
                     .isEqualTo(secondFile.getBytes());
         }
@@ -245,12 +246,12 @@ public class MinioDataAccessorTest {
 
         try (InputStream actualStream = actual.stream()) {
             byte[] actualBytes = actualStream.readAllBytes();
-            assertThat(actualBytes)
+            Assertions.assertThat(actualBytes)
                     .as("Match file content")
                     .isEqualTo(file.getBytes());
         }
 
-        assertThat(actual.path())
+        Assertions.assertThat(actual.path())
                 .as("Match path")
                 .isEqualTo("folder/copy-file.txt");
     }
@@ -273,9 +274,9 @@ public class MinioDataAccessorTest {
         Long folderCount = minioMetadataAccessor.getDirectChildCount(USER_ID, "folder/");
         Long emptyCount = minioMetadataAccessor.getDirectChildCount(USER_ID, "emptyFolder/");
 
-        assertThat(rootCount).isEqualTo(3L);
-        assertThat(folderCount).isEqualTo(2L);
-        assertThat(emptyCount).isZero();
+        Assertions.assertThat(rootCount).isEqualTo(3L);
+        Assertions.assertThat(folderCount).isEqualTo(2L);
+        Assertions.assertThat(emptyCount).isZero();
     }
 
     @Test
@@ -295,6 +296,6 @@ public class MinioDataAccessorTest {
 
         List<StorageObjectInfo> infos = minioMetadataAccessor.searchObjectInfo(USER_ID, "", "File");
 
-        assertThat(infos).hasSize(3);
+        Assertions.assertThat(infos).hasSize(3);
     }
 }

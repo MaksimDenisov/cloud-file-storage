@@ -6,6 +6,11 @@ checkstyle:
 report:
 	./gradlew jacocoTestReport
 
+test:
+	./gradlew test
+it:
+	./gradlew integrationTest
+
 up:
 	docker-compose -f docker-compose-env.yml up -d
 
