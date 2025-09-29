@@ -51,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("it")
 @Testcontainers
 @EnableRedisHttpSession
-public class UserControllerE2ETest {
+abstract class UserControllerE2ETest {
 
     @Autowired
     private MockMvc mockMvc;

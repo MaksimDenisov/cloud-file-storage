@@ -17,11 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import ru.denisovmaksim.cloudfilestorage.IntegrationTestConfiguration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,52 +37,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@Testcontainers
+@Import(IntegrationTestConfiguration.class)
 @Deprecated
-public class MinioDataAccessorTest {
+class MinioDataAccessorTest {
     private static final Long USER_ID = 1L;
     private static final String BUCKET = "user-files";
 
-    @Container
-    private static final MinIOContainer MINIO_CONTAINER = new MinIOContainer("minio/minio")
-            .withExposedPorts(9000)
-            .withEnv("MINIO_ROOT_USER", "user")
-            .withEnv("MINIO_ROOT_PASSWORD", "password")
-            .withCommand("server /data");
-
-
-    @TestConfiguration
-    public static class MinioConfig {
-        @Bean
-        public MinioClient minioClient() {
-            try {
-                String minioEndpoint = "http://" + MINIO_CONTAINER.getHost() + ":"
-                        + MINIO_CONTAINER.getMappedPort(9000);
-
-                MinioClient minioClient = MinioClient.builder()
-                        .endpoint(minioEndpoint)
-                        .credentials("user", "password")
-                        .build();
-                boolean found =
-                        minioClient.bucketExists(BucketExistsArgs.builder().bucket(BUCKET).build());
-                if (!found) {
-                    minioClient.makeBucket(MakeBucketArgs.builder().bucket(BUCKET).build());
-                }
-                return minioClient;
-            } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
     @BeforeEach
     void cleanUp() throws Exception {
-        boolean found =
-                minioClient.bucketExists(BucketExistsArgs.builder().bucket(BUCKET).build());
-        if (!found) {
-            minioClient.makeBucket(MakeBucketArgs.builder().bucket(BUCKET).build());
-        }
-
         Iterable<Result<Item>> objects = minioClient.listObjects(ListObjectsArgs.builder()
                 .bucket(BUCKET)
                 .recursive(true)
