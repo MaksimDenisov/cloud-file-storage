@@ -10,7 +10,7 @@ import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 @AllArgsConstructor
 @Getter
 public final class RequestUploadFileDTO {
-    @ValidPath(PathType.FILENAME)
+    @ValidPath(PathType.NAME)
     private String filename;
     private MultipartFile multipartFile;
 }

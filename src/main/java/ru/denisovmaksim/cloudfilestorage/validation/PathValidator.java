@@ -23,7 +23,7 @@ public class PathValidator implements ConstraintValidator<ValidPath, String> {
         boolean isValid = switch (pathType) {
             case DIR -> PathUtil.isValid(value) && PathUtil.isDir(value);
             case FILEPATH -> PathUtil.isValid(value) && !PathUtil.isDir(value);
-            case FILENAME -> PathUtil.isValid(value) && PathUtil.getBaseName(value).equals(value);
+            case NAME -> PathUtil.isValid(value) && PathUtil.getBaseName(value).equals(value);
         };
 
         if (!isValid && context != null) {
@@ -31,7 +31,7 @@ public class PathValidator implements ConstraintValidator<ValidPath, String> {
             String errorMessage = switch (pathType) {
                 case DIR -> "incorrect dir path";
                 case FILEPATH -> "incorrect file path";
-                case FILENAME -> "incorrect file name";
+                case NAME -> "incorrect file name";
             };
             errorMessage = String.format("%s is %s", value, errorMessage);
             context.buildConstraintViolationWithTemplate(errorMessage)

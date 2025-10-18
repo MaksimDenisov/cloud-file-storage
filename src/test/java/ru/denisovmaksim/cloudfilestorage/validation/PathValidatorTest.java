@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PathValidatorTest {
-    private final PathValidator filenameValidator = new PathValidator(PathType.FILENAME);
+    private final PathValidator filenameValidator = new PathValidator(PathType.NAME);
     private final PathValidator filepathValidator = new PathValidator(PathType.FILEPATH);
     private final PathValidator dirValidator = new PathValidator(PathType.DIR);
 
@@ -38,7 +38,7 @@ class PathValidatorTest {
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!$(),-.^_` ",
             "!", "$", "(", ")", ",", "-", ".", "^", "_", "`", " ",
             "file.txt"})
-    void testValidFileName(String filename) {
+    void testValidName(String filename) {
         assertTrue(filenameValidator.isValid(filename, null),
                 filename + " expected valid file name but got invalid");
     }
@@ -48,7 +48,7 @@ class PathValidatorTest {
             "<", ">", ":", "\"", "\\", "/", "|", "?", "*",
             "#", "%", "[", "]", "{", "}", "~", "'", "\"", ";"
     })
-    void testInvalidFileName(String filename) {
+    void testInvalidName(String filename) {
         assertFalse(filenameValidator.isValid(filename, null),
                 filename + " expected invalid file name but got valid");
     }

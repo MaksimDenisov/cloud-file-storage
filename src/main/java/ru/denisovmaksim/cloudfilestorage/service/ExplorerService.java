@@ -59,7 +59,7 @@ public class ExplorerService {
     }
 
     public void renameFile(@ValidPath(PathType.FILEPATH) String filepath,
-                           @ValidPath(PathType.FILENAME) String newFileName) {
+                           @ValidPath(PathType.NAME) String newFileName) {
         Long authUserId = securityService.getAuthUserId();
         String parentDirectory = PathUtil.getParentDirName(filepath);
         String dstPath = parentDirectory + newFileName;
@@ -69,7 +69,7 @@ public class ExplorerService {
     }
 
     public void renameFolder(@ValidPath(PathType.DIR) String directory,
-                             @ValidPath(PathType.FILENAME) String newFolderName) {
+                             @ValidPath(PathType.NAME) String newFolderName) {
         throwIfRootModification(directory);
         String newPath = PathUtil.getParentDirName(directory) + newFolderName;
         newPath = PathUtil.ensureDirectoryPath(newPath);
