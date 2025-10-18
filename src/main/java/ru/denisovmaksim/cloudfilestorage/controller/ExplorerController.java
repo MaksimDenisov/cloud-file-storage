@@ -49,7 +49,9 @@ public class ExplorerController {
                                RedirectAttributes redirectAttributes) {
         String parentPath = PathUtil.getParentDirName(folderPath);
         log.info("Rename folder with path {} to {}", folderPath, parentPath + newFolderName);
-        redirectAttributes.addAttribute("path", parentPath);
+        if (!parentPath.isEmpty()) {
+            redirectAttributes.addAttribute("path", parentPath);
+        }
         explorerService.renameFolder(folderPath, newFolderName);
         return REDIRECT_TO_ROOT;
     }
@@ -58,8 +60,10 @@ public class ExplorerController {
     public String deleteFolder(@ModelAttribute("folder-path") String folderPath,
                                RedirectAttributes redirectAttributes) {
         log.info("Delete folder with path {}", folderPath);
-        String redirectPath = PathUtil.getParentDirName(folderPath);
-        redirectAttributes.addAttribute("path", redirectPath);
+        String parentPath = PathUtil.getParentDirName(folderPath);
+        if (!parentPath.isEmpty()) {
+            redirectAttributes.addAttribute("path", parentPath);
+        }
         explorerService.deleteFolder(folderPath);
         return REDIRECT_TO_ROOT;
     }
