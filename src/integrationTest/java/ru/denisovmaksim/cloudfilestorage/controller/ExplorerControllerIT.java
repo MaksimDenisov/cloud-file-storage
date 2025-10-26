@@ -35,7 +35,7 @@ public class ExplorerControllerIT {
     @Value("${app.bucket}")
     private String bucket;
 
-    private final String USER_1_FOLDER = "user-1-files/";
+    private final String user1Folder = "user-1-files/";
 
     @Autowired
     private MockMvc mockMvc;
@@ -63,7 +63,7 @@ public class ExplorerControllerIT {
         minioClient.statObject(
                 StatObjectArgs.builder()
                         .bucket(bucket)
-                        .object(USER_1_FOLDER + "test-folder/")
+                        .object(user1Folder + "test-folder/")
                         .build());
 
     }
@@ -83,14 +83,14 @@ public class ExplorerControllerIT {
         minioClient.statObject(
                 StatObjectArgs.builder()
                         .bucket(bucket)
-                        .object(USER_1_FOLDER + "new-folder/")
+                        .object(user1Folder + "new-folder/")
                         .build()
         );
 
         assertThatThrownBy(() -> minioClient.statObject(
                 StatObjectArgs.builder()
                         .bucket(bucket)
-                        .object(USER_1_FOLDER + "old-folder/")
+                        .object(user1Folder + "old-folder/")
                         .build()
         )).isInstanceOf(ErrorResponseException.class);
     }
@@ -109,7 +109,7 @@ public class ExplorerControllerIT {
         assertThatThrownBy(() -> minioClient.statObject(
                 StatObjectArgs.builder()
                         .bucket(bucket)
-                        .object(USER_1_FOLDER + "to-delete/")
+                        .object(user1Folder + "to-delete/")
                         .build()
         )).isInstanceOf(ErrorResponseException.class);
     }
