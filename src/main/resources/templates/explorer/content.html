@@ -3,7 +3,7 @@
 <section layout:fragment="content">
     <div th:replace="~{modal/create::modal (${currentPath})}"></div>
     <div th:replace="~{modal/rename::modal (${currentPath})}"></div>
-    <!-- Desktop table (visible only ≥lg) -->
+    <!-- Desktop table (visible only ≥ md) -->
     <div class="container-fluid px-0 m-0">
         <div class="offcanvas-body d-flex flex-column" th:insert="~{modal/rename::modal (${currentPath})}"></div>
         <div class="row g-0 m-0">
@@ -23,7 +23,7 @@
 
             <div class="col-md-10 bg-light">
                 <div th:replace="~{explorer/breadcrumbs :: breadcrumbs-path (${breadcrumbs})}"></div>
-                <table id="filesTable" class="table p-4 table-bordered table-striped text-center d-none d-lg-table ">
+                <table id="filesTable" class="table p-4 table-bordered table-striped text-center d-none d-md-table ">
                     <thead class="table-header-group">
                     <tr>
                         <th>Icon</th>
@@ -110,8 +110,8 @@
         </div>
     </div>
 
-    <!-- Mobile cards (visible only <lg) -->
-    <div id="filesCards" class="d-lg-none">
+    <!-- Mobile cards (visible only < md) -->
+    <div id="filesCards" class="d-md-none">
         <div th:each="item : ${storageObjects}" class="card mb-2 shadow-sm">
             <div class="card-body p-2">
                 <div class="d-flex justify-content-between align-items-center">
