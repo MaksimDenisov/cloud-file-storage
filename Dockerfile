@@ -8,7 +8,7 @@ COPY gradle /usr/app/gradle
 RUN gradle dependencies || return 0
 
 COPY . /usr/app
-RUN gradle build -x test
+RUN gradle build -x checkstyleMain -x checkstyleTest -x test -x integrationTest
 
 # Second stage, build a docker image with output artifact from previous stage.
 FROM openjdk:17-jdk-alpine
