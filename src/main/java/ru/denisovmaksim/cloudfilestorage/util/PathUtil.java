@@ -6,6 +6,7 @@ public final class PathUtil {
 
     public static final String PATH_SEPARATOR = "/";
     public static final String AVAILABLE_CHARS = "( ) , - . ^ _ ` ! $ № + = @ &";
+
     private PathUtil() {
         throw new UnsupportedOperationException("Utility class");
     }
@@ -49,7 +50,7 @@ public final class PathUtil {
         }
     }
 
-    public static String getParentDirName(String path) {
+    public static String getParentPath(String path) {
         path = path.endsWith(PATH_SEPARATOR) ? path.substring(0, path.length() - 1) : path;
         int lastSlashIndex = path.lastIndexOf(PATH_SEPARATOR);
         return (lastSlashIndex == -1) ? "" : path.substring(0, lastSlashIndex) + PATH_SEPARATOR;

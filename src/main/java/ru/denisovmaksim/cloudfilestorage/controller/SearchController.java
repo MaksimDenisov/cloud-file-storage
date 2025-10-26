@@ -19,6 +19,7 @@ public class SearchController {
 
     @GetMapping("")
     public String getObjects(Model model, @RequestParam("query") String query) {
+        model.addAttribute("query", query);
         model.addAttribute("storageObjects", searchService.search(query));
         return "search/main";
     }

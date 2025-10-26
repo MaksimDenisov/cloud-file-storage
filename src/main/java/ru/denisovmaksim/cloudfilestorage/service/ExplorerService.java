@@ -61,7 +61,7 @@ public class ExplorerService {
     public void renameFile(@ValidPath(PathType.FILEPATH) String filepath,
                            @ValidPath(PathType.NAME) String newFileName) {
         Long authUserId = securityService.getAuthUserId();
-        String parentDirectory = PathUtil.getParentDirName(filepath);
+        String parentDirectory = PathUtil.getParentPath(filepath);
         String dstPath = parentDirectory + newFileName;
         throwIfObjectExist(dstPath);
         minioDataAccessor.copyOneObject(authUserId, filepath, dstPath);
@@ -71,7 +71,7 @@ public class ExplorerService {
     public void renameFolder(@ValidPath(PathType.DIR) String directory,
                              @ValidPath(PathType.NAME) String newFolderName) {
         throwIfRootModification(directory);
-        String newPath = PathUtil.getParentDirName(directory) + newFolderName;
+        String newPath = PathUtil.getParentPath(directory) + newFolderName;
         newPath = PathUtil.ensureDirectoryPath(newPath);
         throwIfObjectExist(newPath);
 
@@ -85,7 +85,7 @@ public class ExplorerService {
     public void deleteFolder(@ValidPath(PathType.DIR) String directory) {
         throwIfRootModification(directory);
         Long authUserId = securityService.getAuthUserId();
-        String parentPath = PathUtil.getParentDirName(directory);
+        String parentPath = PathUtil.getParentPath(directory);
         minioDataAccessor.deleteObjects(authUserId, directory);
         if (!minioMetadataAccessor.isExist(authUserId, parentPath)) {
             minioDataAccessor.createPath(authUserId, parentPath);
@@ -94,7 +94,7 @@ public class ExplorerService {
 
     public void deleteFile(@ValidPath(PathType.FILEPATH) String filePath) {
         Long authUserId = securityService.getAuthUserId();
-        String parentDirectory = PathUtil.getParentDirName(filePath);
+        String parentDirectory = PathUtil.getParentPath(filePath);
         minioDataAccessor.deleteObjects(authUserId, filePath);
         if (!minioMetadataAccessor.isExist(authUserId, parentDirectory)) {
             minioDataAccessor.createPath(authUserId, parentDirectory);

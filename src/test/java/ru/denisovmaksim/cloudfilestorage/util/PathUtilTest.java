@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.denisovmaksim.cloudfilestorage.util.PathUtil.getBaseName;
-import static ru.denisovmaksim.cloudfilestorage.util.PathUtil.getParentDirName;
+import static ru.denisovmaksim.cloudfilestorage.util.PathUtil.getParentPath;
 import static ru.denisovmaksim.cloudfilestorage.util.PathUtil.isDir;
 import static ru.denisovmaksim.cloudfilestorage.util.PathUtil.isRoot;
 import static ru.denisovmaksim.cloudfilestorage.util.PathUtil.isValid;
@@ -88,8 +88,9 @@ class PathUtilTest {
 
     @Test
     void getParentDirNameShouldReturnParentPathWithSlash() {
-        assertEquals("folder/subfolder/", getParentDirName("folder/subfolder/file.txt"));
-        assertEquals("", getParentDirName("folder/"));
-        assertEquals("", getParentDirName("file.txt"));
+        assertEquals("folder/", getParentPath("folder/subfolder/"));
+        assertEquals("folder/subfolder/", getParentPath("folder/subfolder/file.txt"));
+        assertEquals("", getParentPath("folder/"));
+        assertEquals("", getParentPath("file.txt"));
     }
 }

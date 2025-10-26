@@ -36,8 +36,8 @@ public class SearchService {
         for (String path : paths) {
             StorageObjectDTO dto;
             if (PathUtil.isDir(path)) {
-                dto = new StorageObjectDTO(PathUtil.getParentDirName(path),
-                        path.replace(PathUtil.getParentDirName(path), ""),
+                dto = new StorageObjectDTO(path,
+                        path.replace(PathUtil.getParentPath(path), ""),
                         FileType.FOLDER, fileStorage.getDirectChildCount(userId, path));
             } else {
                 FileType type = FileType.UNKNOWN_FILE;
@@ -45,8 +45,8 @@ public class SearchService {
                         .filter(info -> info.getPath().equals(path))
                         .findAny()
                         .orElseThrow();
-                dto = new StorageObjectDTO(PathUtil.getParentDirName(path),
-                        path.replace(PathUtil.getParentDirName(path), ""),
+                dto = new StorageObjectDTO(path,
+                        path.replace(PathUtil.getParentPath(path), ""),
                         type, storageObjectInfo.getSize());
 
             }

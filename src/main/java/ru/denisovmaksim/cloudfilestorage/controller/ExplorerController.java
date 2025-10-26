@@ -43,11 +43,21 @@ public class ExplorerController {
         return "explorer/content";
     }
 
+    @GetMapping("/open-in-folder")
+    public String getObjectsInParentFolder(Model model,
+                                           @RequestParam(required = false, defaultValue = "") String path) {
+        path = PathUtil.getParentPath(path);
+        model.addAttribute("breadcrumbs", PathLinksDTOMapper.toChainLinksFromPath(path));
+        model.addAttribute("storageObjects", explorerService.getFolder(path));
+        model.addAttribute("currentPath", path);
+        return "explorer/content";
+    }
+
     @PostMapping("/rename-folder")
     public String renameFolder(@ModelAttribute("folder-path") String folderPath,
                                @ModelAttribute("new-folder-name") String newFolderName,
                                RedirectAttributes redirectAttributes) {
-        String parentPath = PathUtil.getParentDirName(folderPath);
+        String parentPath = PathUtil.getParentPath(folderPath);
         log.info("Rename folder with path {} to {}", folderPath, parentPath + newFolderName);
         if (!parentPath.isEmpty()) {
             redirectAttributes.addAttribute("path", parentPath);
@@ -60,7 +70,7 @@ public class ExplorerController {
     public String deleteFolder(@ModelAttribute("folder-path") String folderPath,
                                RedirectAttributes redirectAttributes) {
         log.info("Delete folder with path {}", folderPath);
-        String parentPath = PathUtil.getParentDirName(folderPath);
+        String parentPath = PathUtil.getParentPath(folderPath);
         if (!parentPath.isEmpty()) {
             redirectAttributes.addAttribute("path", parentPath);
         }
@@ -72,7 +82,7 @@ public class ExplorerController {
     public String renameFile(@ModelAttribute("filepath") String path,
                              @ModelAttribute("name") String newFileName,
                              RedirectAttributes redirectAttributes) {
-        String parentPath = PathUtil.getParentDirName(path);
+        String parentPath = PathUtil.getParentPath(path);
         log.info("Rename file from {} to {}", path, parentPath + newFileName);
         redirectAttributes.addAttribute("path", parentPath);
         explorerService.renameFile(path, newFileName);
@@ -82,7 +92,7 @@ public class ExplorerController {
     @PostMapping("/delete-file")
     public String deleteFile(@ModelAttribute("filepath") String filepath, RedirectAttributes redirectAttributes) {
         log.info("Delete file with path {}", filepath);
-        String redirectPath = PathUtil.getParentDirName(filepath);
+        String redirectPath = PathUtil.getParentPath(filepath);
         redirectAttributes.addAttribute("path", redirectPath);
         explorerService.deleteFile(filepath);
         return REDIRECT_TO_ROOT;
