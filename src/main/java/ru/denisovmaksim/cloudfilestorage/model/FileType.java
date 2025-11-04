@@ -4,5 +4,5 @@ public enum FileType {
     FOLDER,
     UNKNOWN_FILE,
     IMAGE,
-    MUSIC, TEXT
+    AUDIO
 }

@@ -32,11 +32,9 @@ public class PreviewController {
         model.addAttribute("filepath", filepath);
         FileType type = FileTypeResolver.detectFileType(filepath);
         return switch (type) {
-            case FOLDER -> "redirect:/";
-            case UNKNOWN_FILE -> "preview/unknown";
             case IMAGE -> "preview/image";
-            case MUSIC -> "preview/audio";
-            case TEXT -> "preview/text";
+            case AUDIO -> "preview/audio";
+            default -> "redirect:/";
         };
     }
 

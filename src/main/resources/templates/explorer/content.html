@@ -41,6 +41,7 @@
                         <td th:switch="${item.getType().name()}">
                             <i th:case="'FOLDER'" class="bi bi-folder h5 text-secondary"></i>
                             <i th:case="'IMAGE'" class="bi bi-image h5 text-secondary"></i>
+                            <i th:case="'AUDIO'" class="bi bi-file-music h5 text-secondary"></i>
                             <i th:case="*" class="bi bi-file-binary h5 text-secondary"></i>
                         </td>
 
@@ -48,9 +49,13 @@
                         <td class="text-start" th:switch="${item.getType().name()}">
                             <a th:case="'FOLDER'" th:href="@{/(path=${item.getPath()})}"
                                th:text="${item.getName()}"></a>
-                            <a th:case="*"
+                            <a th:case="'AUDIO'"
                                th:href="@{/preview(filepath=${item.getPath()})}"
                                th:text="${item.getName()}"></a>
+                            <a th:case="'IMAGE'"
+                               th:href="@{/preview(filepath=${item.getPath()})}"
+                               th:text="${item.getName()}"></a>
+                            <a th:case = "*" th:text="${item.getName()}"></a>
                         </td>
 
                         <!-- Size -->
@@ -135,9 +140,10 @@
 
                     <td th:switch="${item.getType().name()}">
                         <button th:case="'FOLDER'"
-                                class="btn btn-light button-folder-delete"
-                                th:data-folderpath="${item.getPath()}">
-                            <i class="bi bi-trash-fill text-danger"></i>
+                                class="btn btn-light button-rename-folder"
+                                th:data-name="${item.getName()}"
+                                th:data-path="${item.getPath()}">
+                            <i class="bi bi-pencil-square text-primary"></i>
                         </button>
                         <button th:case="*" type="button" class="btn btn-light button-rename-file"
                                 th:data-name="${item.getName()}"

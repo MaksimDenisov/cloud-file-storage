@@ -23,7 +23,7 @@ public final class FileTypeResolver {
         }
 
         if (filepath.endsWith(".mp3")) {
-            return FileType.MUSIC;
+            return FileType.AUDIO;
         }
 
         return FileType.UNKNOWN_FILE;
