@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 public class GlobalControllerAdvice {
 
     private static final String REDIRECT_TO_ROOT = "redirect:/";
+   // private static final String FLASH_DANGER = "redirect:/";
 
     @Value("${MAX_FILE_SIZE:10MB}")
     private String maxFileSize;
@@ -33,8 +34,7 @@ public class GlobalControllerAdvice {
     @ExceptionHandler(UserAlreadyExistException.class)
     public String handleUserAlreadyExist(UserAlreadyExistException e, RedirectAttributes attributes) {
         log.error("User already exist: {}", e.getMessage());
-        attributes.addFlashAttribute("flashType", "danger");
-        attributes.addFlashAttribute("flashMsg", "User already exist");
+        setDangerMessage("User already exist", attributes);
         return "redirect:" + UserController.SIGN_UP;
     }
 
@@ -105,8 +105,7 @@ public class GlobalControllerAdvice {
     @ExceptionHandler(RootFolderModificationException.class)
     public String handleUserAlreadyExist(RootFolderModificationException e, RedirectAttributes attributes) {
         log.error("Root folder modification: {}", e.getMessage());
-        attributes.addFlashAttribute("flashType", "danger");
-        attributes.addFlashAttribute("flashMsg", "Not success");
+        setDangerMessage("The root folder cannot be modified", attributes);
         return "redirect:" + UserController.SIGN_UP;
     }
 

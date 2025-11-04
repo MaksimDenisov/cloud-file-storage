@@ -35,7 +35,6 @@ class SearchControllerTest {
     @Test
     void getObjectsShouldAddAttributesToModelAndReturnViewName() {
         String query = "test";
-        String username = "testUser";
         StorageObjectDTO firstDTO =
                 new StorageObjectDTO("file1.txt", "file1.txt", FileType.UNKNOWN_FILE, 100L);
         StorageObjectDTO secondDTO =

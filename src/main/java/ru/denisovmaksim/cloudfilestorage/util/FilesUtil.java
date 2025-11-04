@@ -6,7 +6,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class FilesUtil {
+public final class FilesUtil {
+    private FilesUtil() {
+    }
+
     public static String detectMimeType(String path) {
         try {
             return Files.probeContentType(Path.of(path));
