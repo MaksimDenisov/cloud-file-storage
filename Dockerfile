@@ -11,7 +11,7 @@ COPY . /usr/app
 RUN gradle build -x checkstyleMain -x checkstyleTest -x test -x integrationTest
 
 # Second stage, build a docker image with output artifact from previous stage.
-FROM openjdk:17-jdk-alpine
+FROM eclipse-temurin:17-jdk
 ENV APP_HOME=/usr/app
 
 ENV JDBC_ROOT=root
