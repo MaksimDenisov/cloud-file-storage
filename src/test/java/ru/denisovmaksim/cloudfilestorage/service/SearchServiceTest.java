@@ -38,9 +38,12 @@ class SearchServiceTest {
         String parentDir2 = baseDir + "2025/";
 
         List<StorageObjectDTOResponse> expected = List.of(
-                new StorageObjectDTOResponse("documents/", "reports/", FileType.FOLDER, 2L),
-                new StorageObjectDTOResponse(parentDir1, "report1.txt", FileType.UNKNOWN_FILE, 1000L),
-                new StorageObjectDTOResponse(parentDir2, "report2.txt", FileType.UNKNOWN_FILE, 2000L)
+                new StorageObjectDTOResponse("documents/" + "reports/",
+                        "reports/", FileType.FOLDER, 2L),
+                new StorageObjectDTOResponse(parentDir1 + "report1.txt",
+                        "report1.txt", FileType.UNKNOWN_FILE, 1000L),
+                new StorageObjectDTOResponse(parentDir2 + "report2.txt",
+                        "report2.txt", FileType.UNKNOWN_FILE, 2000L)
         );
 
         List<StorageObjectInfo> mockInfos = List.of(
@@ -53,7 +56,8 @@ class SearchServiceTest {
         when(minioMetadataAccessor.searchObjectInfo(userId, "", query)).thenReturn(mockInfos);
 
         List<StorageObjectDTOResponse> actual = searchService.search(query);
-
+        actual.forEach(System.out::println);
+        expected.forEach(System.out::println);
         assertThat(actual)
                 .usingRecursiveFieldByFieldElementComparator()
                 .isEqualTo(expected);
