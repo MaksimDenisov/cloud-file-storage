@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.denisovmaksim.cloudfilestorage.model.FileType;
-import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
@@ -26,17 +26,17 @@ public class SearchService {
 
     private final SecurityService securityService;
 
-    public List<StorageObjectDTO> search(String query) {
+    public List<StorageObjectDTOResponse> search(String query) {
         Long userId = securityService.getAuthUserId();
         List<StorageObjectInfo> objectInfos = fileStorage.searchObjectInfo(userId, "", query).stream().toList();
         objectInfos.forEach(a -> log.info("File {} at path {}", a.getName(), a.getPath()));
         Set<String> paths = getPathsContainsSubstring(objectInfos, query);
         paths.forEach(path -> log.info("Find path {}", path));
-        Map<String, StorageObjectDTO> dtoMap = new HashMap<>();
+        Map<String, StorageObjectDTOResponse> dtoMap = new HashMap<>();
         for (String path : paths) {
-            StorageObjectDTO dto;
+            StorageObjectDTOResponse dto;
             if (PathUtil.isDir(path)) {
-                dto = new StorageObjectDTO(path,
+                dto = new StorageObjectDTOResponse(path,
                         path.replace(PathUtil.getParentPath(path), ""),
                         FileType.FOLDER, fileStorage.getDirectChildCount(userId, path));
             } else {
@@ -45,7 +45,7 @@ public class SearchService {
                         .filter(info -> info.getPath().equals(path))
                         .findAny()
                         .orElseThrow();
-                dto = new StorageObjectDTO(path,
+                dto = new StorageObjectDTOResponse(path,
                         path.replace(PathUtil.getParentPath(path), ""),
                         type, storageObjectInfo.getSize());
 
@@ -53,7 +53,7 @@ public class SearchService {
             dtoMap.put(path, dto);
         }
         return dtoMap.values().stream()
-                .sorted(Comparator.comparing(StorageObjectDTO::getType).thenComparing(StorageObjectDTO::getName))
+                .sorted(Comparator.comparing(StorageObjectDTOResponse::getType).thenComparing(StorageObjectDTOResponse::getName))
                 .collect(Collectors.toList());
     }
 

@@ -3,7 +3,7 @@ package ru.denisovmaksim.cloudfilestorage.service;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.exception.RootFolderModificationException;
@@ -38,7 +38,7 @@ public class ExplorerService {
         minioDataAccessor.createPath(authUserId, newDirPath);
     }
 
-    public List<StorageObjectDTO> getFolder(@ValidPath(PathType.DIR) String directory) {
+    public List<StorageObjectDTOResponse> getFolder(@ValidPath(PathType.DIR) String directory) {
         Long authUserId = securityService.getAuthUserId();
         List<StorageObjectInfo> infos = minioMetadataAccessor.listObjectInfo(authUserId, directory)
                 .orElseThrow(() -> new NotFoundException(directory));
@@ -49,7 +49,7 @@ public class ExplorerService {
         }
         return infos.stream()
                 .map(StorageObjectDTOMapper::toDTO)
-                .sorted(Comparator.comparing(StorageObjectDTO::getType).thenComparing(StorageObjectDTO::getName))
+                .sorted(Comparator.comparing(StorageObjectDTOResponse::getType).thenComparing(StorageObjectDTOResponse::getName))
                 .collect(Collectors.toList());
     }
 

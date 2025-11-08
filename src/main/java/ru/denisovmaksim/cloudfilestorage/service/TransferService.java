@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
-import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
-import ru.denisovmaksim.cloudfilestorage.dto.RequestUploadFileDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
+import ru.denisovmaksim.cloudfilestorage.dto.request.UploadFileDTORequest;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.service.processing.ZipArchiver;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObject;
@@ -35,29 +35,29 @@ public class TransferService {
 
     private final ZipArchiver zipArchiver;
 
-    public void uploadFile(@ValidPath(PathType.DIR) String parentDirectory, @Valid RequestUploadFileDTO file) {
+    public void uploadFile(@ValidPath(PathType.DIR) String parentDirectory, @Valid UploadFileDTORequest file) {
         throwIfObjectExist(parentDirectory + file.getFilename());
         MultipartFile multipartFile = file.getMultipartFile();
         dataAccessor.saveObject(securityService.getAuthUserId(), parentDirectory, multipartFile);
     }
 
 
-    public NamedStreamDTO getFileAsStream(@ValidPath(PathType.FILEPATH) String filepath) {
+    public NamedStreamDTOResponse getFileAsStream(@ValidPath(PathType.FILEPATH) String filepath) {
         StorageObject storageObject = dataAccessor.getObject(securityService.getAuthUserId(), filepath);
         String baseName = PathUtil.getBaseName(filepath);
         String encodedFileName = URLEncoder.encode(baseName, StandardCharsets.UTF_8)
                 .replace("+", "%20");
         long size = metadataAccessor.getSize(securityService.getAuthUserId(), filepath);
-        return new NamedStreamDTO(encodedFileName, size, storageObject.stream());
+        return new NamedStreamDTOResponse(encodedFileName, size, storageObject.stream());
     }
 
-    public NamedStreamDTO getZipFolderAsStream(@ValidPath(PathType.DIR) String path) {
+    public NamedStreamDTOResponse getZipFolderAsStream(@ValidPath(PathType.DIR) String path) {
         String filename = PathUtil.getBaseName(path) + ".zip";
         String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8)
                 .replace("+", "%20");
         List<StorageObject> fileObjects = dataAccessor.getObjects(securityService.getAuthUserId(), path);
         ByteArrayOutputStream byteArrayOutputStream = zipArchiver.getByteArrayOutputStream(fileObjects, path);
-        return new NamedStreamDTO(encodedFileName, byteArrayOutputStream.size(),
+        return new NamedStreamDTOResponse(encodedFileName, byteArrayOutputStream.size(),
                 new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
     }
 

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ru.denisovmaksim.cloudfilestorage.dto.UserDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.request.UserDTORequest;
 import ru.denisovmaksim.cloudfilestorage.service.AuthenticationService;
 import ru.denisovmaksim.cloudfilestorage.service.UserService;
 
@@ -55,7 +55,7 @@ public class UserController {
     }
 
     @PostMapping(SIGN_UP)
-    public String signUp(@ModelAttribute @Valid UserDTO user,
+    public String signUp(@ModelAttribute @Valid UserDTORequest user,
                          RedirectAttributes attributes,
                          HttpServletRequest request,
                          HttpServletResponse response) {

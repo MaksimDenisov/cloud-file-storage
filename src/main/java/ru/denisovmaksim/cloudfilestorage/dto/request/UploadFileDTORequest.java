@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.dto;
+package ru.denisovmaksim.cloudfilestorage.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
 @AllArgsConstructor
 @Getter
-public final class RequestUploadFileDTO {
+public final class UploadFileDTORequest {
     @ValidPath(PathType.NAME)
     private String filename;
     private MultipartFile multipartFile;

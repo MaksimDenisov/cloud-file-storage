@@ -8,8 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
-import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
-import ru.denisovmaksim.cloudfilestorage.dto.RequestUploadFileDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
+import ru.denisovmaksim.cloudfilestorage.dto.request.UploadFileDTORequest;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
@@ -54,7 +54,7 @@ class TransferServiceTest {
     void uploadFileShouldSaveWhenNotExists() {
         MultipartFile file = mock(MultipartFile.class);
         when(minioMetadataAccessor.isExist(USER_ID, "dir/file.txt")).thenReturn(false);
-        RequestUploadFileDTO dto = new RequestUploadFileDTO("file.txt", file);
+        UploadFileDTORequest dto = new UploadFileDTORequest("file.txt", file);
         transferService.uploadFile("dir/", dto);
 
         verify(minioDataAccessor).saveObject(USER_ID, "dir/", file);
@@ -64,7 +64,7 @@ class TransferServiceTest {
     @DisplayName("Upload file should save it to storage.")
     void uploadFileShouldThrowWhenExists() {
         MultipartFile file = mock(MultipartFile.class);
-        RequestUploadFileDTO dto = new RequestUploadFileDTO("file.txt", file);
+        UploadFileDTORequest dto = new UploadFileDTORequest("file.txt", file);
 
         when(minioMetadataAccessor.isExist(eq(USER_ID), any())).thenReturn(true);
 
@@ -80,7 +80,7 @@ class TransferServiceTest {
         when(minioDataAccessor.getObject(USER_ID, "dir/file.txt"))
                 .thenReturn(new StorageObject("dir/file.txt",  stream));
 
-        NamedStreamDTO result = transferService.getFileAsStream("dir/file.txt");
+        NamedStreamDTOResponse result = transferService.getFileAsStream("dir/file.txt");
         assertEquals("file.txt", java.net.URLDecoder.decode(result.getName(), java.nio.charset.StandardCharsets.UTF_8));
     }
 

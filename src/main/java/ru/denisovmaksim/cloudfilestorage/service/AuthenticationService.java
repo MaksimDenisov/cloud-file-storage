@@ -10,7 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
-import ru.denisovmaksim.cloudfilestorage.dto.UserDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.request.UserDTORequest;
 
 @Service
 public class AuthenticationService {
@@ -25,7 +25,7 @@ public class AuthenticationService {
         this.securityContextRepository = securityContextRepository;
     }
 
-    public void authenticateUserAndSetSession(UserDTO user,
+    public void authenticateUserAndSetSession(UserDTORequest user,
                                               HttpServletRequest request, HttpServletResponse response) {
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(user.getName(), user.getPassword());

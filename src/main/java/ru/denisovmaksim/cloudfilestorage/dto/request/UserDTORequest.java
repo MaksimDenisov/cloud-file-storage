@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.dto;
+package ru.denisovmaksim.cloudfilestorage.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class UserDTO {
+public class UserDTORequest {
 
     @NotNull
     @Size(min = 3, message = "Length of name must be min 3 character")

@@ -1,6 +1,6 @@
 package ru.denisovmaksim.cloudfilestorage.mapper;
 
-import ru.denisovmaksim.cloudfilestorage.dto.LinkDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.response.LinkDTOResponse;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +13,12 @@ public final class PathLinksDTOMapper {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    public static List<LinkDTO> toChainLinksFromPath(String path) {
-        List<LinkDTO> links = new ArrayList<>();
+    public static List<LinkDTOResponse> toChainLinksFromPath(String path) {
+        List<LinkDTOResponse> links = new ArrayList<>();
         StringBuilder builder = new StringBuilder();
         for (String dir : path.split(PATH_SEPARATOR)) {
             builder.append(dir).append(PATH_SEPARATOR);
-            links.add(new LinkDTO(builder.toString(), dir));
+            links.add(new LinkDTOResponse(builder.toString(), dir));
         }
         return links;
     }

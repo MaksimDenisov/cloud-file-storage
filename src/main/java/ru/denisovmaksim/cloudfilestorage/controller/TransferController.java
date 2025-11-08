@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
-import ru.denisovmaksim.cloudfilestorage.dto.RequestUploadFileDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
+import ru.denisovmaksim.cloudfilestorage.dto.request.UploadFileDTORequest;
 import ru.denisovmaksim.cloudfilestorage.service.TransferService;
 
 import java.io.InputStream;
@@ -66,7 +66,7 @@ public class TransferController {
         }
         log.info("Upload file with name {}", multipartFile.getOriginalFilename());
         String filename = (multipartFile.getOriginalFilename() == null) ? "file" : multipartFile.getOriginalFilename();
-        RequestUploadFileDTO fileDTO = new RequestUploadFileDTO(filename, multipartFile);
+        UploadFileDTORequest fileDTO = new UploadFileDTORequest(filename, multipartFile);
         transferService.uploadFile(path, fileDTO);
         return REDIRECT_TO_ROOT;
     }
@@ -86,7 +86,7 @@ public class TransferController {
         return REDIRECT_TO_ROOT;
     }
 
-    private ResponseEntity<InputStreamResource> createStreamResponse(NamedStreamDTO dto) {
+    private ResponseEntity<InputStreamResource> createStreamResponse(NamedStreamDTOResponse dto) {
         InputStream inputStream = dto.getStream();
         InputStreamResource resource = new InputStreamResource(inputStream);
         long contentLength = dto.getLength();

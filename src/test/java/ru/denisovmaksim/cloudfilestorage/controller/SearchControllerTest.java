@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import ru.denisovmaksim.cloudfilestorage.model.FileType;
-import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.service.SearchService;
 
 import java.util.List;
@@ -35,12 +35,12 @@ class SearchControllerTest {
     @Test
     void getObjectsShouldAddAttributesToModelAndReturnViewName() {
         String query = "test";
-        StorageObjectDTO firstDTO =
-                new StorageObjectDTO("file1.txt", "file1.txt", FileType.UNKNOWN_FILE, 100L);
-        StorageObjectDTO secondDTO =
-                new StorageObjectDTO("file2.txt", "file2.txt", FileType.UNKNOWN_FILE, 100L);
+        StorageObjectDTOResponse firstDTO =
+                new StorageObjectDTOResponse("file1.txt", "file1.txt", FileType.UNKNOWN_FILE, 100L);
+        StorageObjectDTOResponse secondDTO =
+                new StorageObjectDTOResponse("file2.txt", "file2.txt", FileType.UNKNOWN_FILE, 100L);
 
-        List<StorageObjectDTO> mockResults = List.of(firstDTO, secondDTO);
+        List<StorageObjectDTOResponse> mockResults = List.of(firstDTO, secondDTO);
 
         Mockito.when(searchService.search(query)).thenReturn(mockResults);
 

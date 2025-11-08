@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.dto;
+package ru.denisovmaksim.cloudfilestorage.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,7 +6,7 @@ import ru.denisovmaksim.cloudfilestorage.model.FileType;
 
 @AllArgsConstructor
 @Getter
-public class StorageObjectDTO {
+public class StorageObjectDTOResponse {
 
     private final String path;
 

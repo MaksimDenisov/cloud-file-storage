@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
@@ -71,7 +71,7 @@ class ExplorerServiceTest {
     void getContentOfDirectory() {
         when(minioMetadataAccessor.listObjectInfo(USER_ID, "dir/")).thenReturn(Optional.of(List.of()));
 
-        List<StorageObjectDTO> result = explorerService.getFolder("dir/");
+        List<StorageObjectDTOResponse> result = explorerService.getFolder("dir/");
         assertNotNull(result);
     }
 

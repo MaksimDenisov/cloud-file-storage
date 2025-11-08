@@ -43,7 +43,7 @@
                             </thead>
                             <tbody>
                             <tr th:each="item : ${storageObjects}" th:switch="${#strings.toString(item.getType())}">
-                                <!-- @thymesVar id="item" type="ru.denisovmaksim.cloudfilestorage.dto.StorageObjectDTO" -->
+                                <!-- @thymesVar id="item" type="ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse" -->
                                 <!-- Icon -->
                                 <td th:switch="${item.getType().name()}">
                                     <i th:case="'FOLDER'" class="bi bi-folder h5 text-secondary"></i>

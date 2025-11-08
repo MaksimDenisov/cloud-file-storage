@@ -3,7 +3,7 @@ package ru.denisovmaksim.cloudfilestorage.service;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import ru.denisovmaksim.cloudfilestorage.dto.NamedStreamDTO;
+import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.exception.ImageProcessingException;
 import ru.denisovmaksim.cloudfilestorage.service.processing.ImageResizer;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
@@ -29,7 +29,7 @@ public class PreviewService {
 
     private final ImageResizer imageResizer;
 
-    public NamedStreamDTO getImage(String filepath) {
+    public NamedStreamDTOResponse getImage(String filepath) {
         StorageObject storageObject = dataAccessor.getObject(securityService.getAuthUserId(), filepath);
         String baseName = PathUtil.getBaseName(filepath);
         String encodedFileName = URLEncoder.encode(baseName, StandardCharsets.UTF_8)
@@ -43,6 +43,6 @@ public class PreviewService {
         } catch (Exception e) {
             throw new ImageProcessingException(e);
         }
-        return new NamedStreamDTO(encodedFileName, os.size(), resizedStream);
+        return new NamedStreamDTOResponse(encodedFileName, os.size(), resizedStream);
     }
 }
