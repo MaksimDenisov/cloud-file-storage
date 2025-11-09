@@ -97,7 +97,7 @@ public class MinioMetadataAccessor {
      * @param query  Searching substring
      * @return a list of storage object information if present
      */
-    public List<StorageObjectInfo> searchObjectInfo(Long userId, String path, String query) {
+    public List<StorageObjectInfo> findObjectInfosBySubstring(Long userId, String path, String query) {
         log.info("Searching objects info at path '{}' for userId={}", path, userId);
         List<Item> items = objectFetcher.getMinioItems(userId, path, true)
                 .orElseGet(Collections::emptyList);

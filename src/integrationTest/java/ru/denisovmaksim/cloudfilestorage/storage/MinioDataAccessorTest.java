@@ -247,7 +247,7 @@ class MinioDataAccessorTest {
         minioDataAccessor.createPath(USER_ID, "File/");
         minioDataAccessor.createPath(USER_ID, "NotContain/FolderName/");
 
-        List<StorageObjectInfo> infos = minioMetadataAccessor.searchObjectInfo(USER_ID, "", "File");
+        List<StorageObjectInfo> infos = minioMetadataAccessor.findObjectInfosBySubstring(USER_ID, "", "File");
 
         Assertions.assertThat(infos).hasSize(3);
     }

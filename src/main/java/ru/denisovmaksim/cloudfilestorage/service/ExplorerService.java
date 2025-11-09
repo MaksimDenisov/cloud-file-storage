@@ -49,7 +49,8 @@ public class ExplorerService {
         }
         return infos.stream()
                 .map(StorageObjectDTOMapper::toDTO)
-                .sorted(Comparator.comparing(StorageObjectDTOResponse::getType).thenComparing(StorageObjectDTOResponse::getName))
+                .sorted(Comparator.comparing(StorageObjectDTOResponse::getType)
+                        .thenComparing(StorageObjectDTOResponse::getName))
                 .collect(Collectors.toList());
     }
 

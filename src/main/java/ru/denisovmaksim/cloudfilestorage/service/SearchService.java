@@ -3,57 +3,53 @@ package ru.denisovmaksim.cloudfilestorage.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.denisovmaksim.cloudfilestorage.model.FileType;
+import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse;
+import ru.denisovmaksim.cloudfilestorage.model.FileType;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
 @Slf4j
 public class SearchService {
 
-    private final MinioMetadataAccessor fileStorage;
+    private final MinioMetadataAccessor metadataAccessor;
 
     private final SecurityService securityService;
 
     public List<StorageObjectDTOResponse> search(String query) {
         Long userId = securityService.getAuthUserId();
-        List<StorageObjectInfo> objectInfos = fileStorage.searchObjectInfo(userId, "", query).stream().toList();
-        objectInfos.forEach(a -> log.info("File {} at path {}", a.getName(), a.getPath()));
+        List<StorageObjectInfo> objectInfos = metadataAccessor
+                .findObjectInfosBySubstring(userId, "", query).stream().toList();
+        objectInfos.forEach(a -> log.info("Found {}", a.getPath()));
         Set<String> paths = getPathsContainsSubstring(objectInfos, query);
-        paths.forEach(path -> log.info("Find path {}", path));
-        Map<String, StorageObjectDTOResponse> dtoMap = new HashMap<>();
-        for (String path : paths) {
-            StorageObjectDTOResponse dto;
-            if (PathUtil.isDir(path)) {
-                dto = new StorageObjectDTOResponse(path,
-                        path.replace(PathUtil.getParentPath(path), ""),
-                        FileType.FOLDER, fileStorage.getDirectChildCount(userId, path));
-            } else {
-                FileType type = FileType.UNKNOWN_FILE;
-                StorageObjectInfo storageObjectInfo = objectInfos.stream()
-                        .filter(info -> info.getPath().equals(path))
-                        .findAny()
-                        .orElseThrow();
-                dto = new StorageObjectDTOResponse(path,
-                        path.replace(PathUtil.getParentPath(path), ""),
-                        type, storageObjectInfo.getSize());
-
-            }
-            dtoMap.put(path, dto);
+        for (StorageObjectInfo info : objectInfos) {
+            paths.remove(info.getPath());
         }
-        return dtoMap.values().stream()
-                .sorted(Comparator.comparing(StorageObjectDTOResponse::getType).thenComparing(StorageObjectDTOResponse::getName))
+        List<StorageObjectInfo> phantomFolders = new ArrayList<>();
+        for (String path : paths) {
+            log.info("Found folder {}", path);
+            String name = PathUtil.getBaseName(path);
+            boolean isDir = PathUtil.isDir(path);
+            Long size = metadataAccessor.getDirectChildCount(securityService.getAuthUserId(), path);
+            StorageObjectInfo storageObjectInfo = new StorageObjectInfo(path, name, isDir, size);
+            phantomFolders.add(storageObjectInfo);
+        }
+        return Stream.concat(objectInfos.stream(), phantomFolders.stream())
+                .map(StorageObjectDTOMapper::toDTO)
+                .filter(dto -> dto.getName().contains(query))
+                .sorted(Comparator.comparing((StorageObjectDTOResponse dto) -> dto.getType() == FileType.FOLDER ? 0 : 1)
+                        .thenComparing(StorageObjectDTOResponse::getName))
                 .collect(Collectors.toList());
     }
 

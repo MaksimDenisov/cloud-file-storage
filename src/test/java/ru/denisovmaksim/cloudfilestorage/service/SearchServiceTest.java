@@ -39,7 +39,7 @@ class SearchServiceTest {
 
         List<StorageObjectDTOResponse> expected = List.of(
                 new StorageObjectDTOResponse("documents/" + "reports/",
-                        "reports/", FileType.FOLDER, 2L),
+                        "reports", FileType.FOLDER, 2L),
                 new StorageObjectDTOResponse(parentDir1 + "report1.txt",
                         "report1.txt", FileType.UNKNOWN_FILE, 1000L),
                 new StorageObjectDTOResponse(parentDir2 + "report2.txt",
@@ -53,7 +53,7 @@ class SearchServiceTest {
 
         when(securityService.getAuthUserId()).thenReturn(userId);
         when(minioMetadataAccessor.getDirectChildCount(userId, "documents/reports/")).thenReturn(2L);
-        when(minioMetadataAccessor.searchObjectInfo(userId, "", query)).thenReturn(mockInfos);
+        when(minioMetadataAccessor.findObjectInfosBySubstring(userId, "", query)).thenReturn(mockInfos);
 
         List<StorageObjectDTOResponse> actual = searchService.search(query);
         actual.forEach(System.out::println);

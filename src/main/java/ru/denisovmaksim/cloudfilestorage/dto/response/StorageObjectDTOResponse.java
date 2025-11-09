@@ -8,7 +8,7 @@ import ru.denisovmaksim.cloudfilestorage.model.FileType;
 @Getter
 public class StorageObjectDTOResponse {
 
-    private final String path;
+    private final String fullPath;
 
     private final String name;
 
