@@ -8,5 +8,5 @@ logging:
   level:
     org:
       springframework:
-        web: debug
-    ROOT: debug
+        web: info
+    ROOT: info

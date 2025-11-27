@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @Import(IntegrationTestConfiguration.class)
-@Deprecated
 class MinioDataAccessorTest {
     private static final Long USER_ID = 1L;
     private static final String BUCKET = "user-files";

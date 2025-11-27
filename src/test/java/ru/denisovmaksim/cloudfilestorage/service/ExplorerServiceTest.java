@@ -92,7 +92,7 @@ class ExplorerServiceTest {
         explorerService.renameFile("dir/old.txt", "new.txt");
 
         verify(minioDataAccessor).copyOneObject(USER_ID, "dir/old.txt", "dir/new.txt");
-        verify(minioDataAccessor).deleteObjects(USER_ID, "dir/old.txt");
+        verify(minioDataAccessor).deleteOneObject(USER_ID, "dir/old.txt");
     }
 
     @Test

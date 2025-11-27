@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@Deprecated
 @Import(IntegrationTestConfiguration.class)
 class MinioMetadataAccessorTest {
 
@@ -42,10 +41,6 @@ class MinioMetadataAccessorTest {
 
     @Autowired
     private MinioMetadataAccessor minioMetadataAccessor;
-
-
-
-
 
     @Test
     void getStorageObjectsByNotExistPath() {

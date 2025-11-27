@@ -13,7 +13,13 @@ public class MinioPathResolver {
     private static final int MINIO_MAX_PREFIX_BYTE_LENGTH = 1024;
 
     String resolveMinioPath(Long userId, String path) {
-        path = path.replaceAll("/{2,}", "/");
+        if (!PathUtil.isValid(path)) {
+            String message = String.format("The must contains only : %s %s",
+                    PathUtil.PATH_SEPARATOR,
+                    PathUtil.AVAILABLE_CHARS);
+            throw new IllegalArgumentException(message);
+        }
+        path = PathUtil.normalize(getUserFolder(userId) + path);
         int byteLength = path.getBytes(StandardCharsets.UTF_8).length;
         if (byteLength > MINIO_MAX_PREFIX_BYTE_LENGTH) {
             String message = String.format("The path size %s exceed %d bytes",
@@ -21,13 +27,7 @@ public class MinioPathResolver {
             log.error(message);
             throw new IllegalArgumentException(message);
         }
-        if (!PathUtil.isValid(path)) {
-            String message = String.format("The must contains only : %s %s",
-                    PathUtil.PATH_SEPARATOR,
-                    PathUtil.AVAILABLE_CHARS);
-            throw new IllegalArgumentException(message);
-        }
-        return getUserFolder(userId) + path;
+        return path;
     }
 
     String resolvePathFromMinioObjectName(Long userId, String objectName) {

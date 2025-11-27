@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -132,7 +133,8 @@ public class MinioDataAccessor {
                 minioClient.putObject(
                         PutObjectArgs.builder()
                                 .bucket(bucket)
-                                .object(resolver.resolveMinioPath(userId, path + file.getOriginalFilename()))
+                                .object(resolver.resolveMinioPath(userId, PathUtil.ensureDirectoryPath(path)
+                                        + file.getOriginalFilename()))
                                 .stream(file.getInputStream(), file.getSize(), -1)
                                 .contentType(file.getContentType())
                                 .build()
@@ -202,6 +204,20 @@ public class MinioDataAccessor {
                                         RemoveObjectArgs.builder().bucket(bucket)
                                                 .object(item.objectName())
                                                 .build()))));
+        MinioExceptionHandler.interceptMinioExceptions(() -> minioClient.removeObject(
+                RemoveObjectArgs.builder().bucket(bucket)
+                        .object(resolver.resolveMinioPath(userId, path))
+                        .build()));
+    }
+
+    /**
+     * Deletes one object under the specified path, including the folder itself.
+     *
+     * @param userId the ID of the user
+     * @param path   the path to delete
+     */
+    public void deleteOneObject(Long userId, String path) {
+        log.info("Deleting one object at path '{}' for userId={}", path, userId);
         MinioExceptionHandler.interceptMinioExceptions(() -> minioClient.removeObject(
                 RemoveObjectArgs.builder().bucket(bucket)
                         .object(resolver.resolveMinioPath(userId, path))

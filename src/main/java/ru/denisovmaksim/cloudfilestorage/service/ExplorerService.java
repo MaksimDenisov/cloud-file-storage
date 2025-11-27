@@ -66,7 +66,7 @@ public class ExplorerService {
         String dstPath = parentDirectory + newFileName;
         throwIfObjectExist(dstPath);
         minioDataAccessor.copyOneObject(authUserId, filepath, dstPath);
-        minioDataAccessor.deleteObjects(authUserId, filepath);
+        minioDataAccessor.deleteOneObject(authUserId, filepath);
     }
 
     public void renameFolder(@ValidPath(PathType.DIR) String directory,
