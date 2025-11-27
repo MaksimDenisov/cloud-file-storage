@@ -38,18 +38,19 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-thymeleaf:3.2.4',
             'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.3.0',
             'org.springframework.boot:spring-boot-starter-security:3.0.4',
-            'mysql:mysql-connector-java:8.0.28',
-            'io.minio:minio:8.5.11',
+            'mysql:mysql-connector-java:8.0.33',
+            'io.minio:minio:8.6.0',
             'net.coobird:thumbnailator:0.4.20'
     )
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 
-    testImplementation "org.testcontainers:testcontainers:1.20.1"
-    testImplementation "org.testcontainers:junit-jupiter:1.19.3"
-    testImplementation "org.testcontainers:mysql:1.20.1"
-    testImplementation "org.testcontainers:minio:1.20.6"
+
+    testImplementation 'org.testcontainers:testcontainers:2.0.2'
+    testImplementation "org.testcontainers:junit-jupiter:1.21.3"
+    testImplementation 'org.testcontainers:mysql:1.21.3'
+    testImplementation "org.testcontainers:minio:1.21.3"
     testImplementation 'com.redis.testcontainers:testcontainers-redis:1.6.4'
 
     runtimeOnly 'org.postgresql:postgresql'
