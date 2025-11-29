@@ -21,9 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("it")
 @Import({IntegrationTestConfiguration.class, StorageFixture.class})
 @Testcontainers
-public class ExplorerServiceIT {
+public class ObjectOperationsServiceIT {
     @Autowired
     private ExplorerService explorerService;
+
+    @Autowired
+    private ObjectOperationsService objectOperationsService;
 
     @Autowired
     private StorageFixture storageFixture;
@@ -42,7 +45,7 @@ public class ExplorerServiceIT {
     void shouldRenameFile() {
         storageFixture.file("", "file", "Content");
 
-        explorerService.renameFile("file", "new-file");
+        objectOperationsService.renameFile("file", "new-file");
 
         List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
         assertThat(actual)
@@ -57,10 +60,10 @@ public class ExplorerServiceIT {
     }
 
     @Test
-    void shouldRenameFileWithSamePrefix() {
+    void shouldRenameFileWithSamePrefixLonger() {
         storageFixture.file("", "file", "Content");
 
-        explorerService.renameFile("file", "file.txt");
+        objectOperationsService.renameFile("file", "file.txt");
 
         List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
         assertThat(actual)

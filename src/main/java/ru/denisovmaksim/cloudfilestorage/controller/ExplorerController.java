@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.mapper.PathLinksDTOMapper;
 import ru.denisovmaksim.cloudfilestorage.service.ExplorerService;
+import ru.denisovmaksim.cloudfilestorage.service.ObjectOperationsService;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 
 
@@ -18,10 +19,9 @@ import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 @AllArgsConstructor
 @Slf4j
 public class ExplorerController {
-
     private static final String REDIRECT_TO_ROOT = "redirect:/";
-
     private final ExplorerService explorerService;
+    private final ObjectOperationsService objectOperationsService;
 
     @PostMapping("/add-folder")
     public String addFolder(@ModelAttribute("folder-name") String folderName,
@@ -31,7 +31,7 @@ public class ExplorerController {
         if (!path.isEmpty()) {
             redirectAttributes.addAttribute("path", path);
         }
-        explorerService.createFolder(PathUtil.ensureDirectoryPath(path + folderName));
+        objectOperationsService.createFolder(PathUtil.ensureDirectoryPath(path + folderName));
         return REDIRECT_TO_ROOT;
     }
 
@@ -62,7 +62,7 @@ public class ExplorerController {
         if (!parentPath.isEmpty()) {
             redirectAttributes.addAttribute("path", parentPath);
         }
-        explorerService.renameFolder(folderPath, newFolderName);
+        objectOperationsService.renameFolder(folderPath, newFolderName);
         return REDIRECT_TO_ROOT;
     }
 
@@ -74,7 +74,7 @@ public class ExplorerController {
         if (!parentPath.isEmpty()) {
             redirectAttributes.addAttribute("path", parentPath);
         }
-        explorerService.deleteFolder(folderPath);
+        objectOperationsService.deleteFolder(folderPath);
         return REDIRECT_TO_ROOT;
     }
 
@@ -85,7 +85,7 @@ public class ExplorerController {
         String parentPath = PathUtil.getParentPath(path);
         log.info("Rename file from {} to {}", path, parentPath + newFileName);
         redirectAttributes.addAttribute("path", parentPath);
-        explorerService.renameFile(path, newFileName);
+        objectOperationsService.renameFile(path, newFileName);
         return REDIRECT_TO_ROOT;
     }
 
@@ -94,7 +94,7 @@ public class ExplorerController {
         log.info("Delete file with path {}", filepath);
         String redirectPath = PathUtil.getParentPath(filepath);
         redirectAttributes.addAttribute("path", redirectPath);
-        explorerService.deleteFile(filepath);
+        objectOperationsService.deleteFile(filepath);
         return REDIRECT_TO_ROOT;
     }
 }

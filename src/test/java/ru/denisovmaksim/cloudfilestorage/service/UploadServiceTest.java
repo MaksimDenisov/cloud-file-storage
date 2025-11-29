@@ -8,18 +8,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
-import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.dto.request.UploadFileDTORequest;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
-import ru.denisovmaksim.cloudfilestorage.storage.StorageObject;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -28,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TransferServiceTest {
+class UploadServiceTest {
 
     @Mock
     private MinioMetadataAccessor minioMetadataAccessor;
@@ -40,7 +35,7 @@ class TransferServiceTest {
     private SecurityService securityService;
 
     @InjectMocks
-    private TransferService transferService;
+    private UploadService uploadService;
 
     private static final Long USER_ID = 1L;
 
@@ -55,7 +50,7 @@ class TransferServiceTest {
         MultipartFile file = mock(MultipartFile.class);
         when(minioMetadataAccessor.isExist(USER_ID, "dir/file.txt")).thenReturn(false);
         UploadFileDTORequest dto = new UploadFileDTORequest("file.txt", file);
-        transferService.uploadFile("dir/", dto);
+        uploadService.uploadFile("dir/", dto);
 
         verify(minioDataAccessor).saveObject(USER_ID, "dir/", file);
     }
@@ -69,19 +64,7 @@ class TransferServiceTest {
         when(minioMetadataAccessor.isExist(eq(USER_ID), any())).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class,
-                () -> transferService.uploadFile("dir/", dto));
-    }
-
-    @Test
-    @DisplayName("Get file should return stream.")
-    void getFileShouldReturnStreamDTO() {
-        InputStream stream = new ByteArrayInputStream("test".getBytes());
-
-        when(minioDataAccessor.getObject(USER_ID, "dir/file.txt"))
-                .thenReturn(new StorageObject("dir/file.txt",  stream));
-
-        NamedStreamDTOResponse result = transferService.getFileAsStream("dir/file.txt");
-        assertEquals("file.txt", java.net.URLDecoder.decode(result.getName(), java.nio.charset.StandardCharsets.UTF_8));
+                () -> uploadService.uploadFile("dir/", dto));
     }
 
     @Test
@@ -93,7 +76,7 @@ class TransferServiceTest {
 
         when(minioMetadataAccessor.isExist(USER_ID, "folder")).thenReturn(false);
 
-        transferService.uploadFolder("", files);
+        uploadService.uploadFolder("", files);
 
         verify(minioDataAccessor).saveObject(USER_ID, "", file);
     }
