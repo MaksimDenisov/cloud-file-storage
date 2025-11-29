@@ -76,4 +76,22 @@ public class ObjectOperationsServiceIT {
                     assertThat(dto.getName()).isEqualTo("file");
                 });
     }
+
+    @Test
+    void shouldRenameFileWithSamePrefixShorter() {
+        storageFixture.file("", "file.txt", "Content");
+
+        objectOperationsService.renameFile("file.txt", "file");
+
+        List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
+        assertThat(actual)
+                .anySatisfy(dto -> {
+                    assertThat(dto.getFullPath()).isEqualTo("file");
+                    assertThat(dto.getName()).isEqualTo("filet");
+                });
+        assertThat(actual)
+                .noneSatisfy(dto -> {
+                    assertThat(dto.getName()).isEqualTo("file.txt");
+                });
+    }
 }
