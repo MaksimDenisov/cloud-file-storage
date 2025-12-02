@@ -1,10 +1,12 @@
 package ru.denisovmaksim.cloudfilestorage.storage;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 
 @Getter
+@AllArgsConstructor
 public final class StorageObjectInfo {
 
     private final String path;
@@ -15,11 +17,4 @@ public final class StorageObjectInfo {
 
     @Setter
     private long size;
-
-    public StorageObjectInfo(String path, String name, boolean isDir, long size) {
-        this.path = path;
-        this.name = name;
-        this.dir = isDir;
-        this.size = size;
-    }
 }

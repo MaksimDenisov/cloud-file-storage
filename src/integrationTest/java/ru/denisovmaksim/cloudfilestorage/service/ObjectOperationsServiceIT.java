@@ -11,7 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.denisovmaksim.cloudfilestorage.IntegrationTestConfiguration;
 import ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse;
-import ru.denisovmaksim.cloudfilestorage.fixture.StorageFixture;
+import ru.denisovmaksim.cloudfilestorage.service.fixture.StorageFixture;
 
 import java.util.List;
 

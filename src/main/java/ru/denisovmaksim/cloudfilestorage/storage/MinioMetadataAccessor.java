@@ -113,7 +113,7 @@ public class MinioMetadataAccessor {
      * Returns the number of direct children for a given path.
      *
      * @param userId the ID of the user
-     * @param path   the folder path to delete
+     * @param path    the logical user path
      * @return the count of child items
      */
     public Long getDirectChildCount(Long userId, String path) {

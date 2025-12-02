@@ -7,7 +7,6 @@ import io.minio.errors.MinioException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 
 import java.io.IOException;
@@ -16,7 +15,6 @@ import java.security.NoSuchAlgorithmException;
 
 
 @Configuration()
-@Profile({"dev", "prod"})
 public class MinioConfig {
     @Value("${minio.endpoint}")
     private String endpoint;

@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.fixture;
+package ru.denisovmaksim.cloudfilestorage.service.fixture;
 
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.mock.web.MockMultipartFile;
