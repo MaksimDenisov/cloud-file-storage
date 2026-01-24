@@ -27,7 +27,7 @@ public class ObjectOperationsService {
         Long authUserId = securityService.getAuthUserId();
         String newDirPath = PathUtil.ensureDirectoryPath(path);
         throwIfObjectExist(newDirPath);
-        minioDataAccessor.createPath(authUserId, newDirPath);
+        minioMetadataAccessor.createPath(authUserId, newDirPath);
     }
 
     public void renameFile(@ValidPath(PathType.FILEPATH) String filepath,
@@ -49,7 +49,7 @@ public class ObjectOperationsService {
 
         Long authUserId = securityService.getAuthUserId();
         if (minioDataAccessor.copyObjects(authUserId, directory, newPath) == 0) {
-            minioDataAccessor.createPath(authUserId, newPath);
+            minioMetadataAccessor.createPath(authUserId, newPath);
         }
         minioDataAccessor.deleteObjects(authUserId, directory);
     }
@@ -60,7 +60,7 @@ public class ObjectOperationsService {
         String parentPath = PathUtil.getParentPath(directory);
         minioDataAccessor.deleteObjects(authUserId, directory);
         if (!minioMetadataAccessor.isExist(authUserId, parentPath)) {
-            minioDataAccessor.createPath(authUserId, parentPath);
+            minioMetadataAccessor.createPath(authUserId, parentPath);
         }
     }
 
@@ -69,7 +69,7 @@ public class ObjectOperationsService {
         String parentDirectory = PathUtil.getParentPath(filePath);
         minioDataAccessor.deleteObjects(authUserId, filePath);
         if (!minioMetadataAccessor.isExist(authUserId, parentDirectory)) {
-            minioDataAccessor.createPath(authUserId, parentDirectory);
+            minioMetadataAccessor.createPath(authUserId, parentDirectory);
         }
     }
 

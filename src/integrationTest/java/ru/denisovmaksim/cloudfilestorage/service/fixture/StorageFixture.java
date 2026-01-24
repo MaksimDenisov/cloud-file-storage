@@ -42,7 +42,7 @@ public class StorageFixture {
 
 
     public void folder(String path) {
-        dataAccessor.createPath(USER_ID, path);
+        metadataAccessor.createPath(USER_ID, path);
     }
 
     public void file(String path, String filename, String content) {

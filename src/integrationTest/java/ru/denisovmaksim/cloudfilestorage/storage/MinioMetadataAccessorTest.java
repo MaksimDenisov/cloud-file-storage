@@ -1,88 +1,21 @@
 package ru.denisovmaksim.cloudfilestorage.storage;
 
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.errors.MinioException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.testcontainers.containers.MinIOContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.storage.assertion.StorageObjectInfoListAssert;
-import ru.denisovmaksim.cloudfilestorage.storage.fixtures.MinioFixture;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static ru.denisovmaksim.cloudfilestorage.storage.fixtures.MinioFixture.BUCKET;
 import static ru.denisovmaksim.cloudfilestorage.storage.fixtures.MinioFixture.USER_ID;
 
 
 @SpringJUnitConfig
 @Testcontainers
-@Import({MinioMetadataAccessor.class,
-        MinioPathResolver.class,
-        MinioObjectFetcher.class,
-        MinioFixture.class})
-class MinioMetadataAccessorTest {
-    @Container
-    private static final MinIOContainer MINIO_CONTAINER = new MinIOContainer("minio/minio");
-
-    @Autowired
-    private MinioMetadataAccessor minioMetadataAccessor;
-
-    @Autowired
-    private MinioFixture fixture;
-
-    @DynamicPropertySource
-    static void props(DynamicPropertyRegistry registry) {
-        registry.add("minio.url", () -> "http://" + MINIO_CONTAINER.getHost() +
-                ":" + MINIO_CONTAINER.getMappedPort(9000));
-        registry.add("minio.access-key", MINIO_CONTAINER::getUserName);
-        registry.add("minio.secret-key", MINIO_CONTAINER::getPassword);
-        registry.add("minio.bucket", () -> BUCKET);
-        registry.add("app.bucket", () -> BUCKET);
-    }
-
-    @TestConfiguration
-    static class Configuration {
-        @Bean
-        public MinioClient minioClient(
-                @Value("${minio.url}") String endpoint,
-                @Value("${minio.access-key}") String accessKey,
-                @Value("${minio.secret-key}") String secretKey,
-                @Value("${minio.bucket}") String bucket) {
-            try {
-                MinioClient minioClient =
-                        MinioClient.builder()
-                                .endpoint(endpoint)
-                                .credentials(accessKey, secretKey)
-                                .build();
-                boolean found =
-                        minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucket).build());
-                if (!found) {
-                    minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucket).build());
-                }
-                return minioClient;
-            } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
-                throw new FileStorageException(e);
-            }
-        }
-    }
+class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
 
     @BeforeEach
     void cleanUp() throws Exception {

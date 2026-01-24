@@ -2,6 +2,7 @@ package ru.denisovmaksim.cloudfilestorage.storage;
 
 import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
 import io.minio.Result;
 import io.minio.StatObjectArgs;
 import io.minio.messages.Item;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 
+import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +36,24 @@ public class MinioMetadataAccessor {
         this.resolver = resolver;
         this.bucket = bucket;
         this.objectFetcher = objectFetcher;
+    }
+
+    /**
+     * Creates an empty folder object in the storage for the specified user and path.
+     *
+     * @param userId the ID of the user
+     * @param path   the logical path to be created
+     */
+    public void createPath(Long userId, String path) {
+        log.info("Create path '{}' for userId={}", path, userId);
+        MinioExceptionHandler.interceptMinioExceptions(() ->
+                minioClient.putObject(
+                        PutObjectArgs.builder()
+                                .bucket(bucket)
+                                .object(resolver.resolveMinioPath(userId, path))
+                                .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
+                                .build())
+        );
     }
 
     /**

@@ -1,7 +1,6 @@
 package ru.denisovmaksim.cloudfilestorage.storage;
 
 import io.minio.ListObjectsArgs;
-import io.minio.MinioClient;
 import io.minio.RemoveObjectArgs;
 import io.minio.Result;
 import io.minio.messages.Item;
@@ -11,11 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.multipart.MultipartFile;
-import ru.denisovmaksim.cloudfilestorage.IntegrationTestConfiguration;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import ru.denisovmaksim.cloudfilestorage.storage.fixtures.MinioFixture;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,9 +25,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
-@Import(IntegrationTestConfiguration.class)
-class MinioDataAccessorTest {
+@SpringJUnitConfig
+@Testcontainers
+class MinioDataAccessorTest extends AbstractMinioIntegrationTest {
     private static final Long USER_ID = 1L;
     private static final String BUCKET = "user-files";
 
@@ -44,37 +44,11 @@ class MinioDataAccessorTest {
         }
     }
 
-    @Autowired
-    private MinioClient minioClient;
-
-
-    @Autowired
-    private MinioDataAccessor minioDataAccessor;
-
-
-    @Autowired
-    private MinioMetadataAccessor minioMetadataAccessor;
-
-    @Test
-    void createPath() {
-        minioDataAccessor.createPath(USER_ID, "folder/");
-
-        StorageObjectInfo expectedObject = new StorageObjectInfo("folder/", "folder", true, 0);
-
-        List<StorageObjectInfo> actualObjects = minioMetadataAccessor.listObjectInfo(USER_ID, "").get();
-
-        Assertions.assertThat(actualObjects)
-                .as("Count of objects")
-                .hasSize(1)
-                .usingRecursiveFieldByFieldElementComparator()
-                .contains(expectedObject);
-    }
-
     @ParameterizedTest
     @ValueSource(strings = {"..", "*", "|", "\\", "\"", ";"})
     void createNotValidPath(String notValidPath) {
         assertThrows(IllegalArgumentException.class, () ->
-                minioDataAccessor.createPath(USER_ID, notValidPath)
+                minioMetadataAccessor.createPath(USER_ID, notValidPath)
         );
     }
 
@@ -82,7 +56,7 @@ class MinioDataAccessorTest {
     void createVeryLongPath() {
         String veryLongPath = "a".repeat(1025);
         assertThrows(IllegalArgumentException.class, () ->
-                minioDataAccessor.createPath(USER_ID, veryLongPath)
+                minioMetadataAccessor.createPath(USER_ID, veryLongPath)
         );
     }
 
@@ -220,7 +194,7 @@ class MinioDataAccessorTest {
         minioDataAccessor.saveObject(USER_ID, "", rootFile);
         minioDataAccessor.saveObject(USER_ID, "folder/", firstFile);
         minioDataAccessor.saveObject(USER_ID, "folder/", secondFile);
-        minioDataAccessor.createPath(USER_ID, "emptyFolder/");
+        minioMetadataAccessor.createPath(USER_ID, "emptyFolder/");
 
         Long rootCount = minioMetadataAccessor.getDirectChildCount(USER_ID, "");
         Long folderCount = minioMetadataAccessor.getDirectChildCount(USER_ID, "folder/");
@@ -243,8 +217,8 @@ class MinioDataAccessorTest {
         minioDataAccessor.saveObject(USER_ID, "", rootFile);
         minioDataAccessor.saveObject(USER_ID, "root/folder/", firstFile);
         minioDataAccessor.saveObject(USER_ID, "root/folder/", secondFile);
-        minioDataAccessor.createPath(USER_ID, "File/");
-        minioDataAccessor.createPath(USER_ID, "NotContain/FolderName/");
+        minioMetadataAccessor.createPath(USER_ID, "File/");
+        minioMetadataAccessor.createPath(USER_ID, "NotContain/FolderName/");
 
         List<StorageObjectInfo> infos = minioMetadataAccessor.findObjectInfosBySubstring(USER_ID, "", "File");
 

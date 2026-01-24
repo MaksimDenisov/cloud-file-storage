@@ -47,7 +47,7 @@ class ObjectOperationsServiceTest {
 
         objectOperationsService.createFolder("dir/");
 
-        verify(minioDataAccessor).createPath(USER_ID, "dir/");
+        verify(minioMetadataAccessor).createPath(USER_ID, "dir/");
     }
 
     @Test
@@ -81,7 +81,7 @@ class ObjectOperationsServiceTest {
         objectOperationsService.deleteFile("dir/file.txt");
 
         verify(minioDataAccessor).deleteObjects(USER_ID, "dir/file.txt");
-        verify(minioDataAccessor).createPath(USER_ID, "dir/");
+        verify(minioMetadataAccessor).createPath(USER_ID, "dir/");
     }
 
 
@@ -112,7 +112,7 @@ class ObjectOperationsServiceTest {
 
         objectOperationsService.renameFolder(currentPath, newFolderName);
 
-        verify(minioDataAccessor).createPath(USER_ID, newPath);
+        verify(minioMetadataAccessor).createPath(USER_ID, newPath);
         verify(minioDataAccessor).deleteObjects(USER_ID, currentPath);
     }
 
@@ -144,7 +144,7 @@ class ObjectOperationsServiceTest {
         objectOperationsService.deleteFolder(path);
 
         verify(minioDataAccessor).deleteObjects(USER_ID, path);
-        verify(minioDataAccessor).createPath(USER_ID, parentPath);
+        verify(minioMetadataAccessor).createPath(USER_ID, parentPath);
     }
 
     @Test
@@ -158,6 +158,6 @@ class ObjectOperationsServiceTest {
         objectOperationsService.deleteFolder(path);
 
         verify(minioDataAccessor).deleteObjects(USER_ID, path);
-        verify(minioDataAccessor, never()).createPath(any(), any());
+        verify(minioMetadataAccessor, never()).createPath(any(), any());
     }
 }

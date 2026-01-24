@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,24 +36,6 @@ public class MinioDataAccessor {
         this.resolver = resolver;
         this.bucket = bucket;
         this.objectFetcher = objectFetcher;
-    }
-
-    /**
-     * Creates an empty folder object in the storage for the specified user and path.
-     *
-     * @param userId the ID of the user
-     * @param path   the logical path to be created
-     */
-    public void createPath(Long userId, String path) {
-        log.info("Create path '{}' for userId={}", path, userId);
-        MinioExceptionHandler.interceptMinioExceptions(() ->
-                minioClient.putObject(
-                        PutObjectArgs.builder()
-                                .bucket(bucket)
-                                .object(resolver.resolveMinioPath(userId, path))
-                                .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
-                                .build())
-        );
     }
 
     /**
