@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-import ru.denisovmaksim.cloudfilestorage.service.ExplorerService;
 import ru.denisovmaksim.cloudfilestorage.service.StreamService;
 import ru.denisovmaksim.cloudfilestorage.util.FilesUtil;
 
@@ -18,14 +17,12 @@ import ru.denisovmaksim.cloudfilestorage.util.FilesUtil;
 public class StreamController {
     private final StreamService streamService;
 
-    private final ExplorerService explorerService;
-
     @GetMapping("/stream")
     public ResponseEntity<StreamingResponseBody> streamAudio(@RequestParam()
                                                              String filepath,
                                                              @RequestHeader(value = "Range", required = false)
                                                              String rangeHeader) {
-        Long fileLength = explorerService.getSize(filepath);
+        Long fileLength = streamService.getSize(filepath);
 
         long rangeStart = 0;
         long rangeEnd = fileLength - 1;

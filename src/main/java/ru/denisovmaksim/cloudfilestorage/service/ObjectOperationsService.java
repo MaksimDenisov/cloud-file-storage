@@ -59,7 +59,7 @@ public class ObjectOperationsService {
         Long authUserId = securityService.getAuthUserId();
         String parentPath = PathUtil.getParentPath(directory);
         minioDataAccessor.deleteObjects(authUserId, directory);
-        if (!minioMetadataAccessor.isExist(authUserId, parentPath)) {
+        if (!minioMetadataAccessor.isExistByPrefix(authUserId, parentPath)) {
             minioMetadataAccessor.createPath(authUserId, parentPath);
         }
     }
@@ -68,14 +68,14 @@ public class ObjectOperationsService {
         Long authUserId = securityService.getAuthUserId();
         String parentDirectory = PathUtil.getParentPath(filePath);
         minioDataAccessor.deleteObjects(authUserId, filePath);
-        if (!minioMetadataAccessor.isExist(authUserId, parentDirectory)) {
+        if (!minioMetadataAccessor.isExistByPrefix(authUserId, parentDirectory)) {
             minioMetadataAccessor.createPath(authUserId, parentDirectory);
         }
     }
 
     private void throwIfObjectExist(String path) {
         Long authUserId = securityService.getAuthUserId();
-        if (minioMetadataAccessor.isExist(authUserId, path)) {
+        if (minioMetadataAccessor.isExistByPrefix(authUserId, path)) {
             throw new ObjectAlreadyExistException(String.format("Path %s already exist", path));
         }
     }

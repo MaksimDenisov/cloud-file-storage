@@ -2,11 +2,13 @@ package ru.denisovmaksim.cloudfilestorage.storage;
 
 import io.minio.MinioClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MinIOContainer;
 import org.testcontainers.junit.jupiter.Container;
+import ru.denisovmaksim.cloudfilestorage.config.MinioProperties;
 import ru.denisovmaksim.cloudfilestorage.storage.fixtures.MinioFixture;
 
 @Import({MinioTestConfiguration.class,
@@ -14,7 +16,9 @@ import ru.denisovmaksim.cloudfilestorage.storage.fixtures.MinioFixture;
         MinioMetadataAccessor.class,
         MinioPathResolver.class,
         MinioObjectFetcher.class,
-        MinioFixture.class})
+        MinioFixture.class,
+        StorageObjectInfoMapper.class})
+@EnableConfigurationProperties(MinioProperties.class)
 public abstract class AbstractMinioIntegrationTest {
 
     public static final String BUCKET = "user-files";

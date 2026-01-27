@@ -7,15 +7,10 @@ import io.minio.messages.Item;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.denisovmaksim.cloudfilestorage.storage.fixtures.MinioFixture;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,12 +19,11 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static ru.denisovmaksim.cloudfilestorage.service.fixture.StorageFixture.USER_ID;
 
 @SpringJUnitConfig
 @Testcontainers
 class MinioDataAccessorTest extends AbstractMinioIntegrationTest {
-    private static final Long USER_ID = 1L;
-    private static final String BUCKET = "user-files";
 
     @BeforeEach
     void cleanUp() throws Exception {
@@ -42,22 +36,6 @@ class MinioDataAccessorTest extends AbstractMinioIntegrationTest {
             String objectName = object.get().objectName();
             minioClient.removeObject(RemoveObjectArgs.builder().bucket(BUCKET).object(objectName).build());
         }
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"..", "*", "|", "\\", "\"", ";"})
-    void createNotValidPath(String notValidPath) {
-        assertThrows(IllegalArgumentException.class, () ->
-                minioMetadataAccessor.createPath(USER_ID, notValidPath)
-        );
-    }
-
-    @Test
-    void createVeryLongPath() {
-        String veryLongPath = "a".repeat(1025);
-        assertThrows(IllegalArgumentException.class, () ->
-                minioMetadataAccessor.createPath(USER_ID, veryLongPath)
-        );
     }
 
     @Test
@@ -76,8 +54,8 @@ class MinioDataAccessorTest extends AbstractMinioIntegrationTest {
                     .isEqualTo(file.getBytes());
         }
 
-        assertTrue(minioMetadataAccessor.isExist(USER_ID, "folder/"));
-        assertTrue(minioMetadataAccessor.isExist(USER_ID, "folder/file.txt"));
+        assertTrue(minioMetadataAccessor.isExistByPrefix(USER_ID, "folder/"));
+        assertTrue(minioMetadataAccessor.isExistByPrefix(USER_ID, "folder/file.txt"));
         Assertions.assertThat(actual.path())
                 .as("Match path")
                 .isEqualTo("folder/file.txt");
@@ -207,6 +185,7 @@ class MinioDataAccessorTest extends AbstractMinioIntegrationTest {
 
     @Test
     void shouldSearchObjects() {
+        //TODO Extract to fixture
         MultipartFile firstFile = new MockMultipartFile("firstFile.txt", "firstFile.txt",
                 "text/plain", "First".getBytes());
         MultipartFile secondFile = new MockMultipartFile("secondFile.txt", "secondFile.txt",

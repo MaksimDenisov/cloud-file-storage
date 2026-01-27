@@ -3,7 +3,10 @@ package ru.denisovmaksim.cloudfilestorage.service;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 import ru.denisovmaksim.cloudfilestorage.validation.PathType;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
@@ -14,6 +17,7 @@ import java.io.InputStream;
 @AllArgsConstructor
 public class StreamService {
     private final MinioDataAccessor dataAccessor;
+    private final MinioMetadataAccessor minioMetadataAccessor;
     private final SecurityService securityService;
 
     public StreamingResponseBody getRange(@ValidPath(PathType.FILEPATH) String filepath,
@@ -39,5 +43,11 @@ public class StreamService {
                 current += bytesToRead;
             }
         };
+    }
+
+    public Long getSize(String path) {
+        StorageObjectInfo info = minioMetadataAccessor.getOne(securityService.getAuthUserId(), path)
+                .orElseThrow(() -> new NotFoundException(path));
+        return info.getSize();
     }
 }

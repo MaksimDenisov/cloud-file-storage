@@ -6,7 +6,6 @@ import org.springframework.validation.annotation.Validated;
 import ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 import ru.denisovmaksim.cloudfilestorage.validation.PathType;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 public class ExplorerService {
     private final MinioMetadataAccessor minioMetadataAccessor;
 
-    private final MinioDataAccessor minioDataAccessor;
+
 
     private final SecurityService securityService;
 
@@ -42,9 +41,5 @@ public class ExplorerService {
                 .collect(Collectors.toList());
     }
 
-    public Long getSize(@ValidPath(PathType.FILEPATH) String filepath) {
-        Long authUserId = securityService.getAuthUserId();
-        return minioMetadataAccessor.getSize(authUserId, filepath);
-    }
 
 }

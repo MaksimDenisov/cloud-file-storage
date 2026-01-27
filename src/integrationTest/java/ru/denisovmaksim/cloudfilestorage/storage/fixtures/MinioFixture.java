@@ -20,6 +20,7 @@ import java.util.Optional;
 public class MinioFixture {
     public static final Long USER_ID = 1L;
     public static final String BUCKET = "user-files";
+    public static final Integer MINIO_EXCEED_PREFIX_LENGTH = 1025;
     private final MinioClient minioClient;
 
     public MinioFixture(MinioClient minioClient) {

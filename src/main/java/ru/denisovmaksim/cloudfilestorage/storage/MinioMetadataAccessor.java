@@ -5,11 +5,12 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.Result;
 import io.minio.StatObjectArgs;
+import io.minio.StatObjectResponse;
 import io.minio.messages.Item;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
+import ru.denisovmaksim.cloudfilestorage.config.MinioProperties;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
@@ -22,21 +23,13 @@ import java.util.stream.StreamSupport;
  */
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class MinioMetadataAccessor {
     private final MinioClient minioClient;
     private final MinioPathResolver resolver;
-    private final String bucket;
     private final MinioObjectFetcher objectFetcher;
-
-    public MinioMetadataAccessor(MinioClient minioClient,
-                                 MinioPathResolver resolver,
-                                 MinioObjectFetcher objectFetcher,
-                                 @Value("${app.bucket}") String bucket) {
-        this.minioClient = minioClient;
-        this.resolver = resolver;
-        this.bucket = bucket;
-        this.objectFetcher = objectFetcher;
-    }
+    private final StorageObjectInfoMapper mapper;
+    private final MinioProperties properties;
 
     /**
      * Creates an empty folder object in the storage for the specified user and path.
@@ -49,7 +42,7 @@ public class MinioMetadataAccessor {
         MinioExceptionHandler.interceptMinioExceptions(() ->
                 minioClient.putObject(
                         PutObjectArgs.builder()
-                                .bucket(bucket)
+                                .bucket(properties.bucket())
                                 .object(resolver.resolveMinioPath(userId, path))
                                 .stream(new ByteArrayInputStream(new byte[]{}), 0, -1)
                                 .build())
@@ -63,11 +56,11 @@ public class MinioMetadataAccessor {
      * @param path   the virtual path to check for object existence
      * @return {@code true} if at least one object exists at the specified path; {@code false} otherwise
      */
-    public boolean isExist(Long userId, String path) {
+    public boolean isExistByPrefix(Long userId, String path) {
         log.info("Check exist path '{}' for userId={}", path, userId);
         Iterable<Result<Item>> results = minioClient.listObjects(
                 ListObjectsArgs.builder()
-                        .bucket(bucket)
+                        .bucket(properties.bucket())
                         .prefix(resolver.resolveMinioPath(userId, path))
                         .maxKeys(1)
                         .build()
@@ -75,24 +68,18 @@ public class MinioMetadataAccessor {
         return results.iterator().hasNext();
     }
 
-    /**
-     * Gets the size of an object in MinIO for the given user and path.
-     *
-     * @param userId user identifier
-     * @param path   relative object path
-     * @return object size in bytes, or {@code -1} if the object does not exist
-     */
-    public long getSize(Long userId, String path) {
-        log.info("Check exist path '{}' for userId={}", path, userId);
-        if (!isExist(userId, path)) {
-            return -1;
-        }
-        return MinioExceptionHandler.interceptMinioExceptions(() ->
-                minioClient.statObject(
-                        StatObjectArgs.builder()
-                                .bucket(bucket)
-                                .object(resolver.resolveMinioPath(userId, path))
-                                .build()).size());
+    public Optional<StorageObjectInfo> getOne(Long userId, String path) {
+        return MinioExceptionHandler.interceptMinioExceptions(() -> {
+            if (!isExistByPrefix(userId, path)) {
+                return Optional.empty();
+            }
+            StatObjectResponse stat = minioClient.statObject(
+                    StatObjectArgs.builder()
+                            .bucket(properties.bucket())
+                            .object(resolver.resolveMinioPath(userId, path))
+                            .build());
+            return Optional.of(mapper.from(userId, stat));
+        });
     }
 
     /**
@@ -106,7 +93,7 @@ public class MinioMetadataAccessor {
         log.info("Fetching objects info at path '{}' for userId={}", path, userId);
         return objectFetcher.getMinioItems(userId, path, false)
                 .map(list -> list.stream()
-                        .map(item -> toStorageObjectInfo(userId, item))
+                        .map(item -> mapper.from(userId, item))
                         .toList());
     }
 
@@ -125,7 +112,7 @@ public class MinioMetadataAccessor {
         return items.stream()
                 .filter(name -> resolver.resolvePathFromMinioObjectName(userId, name.objectName()).toUpperCase()
                         .contains(upperCaseQuery))
-                .map(item -> toStorageObjectInfo(userId, item))
+                .map(item -> mapper.from(userId, item))
                 .toList();
     }
 
@@ -133,7 +120,7 @@ public class MinioMetadataAccessor {
      * Returns the number of direct children for a given path.
      *
      * @param userId the ID of the user
-     * @param path    the logical user path
+     * @param path   the logical user path
      * @return the count of child items
      */
     public Long getDirectChildCount(Long userId, String path) {
@@ -141,7 +128,7 @@ public class MinioMetadataAccessor {
         String minioPath = resolver.resolveMinioPath(userId, path);
         Iterable<Result<Item>> minioItems = minioClient.listObjects(
                 ListObjectsArgs.builder()
-                        .bucket(bucket)
+                        .bucket(properties.bucket())
                         .prefix(minioPath)
                         .build());
         return StreamSupport.stream(minioItems.spliterator(), false)
@@ -149,19 +136,4 @@ public class MinioMetadataAccessor {
                 .filter(item -> !item.objectName().equals(minioPath))
                 .count();
     }
-
-    /**
-     * Map raw MinIO item to StorageObjectInfo
-     *
-     * @param userId the ID of the user
-     * @param item   raw MinIO item from storage
-     * @return a StorageObjectInfo object
-     */
-    private StorageObjectInfo toStorageObjectInfo(Long userId, Item item) {
-        String objectPath = resolver.resolvePathFromMinioObjectName(userId, item.objectName());
-        String baseName = PathUtil.getBaseName(objectPath);
-        boolean isDir = PathUtil.isDir(objectPath);
-        return new StorageObjectInfo(objectPath, baseName, isDir, item.size());
-    }
 }
-

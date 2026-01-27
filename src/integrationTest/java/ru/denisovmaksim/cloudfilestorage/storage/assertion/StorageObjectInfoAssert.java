@@ -3,6 +3,8 @@ package ru.denisovmaksim.cloudfilestorage.storage.assertion;
 import org.assertj.core.api.AbstractAssert;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 
+
+
 public class StorageObjectInfoAssert
         extends AbstractAssert<StorageObjectInfoAssert, StorageObjectInfo> {
 

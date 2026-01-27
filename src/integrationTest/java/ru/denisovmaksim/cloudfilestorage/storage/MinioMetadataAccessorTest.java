@@ -3,15 +3,21 @@ package ru.denisovmaksim.cloudfilestorage.storage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import ru.denisovmaksim.cloudfilestorage.service.fixture.StorageFixture;
+import ru.denisovmaksim.cloudfilestorage.storage.assertion.StorageObjectInfoAssert;
 import ru.denisovmaksim.cloudfilestorage.storage.assertion.StorageObjectInfoListAssert;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static ru.denisovmaksim.cloudfilestorage.storage.fixtures.MinioFixture.MINIO_EXCEED_PREFIX_LENGTH;
 import static ru.denisovmaksim.cloudfilestorage.storage.fixtures.MinioFixture.USER_ID;
-
 
 @SpringJUnitConfig
 @Testcontainers
@@ -23,9 +29,47 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
     }
 
     @Test
+    void shouldCreatePath() {
+        String path = "/folder/subfolder/";
+        minioMetadataAccessor.createPath(StorageFixture.USER_ID, path);
+        Optional<StorageObjectInfo> info = minioMetadataAccessor.getOne(USER_ID,path);
+        assertThat(info.isPresent()).isTrue();
+        StorageObjectInfoAssert.assertThat(info.get())
+                .isDirectory()
+                .hasName("subfolder")
+                .hasPath( "folder/subfolder/")
+                .hasSize(0);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"..", "*", "|", "\\", "\"", ";"})
+    @DisplayName("If path contains not accepted chars should throw exception.")
+    void shouldThrowExceptionWhenCreateNotValidPath(String notValidPath) {
+        assertThrows(IllegalArgumentException.class, () ->
+                minioMetadataAccessor.createPath(StorageFixture.USER_ID, notValidPath)
+        );
+    }
+
+    @Test
+    @DisplayName("If path length exceed 1024 bytes should throw exception.")
+    void shouldThrowExceptionWhenCreateVeryLongPath() {
+        String veryLongPath = "a".repeat(MINIO_EXCEED_PREFIX_LENGTH);
+        assertThrows(IllegalArgumentException.class, () ->
+                minioMetadataAccessor.createPath(StorageFixture.USER_ID, veryLongPath)
+        );
+    }
+
+    @Test
+    @DisplayName("Accessing metadata of a non-existent file should return empty")
+    void shouldReturnFalseOrEmptyWhenAccessingNonExistentFileMetadata() {
+        assertThat(minioMetadataAccessor.getOne(USER_ID, "not-exist-path"))
+                .isNotPresent();
+    }
+
+    @Test
     @DisplayName("Accessing metadata of a non-existent path should return false/empty")
     void shouldReturnFalseOrEmptyWhenAccessingNonExistentPathMetadata() {
-        assertThat(minioMetadataAccessor.isExist(USER_ID, "not-exist-path"))
+        assertThat(minioMetadataAccessor.isExistByPrefix(USER_ID, "not-exist-path"))
                 .isFalse();
         assertThat(minioMetadataAccessor.listObjectInfo(USER_ID, "not-exist-path"))
                 .isNotPresent();
@@ -41,23 +85,6 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
     }
 
     @Test
-    @DisplayName("Getting size of a non-existent path should return -1")
-    void shouldReturnMinusOneWhenGettingSizeOfNonExistentPath() {
-        assertThat(minioMetadataAccessor.getSize(USER_ID, "not-exist-path"))
-                .isEqualTo(-1);
-    }
-
-    @Test
-    @DisplayName("Getting size of an existing file should return its size")
-    void shouldReturnFileSizeWhenGettingSizeOfExistingFile() throws Exception {
-        String content = "Content";
-        fixture.file("user-1-files/file.txt", content);
-
-        assertThat(minioMetadataAccessor.getSize(USER_ID, "file.txt"))
-                .isEqualTo(content.length());
-    }
-
-    @Test
     @DisplayName("Getting direct child count of a non-existent path should return 0")
     void shouldReturnZeroWhenGettingDirectChildCountOfNonExistentPath() {
         assertThat(minioMetadataAccessor.getDirectChildCount(USER_ID, "not-exist-path"))
@@ -66,10 +93,10 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
 
     @Test
     @DisplayName("Getting direct child count of a existent path should return its sum of files and folders")
-    void shouldReturnSumOfFilesAndFoldersWhenGettingDirectChildCountOfExistingPath() throws Exception  {
+    void shouldReturnSumOfFilesAndFoldersWhenGettingDirectChildCountOfExistingPath() throws Exception {
         fixture.folder("user-1-files/folder/");
         fixture.folder("user-1-files/folder/folder");
-        fixture.file("user-1-files/folder/file.txt","content");
+        fixture.file("user-1-files/folder/file.txt", "content");
         fixture.file("user-1-files/file.txt", "content");
 
         assertThat(minioMetadataAccessor.getDirectChildCount(USER_ID, "/"))
@@ -82,17 +109,17 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
 
     @Test
     @DisplayName("search() should return DTOs based on query")
-    void shouldReturnObjectInfosWhenSearchingBySubstring() throws Exception  {
+    void shouldReturnObjectInfosWhenSearchingBySubstring() throws Exception {
         fixture.folder("user-1-files/folder/");
         fixture.folder("user-1-files/folder/folder");
         fixture.folder("user-1-files/folder/folder/folder.txt");
-        fixture.file("user-1-files/folder/file.txt","content");
+        fixture.file("user-1-files/folder/file.txt", "content");
         fixture.file("user-1-files/file.txt", "content");
 
         List<StorageObjectInfo> paths =
                 minioMetadataAccessor.findObjectInfosBySubstring(USER_ID, "/", "file");
 
         StorageObjectInfoListAssert.assertThat(paths)
-                .containsExactlyPaths("folder/file.txt","file.txt");
+                .containsExactlyPaths("folder/file.txt", "file.txt");
     }
 }
