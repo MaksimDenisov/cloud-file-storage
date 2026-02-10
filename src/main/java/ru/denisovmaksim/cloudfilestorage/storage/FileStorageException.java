@@ -1,4 +1,4 @@
-package ru.denisovmaksim.cloudfilestorage.exception;
+package ru.denisovmaksim.cloudfilestorage.storage;
 
 public class FileStorageException extends RuntimeException {
     public FileStorageException() {

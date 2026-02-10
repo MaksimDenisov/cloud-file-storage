@@ -3,8 +3,8 @@ package ru.denisovmaksim.cloudfilestorage.service.fixture;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 
 import java.nio.charset.StandardCharsets;
@@ -17,11 +17,11 @@ public class StorageFixture {
 
     public static final Long USER_ID = 1L;
 
-    private final MinioDataAccessor dataAccessor;
+    private final StorageDataAccessor dataAccessor;
 
-    private final MinioMetadataAccessor metadataAccessor;
+    private final StorageMetadataAccessor metadataAccessor;
 
-    public StorageFixture(MinioDataAccessor dataAccessor, MinioMetadataAccessor metadataAccessor) {
+    public StorageFixture(StorageDataAccessor dataAccessor, StorageMetadataAccessor metadataAccessor) {
         this.dataAccessor = dataAccessor;
         this.metadataAccessor = metadataAccessor;
     }

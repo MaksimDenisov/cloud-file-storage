@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.controller.UserController;
-import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
+import ru.denisovmaksim.cloudfilestorage.storage.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.exception.ImageProcessingException;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;

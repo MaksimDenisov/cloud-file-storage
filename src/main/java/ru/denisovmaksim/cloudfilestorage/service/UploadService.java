@@ -7,8 +7,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.dto.request.UploadFileDTORequest;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.validation.PathType;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
@@ -18,9 +18,9 @@ import java.util.List;
 @Validated
 @AllArgsConstructor
 public class UploadService {
-    private final MinioMetadataAccessor metadataAccessor;
+    private final StorageMetadataAccessor metadataAccessor;
 
-    private final MinioDataAccessor dataAccessor;
+    private final StorageDataAccessor dataAccessor;
 
     private final SecurityService securityService;
 

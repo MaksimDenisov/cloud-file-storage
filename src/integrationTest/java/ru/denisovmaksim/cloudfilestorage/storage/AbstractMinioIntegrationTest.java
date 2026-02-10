@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.MinIOContainer;
-import org.testcontainers.junit.jupiter.Container;
 import ru.denisovmaksim.cloudfilestorage.config.MinioProperties;
 import ru.denisovmaksim.cloudfilestorage.storage.fixtures.MinioFixture;
 

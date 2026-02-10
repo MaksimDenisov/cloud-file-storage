@@ -6,7 +6,7 @@ import org.springframework.validation.annotation.Validated;
 import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.exception.ImageProcessingException;
 import ru.denisovmaksim.cloudfilestorage.service.processing.ImageResizer;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObject;
 import ru.denisovmaksim.cloudfilestorage.util.FileTypeResolver;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
@@ -23,7 +23,7 @@ public class PreviewService {
 
     private static final int IMAGE_WIDTH = 800;
 
-    private final MinioDataAccessor dataAccessor;
+    private final StorageDataAccessor dataAccessor;
 
     private final SecurityService securityService;
 

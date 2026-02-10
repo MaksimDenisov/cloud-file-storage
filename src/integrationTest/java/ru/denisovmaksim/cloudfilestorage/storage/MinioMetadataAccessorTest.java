@@ -1,16 +1,23 @@
 package ru.denisovmaksim.cloudfilestorage.storage;
 
+import io.minio.errors.MinioException;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.denisovmaksim.cloudfilestorage.service.fixture.StorageFixture;
 import ru.denisovmaksim.cloudfilestorage.storage.assertion.StorageObjectInfoAssert;
 import ru.denisovmaksim.cloudfilestorage.storage.assertion.StorageObjectInfoListAssert;
 
+import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +28,7 @@ import static ru.denisovmaksim.cloudfilestorage.storage.fixtures.MinioFixture.US
 
 @SpringJUnitConfig
 @Testcontainers
+//TODO Complete MinioMetadataAccessorTest
 class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
 
     @BeforeEach
@@ -29,7 +37,8 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
     }
 
     @Test
-    void shouldCreatePath() {
+    @DisplayName("Create new path.")
+    void shouldCreatePath() throws Exception {
         String path = "/folder/subfolder/";
         minioMetadataAccessor.createPath(StorageFixture.USER_ID, path);
         Optional<StorageObjectInfo> info = minioMetadataAccessor.getOne(USER_ID,path);
@@ -61,14 +70,14 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
 
     @Test
     @DisplayName("Accessing metadata of a non-existent file should return empty")
-    void shouldReturnFalseOrEmptyWhenAccessingNonExistentFileMetadata() {
+    void shouldReturnFalseOrEmptyWhenAccessingNonExistentFileMetadata()  throws Exception {
         assertThat(minioMetadataAccessor.getOne(USER_ID, "not-exist-path"))
                 .isNotPresent();
     }
 
     @Test
     @DisplayName("Accessing metadata of a non-existent path should return false/empty")
-    void shouldReturnFalseOrEmptyWhenAccessingNonExistentPathMetadata() {
+    void shouldReturnFalseOrEmptyWhenAccessingNonExistentPathMetadata() throws Exception {
         assertThat(minioMetadataAccessor.isExistByPrefix(USER_ID, "not-exist-path"))
                 .isFalse();
         assertThat(minioMetadataAccessor.listObjectInfo(USER_ID, "not-exist-path"))
@@ -77,7 +86,7 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
 
     @Test
     @DisplayName("Root folder metadata should always be present")
-    void shouldAlwaysReturnMetadataForRootFolder() {
+    void shouldAlwaysReturnMetadataForRootFolder() throws Exception {
         assertThat(minioMetadataAccessor.listObjectInfo(USER_ID, "/"))
                 .isPresent();
         assertThat(minioMetadataAccessor.listObjectInfo(USER_ID, ""))
@@ -86,7 +95,7 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
 
     @Test
     @DisplayName("Getting direct child count of a non-existent path should return 0")
-    void shouldReturnZeroWhenGettingDirectChildCountOfNonExistentPath() {
+    void shouldReturnZeroWhenGettingDirectChildCountOfNonExistentPath()  throws Exception {
         assertThat(minioMetadataAccessor.getDirectChildCount(USER_ID, "not-exist-path"))
                 .isEqualTo(0);
     }
@@ -121,5 +130,51 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
 
         StorageObjectInfoListAssert.assertThat(paths)
                 .containsExactlyPaths("folder/file.txt", "file.txt");
+    }
+
+
+    @Test
+    void shouldReturnDirectChildCount() throws Exception {
+        MultipartFile firstFile = new MockMultipartFile("firstFile.txt", "firstFile.txt",
+                "text/plain", "First".getBytes());
+        MultipartFile secondFile = new MockMultipartFile("secondFile.txt", "secondFile.txt",
+                "text/plain", "Second".getBytes());
+        MultipartFile rootFile = new MockMultipartFile("rootFile.txt", "rootFile.txt",
+                "text/plain", "Root".getBytes());
+
+        minioDataAccessor.saveObject(StorageFixture.USER_ID, "", rootFile);
+        minioDataAccessor.saveObject(StorageFixture.USER_ID, "folder/", firstFile);
+        minioDataAccessor.saveObject(StorageFixture.USER_ID, "folder/", secondFile);
+        minioMetadataAccessor.createPath(StorageFixture.USER_ID, "emptyFolder/");
+
+        Long rootCount = minioMetadataAccessor.getDirectChildCount(StorageFixture.USER_ID, "");
+        Long folderCount = minioMetadataAccessor.getDirectChildCount(StorageFixture.USER_ID, "folder/");
+        Long emptyCount = minioMetadataAccessor.getDirectChildCount(StorageFixture.USER_ID, "emptyFolder/");
+
+        Assertions.assertThat(rootCount).isEqualTo(3L);
+        Assertions.assertThat(folderCount).isEqualTo(2L);
+        Assertions.assertThat(emptyCount).isZero();
+    }
+
+    @Test
+    void shouldSearchObjects() throws Exception {
+        //TODO Extract to fixture
+        MultipartFile firstFile = new MockMultipartFile("firstFile.txt", "firstFile.txt",
+                "text/plain", "First".getBytes());
+        MultipartFile secondFile = new MockMultipartFile("secondFile.txt", "secondFile.txt",
+                "text/plain", "Second".getBytes());
+        MultipartFile rootFile = new MockMultipartFile("root.txt", "root.txt",
+                "text/plain", "Root".getBytes());
+
+        minioDataAccessor.saveObject(StorageFixture.USER_ID, "", rootFile);
+        minioDataAccessor.saveObject(StorageFixture.USER_ID, "root/folder/", firstFile);
+        minioDataAccessor.saveObject(StorageFixture.USER_ID, "root/folder/", secondFile);
+        minioMetadataAccessor.createPath(StorageFixture.USER_ID, "File/");
+        minioMetadataAccessor.createPath(StorageFixture.USER_ID, "NotContain/FolderName/");
+
+        List<StorageObjectInfo> infos =
+                minioMetadataAccessor.findObjectInfosBySubstring(StorageFixture.USER_ID, "", "File");
+
+        Assertions.assertThat(infos).hasSize(3);
     }
 }

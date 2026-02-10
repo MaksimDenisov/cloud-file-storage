@@ -8,8 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,9 +23,9 @@ import static org.mockito.Mockito.when;
 class ObjectOperationsServiceTest {
 
     @Mock
-    private MinioMetadataAccessor minioMetadataAccessor;
+    private StorageMetadataAccessor storageMetadataAccessor;
     @Mock
-    private MinioDataAccessor minioDataAccessor;
+    private StorageDataAccessor storageDataAccessor;
 
     @Mock
     private SecurityService securityService;
@@ -43,17 +43,17 @@ class ObjectOperationsServiceTest {
     @Test
     @DisplayName("Create directory.")
     void createDirectory() {
-        when(minioMetadataAccessor.isExistByPrefix(USER_ID, "dir/")).thenReturn(false);
+        when(storageMetadataAccessor.isExistByPrefix(USER_ID, "dir/")).thenReturn(false);
 
         objectOperationsService.createFolder("dir/");
 
-        verify(minioMetadataAccessor).createPath(USER_ID, "dir/");
+        verify(storageMetadataAccessor).createPath(USER_ID, "dir/");
     }
 
     @Test
     @DisplayName("Should throw exception if directory exist.")
     void createDuplicateDirectory() {
-        when(minioMetadataAccessor.isExistByPrefix(USER_ID, "dir/")).thenReturn(true);
+        when(storageMetadataAccessor.isExistByPrefix(USER_ID, "dir/")).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class, () ->
                 objectOperationsService.createFolder("dir/")
@@ -65,23 +65,23 @@ class ObjectOperationsServiceTest {
     @Test
     @DisplayName("Rename file should copy and delete.")
     void renameFileShouldCopyAndDeleteWhenNewNotExists() {
-        when(minioMetadataAccessor.isExistByPrefix(USER_ID, "dir/new.txt")).thenReturn(false);
+        when(storageMetadataAccessor.isExistByPrefix(USER_ID, "dir/new.txt")).thenReturn(false);
 
         objectOperationsService.renameFile("dir/old.txt", "new.txt");
 
-        verify(minioDataAccessor).copyOneObject(USER_ID, "dir/old.txt", "dir/new.txt");
-        verify(minioDataAccessor).deleteOneObject(USER_ID, "dir/old.txt");
+        verify(storageDataAccessor).copyOneObject(USER_ID, "dir/old.txt", "dir/new.txt");
+        verify(storageDataAccessor).deleteOneObject(USER_ID, "dir/old.txt");
     }
 
     @Test
     @DisplayName("If file last in folder and parent folder not exist should create it.")
     void deleteFileShouldDeleteAndCreateParentFolderIfMissing() {
-        when(minioMetadataAccessor.isExistByPrefix(USER_ID, "dir/")).thenReturn(false);
+        when(storageMetadataAccessor.isExistByPrefix(USER_ID, "dir/")).thenReturn(false);
 
         objectOperationsService.deleteFile("dir/file.txt");
 
-        verify(minioDataAccessor).deleteObjects(USER_ID, "dir/file.txt");
-        verify(minioMetadataAccessor).createPath(USER_ID, "dir/");
+        verify(storageDataAccessor).deleteObjects(USER_ID, "dir/file.txt");
+        verify(storageMetadataAccessor).createPath(USER_ID, "dir/");
     }
 
 
@@ -92,13 +92,13 @@ class ObjectOperationsServiceTest {
         String newFolderName = "newDocs";
         String newPath = "newDocs/";
 
-        when(minioMetadataAccessor.isExistByPrefix(USER_ID, newPath)).thenReturn(false);
-        when(minioDataAccessor.copyObjects(any(), any(), any())).thenReturn(5);
+        when(storageMetadataAccessor.isExistByPrefix(USER_ID, newPath)).thenReturn(false);
+        when(storageDataAccessor.copyObjects(any(), any(), any())).thenReturn(5);
 
         objectOperationsService.renameFolder(currentPath, newFolderName);
 
-        verify(minioDataAccessor).copyObjects(eq(USER_ID), eq(currentPath), anyString());
-        verify(minioDataAccessor).deleteObjects(USER_ID, currentPath);
+        verify(storageDataAccessor).copyObjects(eq(USER_ID), eq(currentPath), anyString());
+        verify(storageDataAccessor).deleteObjects(USER_ID, currentPath);
     }
 
     @Test
@@ -108,12 +108,12 @@ class ObjectOperationsServiceTest {
         String newFolderName = "newFolder";
         String newPath = "newFolder/";
 
-        when(minioMetadataAccessor.isExistByPrefix(USER_ID, newPath)).thenReturn(false);
+        when(storageMetadataAccessor.isExistByPrefix(USER_ID, newPath)).thenReturn(false);
 
         objectOperationsService.renameFolder(currentPath, newFolderName);
 
-        verify(minioMetadataAccessor).createPath(USER_ID, newPath);
-        verify(minioDataAccessor).deleteObjects(USER_ID, currentPath);
+        verify(storageMetadataAccessor).createPath(USER_ID, newPath);
+        verify(storageDataAccessor).deleteObjects(USER_ID, currentPath);
     }
 
     @Test
@@ -123,14 +123,14 @@ class ObjectOperationsServiceTest {
         String newFolderName = "existingFolder";
         String newPath = "docs/existingFolder/";
 
-        when(minioMetadataAccessor.isExistByPrefix(USER_ID, newPath)).thenReturn(true);
+        when(storageMetadataAccessor.isExistByPrefix(USER_ID, newPath)).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class, () ->
                 objectOperationsService.renameFolder(currentPath, newFolderName)
         );
 
-        verify(minioDataAccessor, never()).copyObjects(any(), any(), any());
-        verify(minioDataAccessor, never()).deleteObjects(any(), any());
+        verify(storageDataAccessor, never()).copyObjects(any(), any(), any());
+        verify(storageDataAccessor, never()).deleteObjects(any(), any());
     }
 
     @Test
@@ -139,12 +139,12 @@ class ObjectOperationsServiceTest {
         String path = "docs/folder/";
         String parentPath = "docs/";
 
-        when(minioMetadataAccessor.isExistByPrefix(USER_ID, parentPath)).thenReturn(false);
+        when(storageMetadataAccessor.isExistByPrefix(USER_ID, parentPath)).thenReturn(false);
 
         objectOperationsService.deleteFolder(path);
 
-        verify(minioDataAccessor).deleteObjects(USER_ID, path);
-        verify(minioMetadataAccessor).createPath(USER_ID, parentPath);
+        verify(storageDataAccessor).deleteObjects(USER_ID, path);
+        verify(storageMetadataAccessor).createPath(USER_ID, parentPath);
     }
 
     @Test
@@ -153,11 +153,11 @@ class ObjectOperationsServiceTest {
         String path = "photos/events/";
         String parentPath = "photos/";
 
-        when(minioMetadataAccessor.isExistByPrefix(USER_ID, parentPath)).thenReturn(true);
+        when(storageMetadataAccessor.isExistByPrefix(USER_ID, parentPath)).thenReturn(true);
 
         objectOperationsService.deleteFolder(path);
 
-        verify(minioDataAccessor).deleteObjects(USER_ID, path);
-        verify(minioMetadataAccessor, never()).createPath(any(), any());
+        verify(storageDataAccessor).deleteObjects(USER_ID, path);
+        verify(storageMetadataAccessor, never()).createPath(any(), any());
     }
 }

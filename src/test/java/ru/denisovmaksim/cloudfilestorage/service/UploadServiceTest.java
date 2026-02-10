@@ -10,8 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.dto.request.UploadFileDTORequest;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 
 import java.util.List;
 
@@ -26,10 +26,10 @@ import static org.mockito.Mockito.when;
 class UploadServiceTest {
 
     @Mock
-    private MinioMetadataAccessor minioMetadataAccessor;
+    private StorageMetadataAccessor storageMetadataAccessor;
 
     @Mock
-    private MinioDataAccessor minioDataAccessor;
+    private StorageDataAccessor storageDataAccessor;
 
     @Mock
     private SecurityService securityService;
@@ -48,11 +48,11 @@ class UploadServiceTest {
     @DisplayName("Upload file should save it to storage.")
     void uploadFileShouldSaveWhenNotExists() {
         MultipartFile file = mock(MultipartFile.class);
-        when(minioMetadataAccessor.isExistByPrefix(USER_ID, "dir/file.txt")).thenReturn(false);
+        when(storageMetadataAccessor.isExistByPrefix(USER_ID, "dir/file.txt")).thenReturn(false);
         UploadFileDTORequest dto = new UploadFileDTORequest("file.txt", file);
         uploadService.uploadFile("dir/", dto);
 
-        verify(minioDataAccessor).saveObject(USER_ID, "dir/", file);
+        verify(storageDataAccessor).saveObject(USER_ID, "dir/", file);
     }
 
     @Test
@@ -61,7 +61,7 @@ class UploadServiceTest {
         MultipartFile file = mock(MultipartFile.class);
         UploadFileDTORequest dto = new UploadFileDTORequest("file.txt", file);
 
-        when(minioMetadataAccessor.isExistByPrefix(eq(USER_ID), any())).thenReturn(true);
+        when(storageMetadataAccessor.isExistByPrefix(eq(USER_ID), any())).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class,
                 () -> uploadService.uploadFile("dir/", dto));
@@ -74,10 +74,10 @@ class UploadServiceTest {
         when(file.getOriginalFilename()).thenReturn("folder/file.txt");
         List<MultipartFile> files = List.of(file);
 
-        when(minioMetadataAccessor.isExistByPrefix(USER_ID, "folder")).thenReturn(false);
+        when(storageMetadataAccessor.isExistByPrefix(USER_ID, "folder")).thenReturn(false);
 
         uploadService.uploadFolder("", files);
 
-        verify(minioDataAccessor).saveObject(USER_ID, "", file);
+        verify(storageDataAccessor).saveObject(USER_ID, "", file);
     }
 }

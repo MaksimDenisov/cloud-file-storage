@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
+import ru.denisovmaksim.cloudfilestorage.storage.FileStorageException;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;

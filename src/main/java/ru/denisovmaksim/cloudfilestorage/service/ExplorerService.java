@@ -6,7 +6,7 @@ import org.springframework.validation.annotation.Validated;
 import ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.mapper.StorageObjectDTOMapper;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 import ru.denisovmaksim.cloudfilestorage.validation.PathType;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
@@ -19,19 +19,16 @@ import java.util.stream.Collectors;
 @Validated
 @AllArgsConstructor
 public class ExplorerService {
-    private final MinioMetadataAccessor minioMetadataAccessor;
-
-
-
+    private final StorageMetadataAccessor metadataAccessor;
     private final SecurityService securityService;
 
     public List<StorageObjectDTOResponse> getFolder(@ValidPath(PathType.DIR) String directory) {
         Long authUserId = securityService.getAuthUserId();
-        List<StorageObjectInfo> infos = minioMetadataAccessor.listObjectInfo(authUserId, directory)
+        List<StorageObjectInfo> infos = metadataAccessor.listObjectInfo(authUserId, directory)
                 .orElseThrow(() -> new NotFoundException(directory));
         for (StorageObjectInfo info : infos) {
             if (info.isDir()) {
-                info.setSize(minioMetadataAccessor.getDirectChildCount(authUserId, info.getPath()));
+                info.setSize(metadataAccessor.getDirectChildCount(authUserId, info.getPath()));
             }
         }
         return infos.stream()
@@ -40,6 +37,4 @@ public class ExplorerService {
                         .thenComparing(StorageObjectDTOResponse::getName))
                 .collect(Collectors.toList());
     }
-
-
 }

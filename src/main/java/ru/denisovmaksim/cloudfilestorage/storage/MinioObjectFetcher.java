@@ -4,8 +4,9 @@ import io.minio.ListObjectsArgs;
 import io.minio.MinioClient;
 import io.minio.Result;
 import io.minio.messages.Item;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.denisovmaksim.cloudfilestorage.config.MinioProperties;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 
 import java.util.Collections;
@@ -14,19 +15,13 @@ import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 @Component
-public class MinioObjectFetcher {
+@RequiredArgsConstructor
+class MinioObjectFetcher {
 
     private final MinioClient minioClient;
     private final MinioPathResolver resolver;
-    private final String bucket;
+    private final MinioProperties properties;
 
-    MinioObjectFetcher(MinioClient minioClient,
-                       MinioPathResolver resolver,
-                       @Value("${app.bucket}") String bucket) {
-        this.minioClient = minioClient;
-        this.resolver = resolver;
-        this.bucket = bucket;
-    }
 
     /**
      * Retrieves raw MinIO items from storage for the given path.
@@ -40,7 +35,7 @@ public class MinioObjectFetcher {
         String minioPath = resolver.resolveMinioPath(userId, path);
         Iterable<Result<Item>> minioItems = minioClient.listObjects(
                 ListObjectsArgs.builder()
-                        .bucket(bucket)
+                        .bucket(properties.bucket())
                         .recursive(includeSubObjects)
                         .prefix(minioPath)
                         .build());
@@ -50,7 +45,7 @@ public class MinioObjectFetcher {
             return Optional.ofNullable((PathUtil.isRoot(path)) ? Collections.emptyList() : null);
         }
         return Optional.of(StreamSupport.stream(minioItems.spliterator(), false)
-                .map(item -> MinioExceptionHandler.interceptMinioExceptions(item::get))
+                .map(item -> MinioExceptionHandler.callWithMinio(item::get))
                 .filter(item -> !minioPath.equals(item.objectName()))
                 .toList());
     }

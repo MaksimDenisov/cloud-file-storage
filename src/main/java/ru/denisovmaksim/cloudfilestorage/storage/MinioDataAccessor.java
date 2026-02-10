@@ -6,202 +6,139 @@ import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.errors.MinioException;
 import io.minio.messages.Item;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import ru.denisovmaksim.cloudfilestorage.config.MinioProperties;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Component responsible for interacting with MinIO storage.
- * Provides functionality for uploading, retrieving, copying, and deleting objects.
- */
 @Component
-@Slf4j
-public class MinioDataAccessor {
+@RequiredArgsConstructor
+class MinioDataAccessor {
     private final MinioClient minioClient;
+    private final MinioProperties properties;
     private final MinioPathResolver resolver;
-    private final String bucket;
     private final MinioObjectFetcher objectFetcher;
 
-    public MinioDataAccessor(MinioClient minioClient, MinioPathResolver resolver,
-                             MinioObjectFetcher objectFetcher, @Value("${app.bucket}") String bucket) {
-        this.minioClient = minioClient;
-        this.resolver = resolver;
-        this.bucket = bucket;
-        this.objectFetcher = objectFetcher;
-    }
-
-    /**
-     * Downloads a single object from storage.
-     *
-     * @param userId the ID of the user
-     * @param path   the path to the object
-     * @return the object along with its data stream
-     */
-    public StorageObject getObject(Long userId, String path) {
-        log.info("Downloading object at path '{}' for userId={}", path, userId);
-        return MinioExceptionHandler.interceptMinioExceptions(() -> {
-            String minioPath = resolver.resolveMinioPath(userId, path);
-            InputStream objectInputStream = minioClient.getObject(GetObjectArgs.builder()
-                    .bucket(bucket)
-                    .object(minioPath)
-                    .build());
-            return new StorageObject(path, objectInputStream);
-        });
-    }
-
-    /**
-     * Retrieves a byte range of an object from MinIO as an input stream.
-     *
-     * @param userId        user identifier
-     * @param path          relative object path
-     * @param rangeStart    starting byte offset
-     * @param contentLength number of bytes to read
-     * @return input stream of the requested object range
-     */
-    public InputStream getRangeOfObject(Long userId, String path, Long rangeStart, Long contentLength) {
+    public StorageObject getObject(Long userId, String path) throws MinioException, IOException,
+            NoSuchAlgorithmException, InvalidKeyException {
         String minioPath = resolver.resolveMinioPath(userId, path);
-        return MinioExceptionHandler.interceptMinioExceptions(() -> minioClient.getObject(
+        InputStream objectInputStream = minioClient.getObject(GetObjectArgs.builder()
+                .bucket(properties.bucket())
+                .object(minioPath)
+                .build());
+        return new StorageObject(path, objectInputStream);
+    }
+
+    public InputStream getRangeOfObject(Long userId, String path, Long rangeStart, Long contentLength)
+            throws MinioException, IOException,
+            NoSuchAlgorithmException, InvalidKeyException {
+        String minioPath = resolver.resolveMinioPath(userId, path);
+        return minioClient.getObject(
                 GetObjectArgs.builder()
-                        .bucket(bucket)
+                        .bucket(properties.bucket())
                         .object(minioPath)
                         .offset(rangeStart)
                         .length(contentLength)
-                        .build()));
+                        .build());
     }
 
 
-    /**
-     * Downloads all objects (recursively) under the specified path.
-     *
-     * @param userId the ID of the user
-     * @param path   the folder path
-     * @return a list of file objects with their data streams
-     */
-    public List<StorageObject> getObjects(Long userId, String path) {
+    public List<StorageObject> getObjects(Long userId, String path) throws MinioException, IOException,
+            NoSuchAlgorithmException, InvalidKeyException {
         List<Item> minioItems = objectFetcher.getMinioItems(userId, path, true).orElseThrow();
         List<StorageObject> fileObjects = new ArrayList<>();
         for (Item item : minioItems) {
             String objectName = item.objectName();
             String objectPath = resolver.resolvePathFromMinioObjectName(userId, objectName);
-            InputStream objectInputStream = MinioExceptionHandler
-                    .interceptMinioExceptions(() -> minioClient.getObject(GetObjectArgs.builder()
-                            .bucket(bucket)
-                            .object(objectName)
-                            .build()));
+            InputStream objectInputStream = minioClient.getObject(GetObjectArgs.builder()
+                    .bucket(properties.bucket())
+                    .object(objectName)
+                    .build());
             fileObjects.add(new StorageObject(objectPath, objectInputStream));
         }
         return fileObjects;
     }
 
-    /**
-     * Uploads a file to the specified path.
-     *
-     * @param userId the ID of the user
-     * @param path   the folder path where the file will be stored
-     * @param file   the multipart file to upload
-     */
-    public void saveObject(Long userId, String path, MultipartFile file) {
-        log.info("Uploading file '{}' to path '{}' for userId={}", file.getOriginalFilename(), path, userId);
-        MinioExceptionHandler.interceptMinioExceptions(() ->
-                minioClient.putObject(
-                        PutObjectArgs.builder()
-                                .bucket(bucket)
-                                .object(resolver.resolveMinioPath(userId, PathUtil.ensureDirectoryPath(path)
-                                        + file.getOriginalFilename()))
-                                .stream(file.getInputStream(), file.getSize(), -1)
-                                .contentType(file.getContentType())
-                                .build()
-                )
-        );
+
+    public void saveObject(Long userId, String path, MultipartFile file) throws MinioException, IOException,
+            NoSuchAlgorithmException, InvalidKeyException {
+        minioClient.putObject(
+                PutObjectArgs.builder()
+                        .bucket(properties.bucket())
+                        .object(resolver.resolveMinioPath(userId, PathUtil.ensureDirectoryPath(path)
+                                + file.getOriginalFilename()))
+                        .stream(file.getInputStream(), file.getSize(), -1)
+                        .contentType(file.getContentType())
+                        .build());
     }
 
-    /**
-     * Copies a single object from one path to another.
-     *
-     * @param userId   the ID of the user
-     * @param srcPath  the source path
-     * @param destPath the destination path
-     */
-    public void copyOneObject(Long userId, String srcPath, String destPath) {
-        log.info("Copying one object from path '{}' to path '{}' for userId={}", srcPath, destPath, userId);
-        MinioExceptionHandler.interceptMinioExceptions(() ->
-                minioClient.copyObject(
-                        CopyObjectArgs.builder()
-                                .bucket(bucket)
-                                .object(resolver.resolveMinioPath(userId, destPath))
-                                .source(
-                                        CopySource.builder()
-                                                .bucket(bucket)
-                                                .object(resolver.resolveMinioPath(userId, srcPath))
-                                                .build())
-                                .build()));
+
+    public void copyOneObject(Long userId, String srcPath, String destPath) throws MinioException, IOException,
+            NoSuchAlgorithmException, InvalidKeyException {
+        minioClient.copyObject(
+                CopyObjectArgs.builder()
+                        .bucket(properties.bucket())
+                        .object(resolver.resolveMinioPath(userId, destPath))
+                        .source(
+                                CopySource.builder()
+                                        .bucket(properties.bucket())
+                                        .object(resolver.resolveMinioPath(userId, srcPath))
+                                        .build())
+                        .build());
     }
 
-    /**
-     * Copies all objects (recursively) from one directory to another.
-     *
-     * @param userId   the ID of the user
-     * @param srcPath  the source directory
-     * @param destPath the target directory
-     */
-    public int copyObjects(Long userId, String srcPath, String destPath) {
-        log.info("Copying all objects from path '{}' to path '{}' for userId={}", srcPath, destPath, userId);
+
+    public int copyObjects(Long userId, String srcPath, String destPath) throws MinioException, IOException,
+            NoSuchAlgorithmException, InvalidKeyException {
         String srcMinioPath = resolver.resolveMinioPath(userId, srcPath);
         AtomicInteger count = new AtomicInteger();
-        MinioExceptionHandler.interceptMinioExceptions(() -> {
-            List<Item> minioItems = objectFetcher.getMinioItems(userId, srcPath, true)
-                    .orElseThrow();
-            for (Item item : minioItems) {
-                String fromPath = resolver.resolvePathFromMinioObjectName(userId, item.objectName());
-                String toPath = item.objectName()
-                        .replaceFirst(srcMinioPath, destPath);
-                count.incrementAndGet();
-                copyOneObject(userId, fromPath, toPath);
-            }
-        });
+
+        List<Item> minioItems = objectFetcher.getMinioItems(userId, srcPath, true)
+                .orElseThrow();
+        for (Item item : minioItems) {
+            String fromPath = resolver.resolvePathFromMinioObjectName(userId, item.objectName());
+            String toPath = item.objectName()
+                    .replaceFirst(srcMinioPath, destPath);
+            count.incrementAndGet();
+            copyOneObject(userId, fromPath, toPath);
+        }
         return count.get();
     }
 
-    /**
-     * Deletes all objects under the specified path, including the folder itself.
-     *
-     * @param userId the ID of the user
-     * @param path   the folder path to delete
-     */
-    public void deleteObjects(Long userId, String path) {
-        log.info("Deleting all objects at path '{}' for userId={}", path, userId);
-        objectFetcher.getMinioItems(userId, path, true)
-                .ifPresent(items -> items
-                        .forEach(item ->
-                                MinioExceptionHandler.interceptMinioExceptions(() -> minioClient.removeObject(
-                                        RemoveObjectArgs.builder().bucket(bucket)
-                                                .object(item.objectName())
-                                                .build()))));
-        MinioExceptionHandler.interceptMinioExceptions(() -> minioClient.removeObject(
-                RemoveObjectArgs.builder().bucket(bucket)
+    public void deleteOneObject(Long userId, String path) throws MinioException, IOException,
+            NoSuchAlgorithmException, InvalidKeyException {
+        minioClient.removeObject(
+                RemoveObjectArgs.builder().bucket(properties.bucket())
                         .object(resolver.resolveMinioPath(userId, path))
-                        .build()));
+                        .build());
     }
 
-    /**
-     * Deletes one object under the specified path, including the folder itself.
-     *
-     * @param userId the ID of the user
-     * @param path   the path to delete
-     */
-    public void deleteOneObject(Long userId, String path) {
-        log.info("Deleting one object at path '{}' for userId={}", path, userId);
-        MinioExceptionHandler.interceptMinioExceptions(() -> minioClient.removeObject(
-                RemoveObjectArgs.builder().bucket(bucket)
+    public void deleteObjects(Long userId, String path) throws MinioException, IOException,
+            NoSuchAlgorithmException, InvalidKeyException {
+        Optional<List<Item>> items = objectFetcher.getMinioItems(userId, path, true);
+        if (items.isPresent()) {
+            for (Item item : items.get()) {
+                minioClient.removeObject(
+                        RemoveObjectArgs.builder().bucket(properties.bucket())
+                                .object(item.objectName())
+                                .build());
+            }
+        }
+        minioClient.removeObject(
+                RemoveObjectArgs.builder().bucket(properties.bucket())
                         .object(resolver.resolveMinioPath(userId, path))
-                        .build()));
+                        .build());
     }
 }

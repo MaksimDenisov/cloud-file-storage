@@ -9,8 +9,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObject;
 
 import java.io.ByteArrayInputStream;
@@ -22,10 +22,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class DownloadServiceTest {
     @Mock
-    private MinioMetadataAccessor minioMetadataAccessor;
+    private StorageMetadataAccessor minioMetadataAccessor;
 
     @Mock
-    private MinioDataAccessor minioDataAccessor;
+    private StorageDataAccessor storageDataAccessor;
 
     @Mock
     private SecurityService securityService;
@@ -45,7 +45,7 @@ public class DownloadServiceTest {
     void getFileShouldReturnStreamDTO() {
         InputStream stream = new ByteArrayInputStream("test".getBytes());
 
-        when(minioDataAccessor.getObject(USER_ID, "dir/file.txt"))
+        when(storageDataAccessor.getObject(USER_ID, "dir/file.txt"))
                 .thenReturn(new StorageObject("dir/file.txt",  stream));
 
         NamedStreamDTOResponse result = downloadService.getFileAsStream("dir/file.txt");

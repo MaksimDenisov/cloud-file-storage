@@ -2,7 +2,6 @@ package ru.denisovmaksim.cloudfilestorage.storage;
 
 import io.minio.errors.MinioException;
 import lombok.extern.slf4j.Slf4j;
-import ru.denisovmaksim.cloudfilestorage.exception.FileStorageException;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -15,7 +14,7 @@ final class MinioExceptionHandler {
         throw new UnsupportedOperationException("Utility class");
     }
 
-    static <T> T interceptMinioExceptions(MinioThrowingSupplier<T> supplier) {
+    static <T> T callWithMinio(MinioThrowingSupplier<T> supplier) {
         try {
             return supplier.get();
         } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
@@ -24,7 +23,7 @@ final class MinioExceptionHandler {
         }
     }
 
-    static void interceptMinioExceptions(MinioThrowingRunnable supplier) {
+    static void runWithMinio(MinioThrowingRunnable supplier) {
         try {
             supplier.run();
         } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {

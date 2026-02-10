@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,9 +21,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ExplorerServiceTest {
-
     @Mock
-    private MinioMetadataAccessor minioMetadataAccessor;
+    private StorageMetadataAccessor metadataAccessor;
     @Mock
     private SecurityService securityService;
 
@@ -41,7 +40,7 @@ public class ExplorerServiceTest {
     @Test
     @DisplayName("If directory exist should return list.")
     void getContentOfDirectory() {
-        when(minioMetadataAccessor.listObjectInfo(USER_ID, "dir/")).thenReturn(Optional.of(List.of()));
+        when(metadataAccessor.listObjectInfo(USER_ID, "dir/")).thenReturn(Optional.of(List.of()));
 
         List<StorageObjectDTOResponse> result = explorerService.getFolder("dir/");
         assertNotNull(result);
@@ -50,7 +49,7 @@ public class ExplorerServiceTest {
     @Test
     @DisplayName("If directory not exist should throw exception.")
     void getContentOfNotExistDirectoryShouldThrowNotFound() {
-        when(minioMetadataAccessor.listObjectInfo(USER_ID, "dir/")).thenReturn(Optional.empty());
+        when(metadataAccessor.listObjectInfo(USER_ID, "dir/")).thenReturn(Optional.empty());
 
         assertThrows(NotFoundException.class, () -> explorerService.getFolder("dir/"));
     }

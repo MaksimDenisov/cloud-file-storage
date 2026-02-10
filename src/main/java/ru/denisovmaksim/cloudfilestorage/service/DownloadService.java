@@ -6,9 +6,9 @@ import org.springframework.validation.annotation.Validated;
 import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.service.processing.ZipArchiver;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObject;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioDataAccessor;
-import ru.denisovmaksim.cloudfilestorage.storage.MinioMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 import ru.denisovmaksim.cloudfilestorage.validation.PathType;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
@@ -24,9 +24,9 @@ import java.util.List;
 @AllArgsConstructor
 public class DownloadService {
 
-    private final MinioMetadataAccessor metadataAccessor;
+    private final StorageMetadataAccessor metadataAccessor;
 
-    private final MinioDataAccessor dataAccessor;
+    private final StorageDataAccessor dataAccessor;
 
     private final SecurityService securityService;
 
