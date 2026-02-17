@@ -20,7 +20,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.StreamSupport;
 
 /**
  * Component responsible for retrieving object metadata with MinIO storage.
@@ -91,20 +90,5 @@ class MinioMetadataAccessor {
                         .contains(upperCaseQuery))
                 .map(item -> mapper.from(userId, item))
                 .toList();
-    }
-
-    public Long getDirectChildCount(Long userId, String path)  {
-        log.info("Get count direct child at path '{}' for userId={}", path, userId);
-        String minioPath = resolver.resolveMinioPath(userId, path);
-        Iterable<Result<Item>> minioItems = minioClient.listObjects(
-                ListObjectsArgs.builder()
-                        .bucket(properties.bucket())
-                        .prefix(minioPath)
-                        .build());
-        //TODO Remove MinioExceptionHandler
-        return StreamSupport.stream(minioItems.spliterator(), false)
-                .map(item -> MinioExceptionHandler.callWithMinio(item::get))
-                .filter(item -> !item.objectName().equals(minioPath))
-                .count();
     }
 }

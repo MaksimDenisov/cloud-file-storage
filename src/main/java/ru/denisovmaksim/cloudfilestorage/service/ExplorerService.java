@@ -12,6 +12,7 @@ import ru.denisovmaksim.cloudfilestorage.validation.PathType;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,9 +30,10 @@ public class ExplorerService {
                 .orElseThrow(() -> new NotFoundException(directory));
         List<StorageObjectInfo> infosWithDirSize = new ArrayList<>();
         for (StorageObjectInfo info : infos) {
-            Long size;
+            long size;
             if (info.dir()) {
-                size = metadataAccessor.getDirectChildCount(authUserId, info.path());
+                size = metadataAccessor
+                        .listObjectInfo(authUserId, info.path()).orElse(Collections.emptyList()).size();
             } else {
                 size = info.size();
             }

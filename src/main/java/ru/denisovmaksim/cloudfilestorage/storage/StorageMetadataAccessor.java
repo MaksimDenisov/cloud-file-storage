@@ -40,10 +40,4 @@ public class StorageMetadataAccessor implements MetadataAccessor {
     public List<StorageObjectInfo> findObjectInfosBySubstring(Long userId, String path, String query) {
         return minioMetadataAccessor.findObjectInfosBySubstring(userId, path, query);
     }
-
-    @Override
-    @Deprecated
-    public Long getDirectChildCount(Long userId, String path) {
-        return minioMetadataAccessor.getDirectChildCount(userId, path);
-    }
 }

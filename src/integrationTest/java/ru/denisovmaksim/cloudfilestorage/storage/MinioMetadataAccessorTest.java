@@ -95,29 +95,6 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
     }
 
     @Test
-    @DisplayName("Getting direct child count of a non-existent path should return 0")
-    void shouldReturnZeroWhenGettingDirectChildCountOfNonExistentPath()  throws Exception {
-        assertThat(metadataAccessor.getDirectChildCount(USER_ID, "not-exist-path"))
-                .isEqualTo(0);
-    }
-
-    @Test
-    @DisplayName("Getting direct child count of a existent path should return its sum of files and folders")
-    void shouldReturnSumOfFilesAndFoldersWhenGettingDirectChildCountOfExistingPath() throws Exception {
-        fixture.folder("user-1-files/folder/");
-        fixture.folder("user-1-files/folder/folder");
-        fixture.file("user-1-files/folder/file.txt", "content");
-        fixture.file("user-1-files/file.txt", "content");
-
-        assertThat(metadataAccessor.getDirectChildCount(USER_ID, "/"))
-                .isEqualTo(2);
-        assertThat(metadataAccessor.getDirectChildCount(USER_ID, "folder/"))
-                .isEqualTo(2);
-        assertThat(metadataAccessor.getDirectChildCount(USER_ID, "folder/folder/"))
-                .isEqualTo(0);
-    }
-
-    @Test
     @DisplayName("search() should return DTOs based on query")
     void shouldReturnObjectInfosWhenSearchingBySubstring() throws Exception {
         fixture.folder("user-1-files/folder/");
@@ -131,51 +108,5 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
 
         StorageObjectInfoListAssert.assertThat(paths)
                 .containsExactlyPaths("folder/file.txt", "file.txt");
-    }
-
-
-    @Test
-    void shouldReturnDirectChildCount() throws Exception {
-        MultipartFile firstFile = new MockMultipartFile("firstFile.txt", "firstFile.txt",
-                "text/plain", "First".getBytes());
-        MultipartFile secondFile = new MockMultipartFile("secondFile.txt", "secondFile.txt",
-                "text/plain", "Second".getBytes());
-        MultipartFile rootFile = new MockMultipartFile("rootFile.txt", "rootFile.txt",
-                "text/plain", "Root".getBytes());
-
-        minioDataAccessor.saveObject(StorageFixture.USER_ID, "", rootFile);
-        minioDataAccessor.saveObject(StorageFixture.USER_ID, "folder/", firstFile);
-        minioDataAccessor.saveObject(StorageFixture.USER_ID, "folder/", secondFile);
-        metadataAccessor.createPath(StorageFixture.USER_ID, "emptyFolder/");
-
-        Long rootCount = metadataAccessor.getDirectChildCount(StorageFixture.USER_ID, "");
-        Long folderCount = metadataAccessor.getDirectChildCount(StorageFixture.USER_ID, "folder/");
-        Long emptyCount = metadataAccessor.getDirectChildCount(StorageFixture.USER_ID, "emptyFolder/");
-
-        Assertions.assertThat(rootCount).isEqualTo(3L);
-        Assertions.assertThat(folderCount).isEqualTo(2L);
-        Assertions.assertThat(emptyCount).isZero();
-    }
-
-    @Test
-    void shouldSearchObjects() throws Exception {
-        //TODO Extract to fixture
-        MultipartFile firstFile = new MockMultipartFile("firstFile.txt", "firstFile.txt",
-                "text/plain", "First".getBytes());
-        MultipartFile secondFile = new MockMultipartFile("secondFile.txt", "secondFile.txt",
-                "text/plain", "Second".getBytes());
-        MultipartFile rootFile = new MockMultipartFile("root.txt", "root.txt",
-                "text/plain", "Root".getBytes());
-
-        minioDataAccessor.saveObject(StorageFixture.USER_ID, "", rootFile);
-        minioDataAccessor.saveObject(StorageFixture.USER_ID, "root/folder/", firstFile);
-        minioDataAccessor.saveObject(StorageFixture.USER_ID, "root/folder/", secondFile);
-        metadataAccessor.createPath(StorageFixture.USER_ID, "File/");
-        metadataAccessor.createPath(StorageFixture.USER_ID, "NotContain/FolderName/");
-
-        List<StorageObjectInfo> infos =
-                metadataAccessor.findObjectInfosBySubstring(StorageFixture.USER_ID, "", "File");
-
-        Assertions.assertThat(infos).hasSize(3);
     }
 }

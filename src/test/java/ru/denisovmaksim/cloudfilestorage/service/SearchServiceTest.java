@@ -52,7 +52,6 @@ class SearchServiceTest {
         );
 
         when(securityService.getAuthUserId()).thenReturn(userId);
-        when(metadataAccessor.getDirectChildCount(userId, "documents/reports/")).thenReturn(2L);
         when(metadataAccessor.findObjectInfosBySubstring(userId, "", query)).thenReturn(mockInfos);
 
         List<StorageObjectDTOResponse> actual = searchService.search(query);

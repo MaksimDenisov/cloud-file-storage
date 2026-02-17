@@ -40,13 +40,4 @@ public interface MetadataAccessor {
      * @return a list of storage object information if present
      */
     List<StorageObjectInfo> findObjectInfosBySubstring(Long userId, String path, String query);
-
-    /**
-     * Returns the number of direct children for a given path.
-     *
-     * @param userId the ID of the user
-     * @param path   the logical user path
-     * @return the count of child items
-     */
-    Long getDirectChildCount(Long userId, String path);
 }
