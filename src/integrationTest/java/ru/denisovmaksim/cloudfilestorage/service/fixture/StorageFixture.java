@@ -32,10 +32,10 @@ public class StorageFixture {
             return;
         }
         for (StorageObjectInfo info : objects.get()) {
-            if (info.isDir()) {
-                dataAccessor.deleteObjects(USER_ID, info.getPath());
+            if (info.dir()) {
+                dataAccessor.deleteObjects(USER_ID, info.path());
             } else {
-                dataAccessor.deleteOneObject(USER_ID, info.getPath());
+                dataAccessor.deleteOneObject(USER_ID, info.path());
             }
         }
     }

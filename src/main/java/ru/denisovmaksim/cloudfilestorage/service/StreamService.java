@@ -48,6 +48,6 @@ public class StreamService {
     public Long getSize(String path) {
         StorageObjectInfo info = metadataAccessor.getOne(securityService.getAuthUserId(), path)
                 .orElseThrow(() -> new NotFoundException(path));
-        return info.getSize();
+        return info.size();
     }
 }

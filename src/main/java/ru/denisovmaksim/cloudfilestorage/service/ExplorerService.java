@@ -11,6 +11,7 @@ import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 import ru.denisovmaksim.cloudfilestorage.validation.PathType;
 import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,12 +27,17 @@ public class ExplorerService {
         Long authUserId = securityService.getAuthUserId();
         List<StorageObjectInfo> infos = metadataAccessor.listObjectInfo(authUserId, directory)
                 .orElseThrow(() -> new NotFoundException(directory));
+        List<StorageObjectInfo> infosWithDirSize = new ArrayList<>();
         for (StorageObjectInfo info : infos) {
-            if (info.isDir()) {
-                info.setSize(metadataAccessor.getDirectChildCount(authUserId, info.getPath()));
+            Long size;
+            if (info.dir()) {
+                size = metadataAccessor.getDirectChildCount(authUserId, info.path());
+            } else {
+                size = info.size();
             }
+            infosWithDirSize.add(new StorageObjectInfo(info.path(), info.name(), info.dir(), size));
         }
-        return infos.stream()
+        return infosWithDirSize.stream()
                 .map(StorageObjectDTOMapper::toDTO)
                 .sorted(Comparator.comparing(StorageObjectDTOResponse::getType)
                         .thenComparing(StorageObjectDTOResponse::getName))

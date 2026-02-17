@@ -12,8 +12,8 @@ public final class StorageObjectDTOMapper {
     }
 
     public static StorageObjectDTOResponse toDTO(StorageObjectInfo object) {
-        FileType type = object.isDir()
-                ? FileType.FOLDER : FileTypeResolver.detectFileType(object.getPath());
-        return new StorageObjectDTOResponse(object.getPath(), object.getName(), type, object.getSize());
+        FileType type = object.dir()
+                ? FileType.FOLDER : FileTypeResolver.detectFileType(object.path());
+        return new StorageObjectDTOResponse(object.path(), object.name(), type, object.size());
     }
 }

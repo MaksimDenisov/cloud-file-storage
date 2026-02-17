@@ -29,17 +29,18 @@ public class SearchService {
         Long userId = securityService.getAuthUserId();
         List<StorageObjectInfo> objectInfos = metadataAccessor
                 .findObjectInfosBySubstring(userId, "", query).stream().toList();
-        objectInfos.forEach(a -> log.info("Found {}", a.getPath()));
+        objectInfos.forEach(a -> log.info("Found {}", a.path()));
         Set<String> paths = getPathsContainsSubstring(objectInfos, query);
         for (StorageObjectInfo info : objectInfos) {
-            paths.remove(info.getPath());
+            paths.remove(info.path());
         }
         List<StorageObjectInfo> phantomFolders = new ArrayList<>();
         for (String path : paths) {
             log.info("Found folder {}", path);
             String name = PathUtil.getBaseName(path);
             boolean isDir = PathUtil.isDir(path);
-            Long size = metadataAccessor.getDirectChildCount(securityService.getAuthUserId(), path);
+            //Long size = metadataAccessor.getDirectChildCount(securityService.getAuthUserId(), path);
+            Long size = 0L;
             StorageObjectInfo storageObjectInfo = new StorageObjectInfo(path, name, isDir, size);
             phantomFolders.add(storageObjectInfo);
         }
@@ -54,13 +55,13 @@ public class SearchService {
     private Set<String> getPathsContainsSubstring(List<StorageObjectInfo> objectInfos, String substring) {
         Set<String> paths = new HashSet<>();
         for (StorageObjectInfo info : objectInfos) {
-            int index = info.getPath().toUpperCase().indexOf(substring.toUpperCase());
+            int index = info.path().toUpperCase().indexOf(substring.toUpperCase());
             while (index != -1) {
-                int partPathEnd = info.getPath().indexOf("/", index);
-                partPathEnd = (partPathEnd != -1) ? partPathEnd + 1 : info.getPath().length();
-                String path = info.getPath().substring(0, partPathEnd);
+                int partPathEnd = info.path().indexOf("/", index);
+                partPathEnd = (partPathEnd != -1) ? partPathEnd + 1 : info.path().length();
+                String path = info.path().substring(0, partPathEnd);
                 paths.add(path);
-                index = info.getPath().toUpperCase().indexOf(substring.toUpperCase(), index + 1);
+                index = info.path().toUpperCase().indexOf(substring.toUpperCase(), index + 1);
             }
         }
         return paths;

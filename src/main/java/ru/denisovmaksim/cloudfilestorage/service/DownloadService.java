@@ -35,7 +35,7 @@ public class DownloadService {
     public NamedStreamDTOResponse getFileAsStream(@ValidPath(PathType.FILEPATH) String filepath) {
         long size = metadataAccessor.getOne(securityService.getAuthUserId(), filepath)
                 .orElseThrow(() -> new NotFoundException(filepath))
-                .getSize();
+                .size();
         StorageObject storageObject = dataAccessor.getObject(securityService.getAuthUserId(), filepath);
         String baseName = PathUtil.getBaseName(filepath);
         String encodedFileName = URLEncoder.encode(baseName, StandardCharsets.UTF_8)

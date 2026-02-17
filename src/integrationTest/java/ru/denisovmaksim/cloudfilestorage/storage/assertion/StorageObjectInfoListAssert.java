@@ -21,7 +21,7 @@ public class StorageObjectInfoListAssert extends AbstractAssert<StorageObjectInf
         isNotNull();
 
         List<String> actualPaths = actual.stream()
-                .map(StorageObjectInfo::getPath)
+                .map(StorageObjectInfo::path)
                 .toList();
 
         for (String path : paths) {

@@ -18,25 +18,25 @@ public class StorageObjectInfoAssert
 
     public StorageObjectInfoAssert hasPath(String expectedPath) {
         isNotNull();
-        if (!actual.getPath().equals(expectedPath)) {
+        if (!actual.path().equals(expectedPath)) {
             failWithMessage("Expected path to be <%s> but was <%s>",
-                    expectedPath, actual.getPath());
+                    expectedPath, actual.path());
         }
         return this;
     }
 
     public StorageObjectInfoAssert hasName(String expectedName) {
         isNotNull();
-        if (!actual.getName().equals(expectedName)) {
+        if (!actual.name().equals(expectedName)) {
             failWithMessage("Expected name to be <%s> but was <%s>",
-                    expectedName, actual.getName());
+                    expectedName, actual.name());
         }
         return this;
     }
 
     public StorageObjectInfoAssert isDirectory() {
         isNotNull();
-        if (!actual.isDir()) {
+        if (!actual.dir()) {
             failWithMessage("Expected object to be a directory but it was a file");
         }
         return this;
@@ -44,7 +44,7 @@ public class StorageObjectInfoAssert
 
     public StorageObjectInfoAssert isFile() {
         isNotNull();
-        if (actual.isDir()) {
+        if (actual.dir()) {
             failWithMessage("Expected object to be a file but it was a directory");
         }
         return this;
@@ -52,9 +52,9 @@ public class StorageObjectInfoAssert
 
     public StorageObjectInfoAssert hasSize(long expectedSize) {
         isNotNull();
-        if (actual.getSize() != expectedSize) {
+        if (actual.size() != expectedSize) {
             failWithMessage("Expected size to be <%d> but was <%d>",
-                    expectedSize, actual.getSize());
+                    expectedSize, actual.size());
         }
         return this;
     }
