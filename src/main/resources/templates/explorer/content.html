@@ -35,10 +35,10 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="item : ${storageObjects}" th:switch="${#strings.toString(item.getType())}">
+                    <tr th:each="item : ${storageObjects}" th:switch="${#strings.toString(item.type())}">
                         <!-- @thymesVar id="item" type="ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse" -->
                         <!-- Icon -->
-                        <td th:switch="${item.getType().name()}">
+                        <td th:switch="${item.type().name()}">
                             <i th:case="'FOLDER'" class="bi bi-folder h5 text-secondary"></i>
                             <i th:case="'IMAGE'" class="bi bi-image h5 text-secondary"></i>
                             <i th:case="'AUDIO'" class="bi bi-file-music h5 text-secondary"></i>
@@ -46,35 +46,35 @@
                         </td>
 
                         <!-- Name -->
-                        <td class="text-start" th:switch="${item.getType().name()}">
-                            <a th:case="'FOLDER'" th:href="@{/(path=${item.getFullPath()})}"
-                               th:text="${item.getName()}"></a>
+                        <td class="text-start" th:switch="${item.type().name()}">
+                            <a th:case="'FOLDER'" th:href="@{/(path=${item.fullPath()})}"
+                               th:text="${item.name()}"></a>
                             <a th:case="'AUDIO'"
-                               th:href="@{/preview(filepath=${item.getFullPath()})}"
-                               th:text="${item.getName()}"></a>
+                               th:href="@{/preview(filepath=${item.fullPath()})}"
+                               th:text="${item.name()}"></a>
                             <a th:case="'IMAGE'"
-                               th:href="@{/preview(filepath=${item.getFullPath()})}"
-                               th:text="${item.getName()}"></a>
-                            <a th:case="*" th:text="${item.getName()}"></a>
+                               th:href="@{/preview(filepath=${item.fullPath()})}"
+                               th:text="${item.name()}"></a>
+                            <a th:case="*" th:text="${item.name()}"></a>
                         </td>
 
                         <!-- Size -->
-                        <td th:switch="${item.getType().name()}">
+                        <td th:switch="${item.type().name()}">
                             <i th:case="'FOLDER'"
-                               th:text="${item.getSize() == 0 ? 'Empty' : item.getSize() + (item.getSize() == 1 ? ' object' : ' objects')}"></i>
-                            <i th:case="*" th:text="${item.getSize() / 1024} + ' KB'"></i>
+                               th:text="${item.size() == 0 ? 'Empty' : item.size() + (item.size() == 1 ? ' object' : ' objects')}"></i>
+                            <i th:case="*" th:text="${item.size() / 1024} + ' KB'"></i>
                         </td>
 
                         <!-- Download button -->
-                        <td th:switch="${item.getType().name()}">
+                        <td th:switch="${item.type().name()}">
                             <a th:case="'FOLDER'"
-                               th:if="${item.getSize() > 0}"
-                               th:href="@{download-folder(path=${item.getFullPath()})}">
+                               th:if="${item.size() > 0}"
+                               th:href="@{download-folder(path=${item.fullPath()})}">
                                 <button type="button" class="btn btn-light text-success">
                                     <i class="bi bi-save"></i>
                                 </button>
                             </a>
-                            <a th:case="*" th:href="@{download(path=${item.getFullPath()})}">
+                            <a th:case="*" th:href="@{download(path=${item.fullPath()})}">
                                 <button type="button" class="btn btn-light text-success">
                                     <i class="bi bi-cloud-download"></i>
                                 </button>
@@ -82,29 +82,29 @@
                         </td>
 
                         <!-- Rename button -->
-                        <td th:switch="${item.getType().name()}">
+                        <td th:switch="${item.type().name()}">
                             <button th:case="'FOLDER'" type="button" class="btn btn-light button-rename-folder"
-                                    th:data-name="${item.getName()}"
-                                    th:data-path="${item.getFullPath()}">
+                                    th:data-name="${item.name()}"
+                                    th:data-path="${item.fullPath()}">
                                 <i class="bi bi-pencil-square text-primary"></i>
                             </button>
                             <button th:case="*" type="button" class="btn btn-light button-rename-file"
-                                    th:data-name="${item.getName()}"
-                                    th:data-path="${item.getFullPath()}">
+                                    th:data-name="${item.name()}"
+                                    th:data-path="${item.fullPath()}">
                                 <i class="bi bi-pencil-square text-primary"></i>
                             </button>
                         </td>
 
                         <!-- Delete Button -->
-                        <td th:switch="${item.getType().name()}">
+                        <td th:switch="${item.type().name()}">
                             <button th:case="'FOLDER'"
                                     class="btn btn-light button-folder-delete"
-                                    th:data-folderpath="${item.getFullPath()}">
+                                    th:data-folderpath="${item.fullPath()}">
                                 <i class="bi bi-trash-fill text-danger"></i>
                             </button>
                             <button th:case="*"
                                     class="btn btn-light button-file-delete"
-                                    th:data-filepath="${item.getFullPath()}">
+                                    th:data-filepath="${item.fullPath()}">
                                 <i class="bi bi-trash-fill text-danger"></i>
                             </button>
                         </td>
@@ -120,58 +120,58 @@
         <div th:each="item : ${storageObjects}" class="card mb-2 shadow-sm">
             <div class="card-body p-2">
                 <div class="d-flex justify-content-between align-items-center">
-                    <div th:switch="${item.getType().name()}">
-                        <td th:switch="${item.getType().name()}">
+                    <div th:switch="${item.type().name()}">
+                        <td th:switch="${item.type().name()}">
                             <i th:case="'FOLDER'" class="bi bi-folder h5 text-secondary"></i>
                             <i th:case="'IMAGE'" class="bi bi-image h5 text-secondary"></i>
                             <i th:case="'AUDIO'" class="bi bi-file-music h5 text-secondary"></i>
                             <i th:case="*" class="bi bi-file-binary h5 text-secondary"></i>
                         </td>
 
-                        <td th:switch="${item.getType().name()}">
-                            <a th:case="'FOLDER'" th:href="@{/(path=${item.getFullPath()})}"
-                               th:text="${item.getName()}"></a>
+                        <td th:switch="${item.type().name()}">
+                            <a th:case="'FOLDER'" th:href="@{/(path=${item.fullPath()})}"
+                               th:text="${item.name()}"></a>
                             <a th:case="'AUDIO'"
-                               th:href="@{/preview(filepath=${item.getFullPath()})}"
-                               th:text="${item.getName()}"></a>
+                               th:href="@{/preview(filepath=${item.fullPath()})}"
+                               th:text="${item.name()}"></a>
                             <a th:case="'IMAGE'"
-                               th:href="@{/preview(filepath=${item.getFullPath()})}"
-                               th:text="${item.getName()}"></a>
-                            <a th:case="*" th:text="${item.getName()}"></a>
+                               th:href="@{/preview(filepath=${item.fullPath()})}"
+                               th:text="${item.name()}"></a>
+                            <a th:case="*" th:text="${item.name()}"></a>
                         </td>
                     </div>
                 </div>
                 <div class="text-end small text-muted">
-                    <span th:text="${item.type.name() == 'FOLDER' ? (item.size == 0 ? 'Empty' : item.size + ' objs') : item.size / 1024 + ' KB'}"></span>
+                    <span th:text="${item.type().name() == 'FOLDER' ? (item.size == 0 ? 'Empty' : item.size + ' objs') : item.size / 1024 + ' KB'}"></span>
                 </div>
 
                 <div class="mt-2 d-flex justify-content-end gap-2">
-                    <a th:href="@{download(path=${item.getFullPath()})}" class="btn btn-sm btn-light text-success">
+                    <a th:href="@{download(path=${item.fullPath()})}" class="btn btn-sm btn-light text-success">
                         <i class="bi bi-cloud-download"></i>
                     </a>
 
-                    <td th:switch="${item.getType().name()}">
+                    <td th:switch="${item.type().name()}">
                         <button th:case="'FOLDER'"
                                 class="btn btn-light button-rename-folder"
-                                th:data-name="${item.getName()}"
-                                th:data-path="${item.getFullPath()}">
+                                th:data-name="${item.name()}"
+                                th:data-path="${item.fullPath()}">
                             <i class="bi bi-pencil-square text-primary"></i>
                         </button>
                         <button th:case="*" type="button" class="btn btn-light button-rename-file"
-                                th:data-name="${item.getName()}"
-                                th:data-path="${item.getFullPath()}">
+                                th:data-name="${item.name()}"
+                                th:data-path="${item.fullPath()}">
                             <i class="bi bi-pencil-square text-primary"></i>
                         </button>
                     </td>
-                    <td th:switch="${item.getType().name()}">
+                    <td th:switch="${item.type().name()}">
                         <button th:case="'FOLDER'"
                                 class="btn btn-light button-folder-delete"
-                                th:data-folderpath="${item.getFullPath()}">
+                                th:data-folderpath="${item.fullPath()}">
                             <i class="bi bi-trash-fill text-danger"></i>
                         </button>
                         <button th:case="*"
                                 class="btn btn-light button-file-delete"
-                                th:data-filepath="${item.getFullPath()}">
+                                th:data-filepath="${item.fullPath()}">
                             <i class="bi bi-trash-fill text-danger"></i>
                         </button>
                     </td>

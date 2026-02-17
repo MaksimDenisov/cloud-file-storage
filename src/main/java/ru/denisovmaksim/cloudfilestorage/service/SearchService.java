@@ -46,9 +46,9 @@ public class SearchService {
         }
         return Stream.concat(objectInfos.stream(), phantomFolders.stream())
                 .map(StorageObjectDTOMapper::toDTO)
-                .filter(dto -> dto.getName().contains(query))
-                .sorted(Comparator.comparing((StorageObjectDTOResponse dto) -> dto.getType() == FileType.FOLDER ? 0 : 1)
-                        .thenComparing(StorageObjectDTOResponse::getName))
+                .filter(dto -> dto.name().contains(query))
+                .sorted(Comparator.comparing((StorageObjectDTOResponse dto) -> dto.type() == FileType.FOLDER ? 0 : 1)
+                        .thenComparing(StorageObjectDTOResponse::name))
                 .collect(Collectors.toList());
     }
 

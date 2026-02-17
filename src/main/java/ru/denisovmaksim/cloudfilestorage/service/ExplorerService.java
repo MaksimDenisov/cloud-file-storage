@@ -41,8 +41,8 @@ public class ExplorerService {
         }
         return infosWithDirSize.stream()
                 .map(StorageObjectDTOMapper::toDTO)
-                .sorted(Comparator.comparing(StorageObjectDTOResponse::getType)
-                        .thenComparing(StorageObjectDTOResponse::getName))
+                .sorted(Comparator.comparing(StorageObjectDTOResponse::type)
+                        .thenComparing(StorageObjectDTOResponse::name))
                 .collect(Collectors.toList());
     }
 }

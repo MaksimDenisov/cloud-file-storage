@@ -8,20 +8,25 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.denisovmaksim.cloudfilestorage.IntegrationTestConfiguration;
 import ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.service.fixture.StorageFixture;
+import ru.denisovmaksim.cloudfilestorage.storage.AbstractMinioIntegrationTest;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest()
-@ActiveProfiles("it")
-@Import({IntegrationTestConfiguration.class, StorageFixture.class})
+@SpringJUnitConfig
 @Testcontainers
-public class ObjectOperationsServiceIT {
+@Import({ObjectOperationsService.class, ExplorerService.class,
+        StorageDataAccessor.class, StorageMetadataAccessor.class,
+        StorageFixture.class})
+public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
     @Autowired
     private ExplorerService explorerService;
 
@@ -50,12 +55,12 @@ public class ObjectOperationsServiceIT {
         List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
         assertThat(actual)
                 .anySatisfy(dto -> {
-                    assertThat(dto.getFullPath()).isEqualTo("new-file");
-                    assertThat(dto.getName()).isEqualTo("new-file");
+                    assertThat(dto.fullPath()).isEqualTo("new-file");
+                    assertThat(dto.name()).isEqualTo("new-file");
                 });
         assertThat(actual)
                 .noneSatisfy(dto -> {
-                    assertThat(dto.getName()).isEqualTo("file");
+                    assertThat(dto.name()).isEqualTo("file");
                 });
     }
 
@@ -68,12 +73,12 @@ public class ObjectOperationsServiceIT {
         List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
         assertThat(actual)
                 .anySatisfy(dto -> {
-                    assertThat(dto.getFullPath()).isEqualTo("file.txt");
-                    assertThat(dto.getName()).isEqualTo("file.txt");
+                    assertThat(dto.fullPath()).isEqualTo("file.txt");
+                    assertThat(dto.name()).isEqualTo("file.txt");
                 });
         assertThat(actual)
                 .noneSatisfy(dto -> {
-                    assertThat(dto.getName()).isEqualTo("file");
+                    assertThat(dto.name()).isEqualTo("file");
                 });
     }
 
@@ -86,12 +91,12 @@ public class ObjectOperationsServiceIT {
         List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
         assertThat(actual)
                 .anySatisfy(dto -> {
-                    assertThat(dto.getFullPath()).isEqualTo("file");
-                    assertThat(dto.getName()).isEqualTo("filet");
+                    assertThat(dto.fullPath()).isEqualTo("file");
+                    assertThat(dto.name()).isEqualTo("file");
                 });
         assertThat(actual)
                 .noneSatisfy(dto -> {
-                    assertThat(dto.getName()).isEqualTo("file.txt");
+                    assertThat(dto.name()).isEqualTo("file.txt");
                 });
     }
 }

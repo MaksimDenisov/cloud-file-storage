@@ -6,7 +6,6 @@ import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 import java.util.List;
 
 
-// TODO Use StorageObjectInfoAssert
 public class StorageObjectInfoListAssert extends AbstractAssert<StorageObjectInfoListAssert, List<StorageObjectInfo>> {
 
     protected StorageObjectInfoListAssert(List<StorageObjectInfo> actual) {
