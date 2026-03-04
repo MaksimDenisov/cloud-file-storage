@@ -1,6 +1,7 @@
 package ru.denisovmaksim.cloudfilestorage.service;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +48,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
     }
 
     @Test
+    @DisplayName("Rename file")
     void shouldRenameFile() {
         storageFixture.file("", "file", "Content");
 
@@ -65,6 +67,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
     }
 
     @Test
+    @DisplayName("Rename file with name has same prefix but longer")
     void shouldRenameFileWithSamePrefixLonger() {
         storageFixture.file("", "file", "Content");
 
@@ -83,6 +86,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
     }
 
     @Test
+    @DisplayName("Rename file with name has same prefix but shorter")
     void shouldRenameFileWithSamePrefixShorter() {
         storageFixture.file("", "file.txt", "Content");
 
