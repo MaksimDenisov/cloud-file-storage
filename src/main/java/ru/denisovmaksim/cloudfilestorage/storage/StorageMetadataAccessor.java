@@ -22,11 +22,6 @@ public class StorageMetadataAccessor implements MetadataAccessor {
     }
 
     @Override
-    public boolean isExistByPrefix(Long userId, String path) {
-        return minioMetadataAccessor.isExistByPrefix(userId, path);
-    }
-
-    @Override
     public Optional<StorageObjectInfo> getOne(Long userId, String path) {
         return callWithMinio(() -> minioMetadataAccessor.getOne(userId, path));
     }
@@ -39,5 +34,9 @@ public class StorageMetadataAccessor implements MetadataAccessor {
     @Override
     public List<StorageObjectInfo> findObjectInfosBySubstring(Long userId, String path, String query) {
         return minioMetadataAccessor.findObjectInfosBySubstring(userId, path, query);
+    }
+    @Override
+    public boolean exist(Long userId, String path) {
+        return minioMetadataAccessor.exist(userId, path);
     }
 }

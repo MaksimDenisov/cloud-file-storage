@@ -1,6 +1,5 @@
 package ru.denisovmaksim.cloudfilestorage.storage;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,9 +7,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.web.multipart.MultipartFile;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.denisovmaksim.cloudfilestorage.service.fixture.StorageFixture;
 import ru.denisovmaksim.cloudfilestorage.storage.assertion.StorageObjectInfoAssert;
@@ -79,7 +76,7 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
     @Test
     @DisplayName("Accessing metadata of a non-existent path should return false/empty")
     void shouldReturnFalseOrEmptyWhenAccessingNonExistentPathMetadata() throws Exception {
-        assertThat(metadataAccessor.isExistByPrefix(USER_ID, "not-exist-path"))
+        assertThat(metadataAccessor.exist(USER_ID, "not-exist-path"))
                 .isFalse();
         assertThat(metadataAccessor.listObjectInfo(USER_ID, "not-exist-path"))
                 .isNotPresent();
@@ -98,7 +95,7 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
     @DisplayName("search() should return DTOs based on query")
     void shouldReturnObjectInfosWhenSearchingBySubstring() throws Exception {
         fixture.folder("user-1-files/folder/");
-        fixture.folder("user-1-files/folder/folder");
+        fixture.folder("user-1-files/folder/folder/");
         fixture.folder("user-1-files/folder/folder/folder.txt");
         fixture.file("user-1-files/folder/file.txt", "content");
         fixture.file("user-1-files/file.txt", "content");
@@ -108,5 +105,25 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
 
         StorageObjectInfoListAssert.assertThat(paths)
                 .containsExactlyPaths("folder/file.txt", "file.txt");
+    }
+
+    @Test
+    @DisplayName("Check existing object")
+    void shouldReturnExistOneObject() throws Exception {
+        fixture.folder("user-1-files/folder/folder/");
+        fixture.folder("user-1-files/folder/folder/folder.txt");
+
+        assertThat(metadataAccessor.exist(USER_ID, "fol"))
+                .withFailMessage("try fol")
+                .isFalse();
+        assertThat(metadataAccessor.exist(USER_ID, "folder"))
+                .withFailMessage("try folder")
+                .isFalse();
+        assertThat(metadataAccessor.exist(USER_ID, "folder/"))
+                .withFailMessage("try folder/")
+                .isTrue();
+        assertThat(metadataAccessor.exist(USER_ID, "folder/folder/folder.txt"))
+                .withFailMessage("folder/folder/folder.txt")
+                .isTrue();
     }
 }

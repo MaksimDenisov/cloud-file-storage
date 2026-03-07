@@ -42,7 +42,7 @@ public class UploadService {
     }
 
     private void throwIfObjectExist(String path) {
-        if (metadataAccessor.isExistByPrefix(securityService.getAuthUserId(), path)) {
+        if (metadataAccessor.exist(securityService.getAuthUserId(), path)) {
             throw new ObjectAlreadyExistException(String.format("Path %s already exist", path));
         }
     }

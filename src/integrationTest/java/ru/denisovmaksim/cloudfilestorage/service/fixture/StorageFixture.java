@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
+import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -42,6 +43,7 @@ public class StorageFixture {
 
 
     public void folder(String path) {
+        PathUtil.ensureDirectoryPath(path);
         metadataAccessor.createPath(USER_ID, path);
     }
 

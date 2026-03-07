@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.denisovmaksim.cloudfilestorage.config.MinioProperties;
+import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -20,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 /**
  * Component responsible for retrieving object metadata with MinIO storage.
@@ -45,19 +47,6 @@ class MinioMetadataAccessor {
                         .build());
 
     }
-
-    public boolean isExistByPrefix(Long userId, String path) {
-        log.info("Check exist path '{}' for userId={}", path, userId);
-        Iterable<Result<Item>> results = minioClient.listObjects(
-                ListObjectsArgs.builder()
-                        .bucket(properties.bucket())
-                        .prefix(resolver.resolveMinioPath(userId, path))
-                        .maxKeys(1)
-                        .build()
-        );
-        return results.iterator().hasNext();
-    }
-
 
     public Optional<StorageObjectInfo> getOne(Long userId, String path) throws MinioException, IOException,
             NoSuchAlgorithmException, InvalidKeyException {
@@ -90,5 +79,38 @@ class MinioMetadataAccessor {
                         .contains(upperCaseQuery))
                 .map(item -> mapper.from(userId, item))
                 .toList();
+    }
+
+    public boolean exist(Long userId, String path) {
+        if (PathUtil.isDir(path)) {
+            return isExistByPrefix(userId, path);
+        }
+        return isExistByEquals(userId, path);
+    }
+
+    public boolean isExistByPrefix(Long userId, String path) {
+        log.info("Check exist path by prefix '{}' for userId={}", path, userId);
+        Iterable<Result<Item>> results = minioClient.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket(properties.bucket())
+                        .prefix(resolver.resolveMinioPath(userId, path))
+                        .maxKeys(1)
+                        .build()
+        );
+        return results.iterator().hasNext();
+    }
+
+    public boolean isExistByEquals(Long userId, String path) {
+        log.info("Check exist path '{}' for userId={}", path, userId);
+        String minioPath = resolver.resolveMinioPath(userId, path);
+        Iterable<Result<Item>> minioItems = minioClient.listObjects(
+                ListObjectsArgs.builder()
+                        .bucket(properties.bucket())
+                        .prefix(minioPath)
+                        .build());
+
+        return StreamSupport.stream(minioItems.spliterator(), false)
+                .map(item -> MinioExceptionHandler.callWithMinio(item::get))
+                .anyMatch(item -> minioPath.equals(item.objectName()));
     }
 }

@@ -3,6 +3,7 @@ package ru.denisovmaksim.cloudfilestorage.service;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.exception.RootFolderModificationException;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
@@ -44,6 +45,7 @@ public class ObjectOperationsService {
                              @ValidPath(PathType.NAME) String newFolderName) {
         throwIfRootModification(directory);
         String newPath = PathUtil.getParentPath(directory) + newFolderName;
+        throwIfObjectExist(newPath); // file
         newPath = PathUtil.ensureDirectoryPath(newPath);
         throwIfObjectExist(newPath);
 
@@ -51,32 +53,42 @@ public class ObjectOperationsService {
         if (storageDataAccessor.copyObjects(authUserId, directory, newPath) == 0) {
             minioMetadataAccessor.createPath(authUserId, newPath);
         }
-        storageDataAccessor.deleteObjects(authUserId, directory);
+        storageDataAccessor.deleteObjects(authUserId, PathUtil.ensureDirectoryPath(directory));
     }
 
     public void deleteFolder(@ValidPath(PathType.DIR) String directory) {
+        directory = PathUtil.ensureDirectoryPath(directory);
         throwIfRootModification(directory);
+        throwIfObjectNotExist(directory);
         Long authUserId = securityService.getAuthUserId();
         String parentPath = PathUtil.getParentPath(directory);
         storageDataAccessor.deleteObjects(authUserId, directory);
-        if (!minioMetadataAccessor.isExistByPrefix(authUserId, parentPath)) {
+        if (!minioMetadataAccessor.exist(authUserId, parentPath)) {
             minioMetadataAccessor.createPath(authUserId, parentPath);
         }
     }
 
     public void deleteFile(@ValidPath(PathType.FILEPATH) String filePath) {
         Long authUserId = securityService.getAuthUserId();
+        throwIfObjectNotExist(filePath);
         String parentDirectory = PathUtil.getParentPath(filePath);
-        storageDataAccessor.deleteObjects(authUserId, filePath);
-        if (!minioMetadataAccessor.isExistByPrefix(authUserId, parentDirectory)) {
+        storageDataAccessor.deleteOneObject(authUserId, filePath);
+        if (!minioMetadataAccessor.exist(authUserId, parentDirectory)) {
             minioMetadataAccessor.createPath(authUserId, parentDirectory);
         }
     }
 
     private void throwIfObjectExist(String path) {
         Long authUserId = securityService.getAuthUserId();
-        if (minioMetadataAccessor.isExistByPrefix(authUserId, path)) {
+        if (minioMetadataAccessor.exist(authUserId, path)) {
             throw new ObjectAlreadyExistException(String.format("Path %s already exist", path));
+        }
+    }
+
+    private void throwIfObjectNotExist(String path) {
+        Long authUserId = securityService.getAuthUserId();
+        if (!minioMetadataAccessor.exist(authUserId, path)) {
+            throw new NotFoundException(String.format("Path %s doesn't exist", path));
         }
     }
 

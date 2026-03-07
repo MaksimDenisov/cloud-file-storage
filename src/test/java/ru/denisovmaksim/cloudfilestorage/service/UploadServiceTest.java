@@ -48,7 +48,7 @@ class UploadServiceTest {
     @DisplayName("Upload file should save it to storage.")
     void uploadFileShouldSaveWhenNotExists() {
         MultipartFile file = mock(MultipartFile.class);
-        when(storageMetadataAccessor.isExistByPrefix(USER_ID, "dir/file.txt")).thenReturn(false);
+        when(storageMetadataAccessor.exist(USER_ID, "dir/file.txt")).thenReturn(false);
         UploadFileDTORequest dto = new UploadFileDTORequest("file.txt", file);
         uploadService.uploadFile("dir/", dto);
 
@@ -61,7 +61,7 @@ class UploadServiceTest {
         MultipartFile file = mock(MultipartFile.class);
         UploadFileDTORequest dto = new UploadFileDTORequest("file.txt", file);
 
-        when(storageMetadataAccessor.isExistByPrefix(eq(USER_ID), any())).thenReturn(true);
+        when(storageMetadataAccessor.exist(eq(USER_ID), any())).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class,
                 () -> uploadService.uploadFile("dir/", dto));
@@ -74,7 +74,7 @@ class UploadServiceTest {
         when(file.getOriginalFilename()).thenReturn("folder/file.txt");
         List<MultipartFile> files = List.of(file);
 
-        when(storageMetadataAccessor.isExistByPrefix(USER_ID, "folder")).thenReturn(false);
+        when(storageMetadataAccessor.exist(USER_ID, "folder")).thenReturn(false);
 
         uploadService.uploadFolder("", files);
 

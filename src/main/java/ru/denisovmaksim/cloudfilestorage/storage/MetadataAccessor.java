@@ -19,7 +19,7 @@ public interface MetadataAccessor {
      * @param path   the virtual path to check for object existence
      * @return {@code true} if at least one object exists at the specified path; {@code false} otherwise
      */
-    boolean isExistByPrefix(Long userId, String path);
+    boolean exist(Long userId, String path);
 
     Optional<StorageObjectInfo> getOne(Long userId, String path);
 
