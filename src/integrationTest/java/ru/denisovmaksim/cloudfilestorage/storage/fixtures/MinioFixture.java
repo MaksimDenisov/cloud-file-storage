@@ -7,14 +7,9 @@ import io.minio.RemoveObjectArgs;
 import io.minio.Result;
 import io.minio.messages.Item;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
-import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
 
 @TestComponent
 public class MinioFixture {

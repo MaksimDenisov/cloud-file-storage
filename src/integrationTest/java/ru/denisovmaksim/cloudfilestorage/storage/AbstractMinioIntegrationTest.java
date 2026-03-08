@@ -23,6 +23,7 @@ public abstract class AbstractMinioIntegrationTest {
     public static final String BUCKET = "user-files";
 
     @Autowired
+    // CHECKSTYLE:OFF
     protected MinioClient minioClient;
 
     protected static final MinIOContainer MINIO_CONTAINER =
@@ -36,10 +37,11 @@ public abstract class AbstractMinioIntegrationTest {
 
     @Autowired
     protected MinioFixture fixture;
+    // CHECKSTYLE:ON
     @DynamicPropertySource
     static void minioProperties(DynamicPropertyRegistry registry) {
-        registry.add("minio.url", () -> "http://" + MINIO_CONTAINER.getHost() +
-                ":" + MINIO_CONTAINER.getMappedPort(9000));
+        registry.add("minio.url", () -> "http://" + MINIO_CONTAINER.getHost()
+                + ":" + MINIO_CONTAINER.getMappedPort(9000));
         registry.add("minio.access-key", MINIO_CONTAINER::getUserName);
         registry.add("minio.secret-key", MINIO_CONTAINER::getPassword);
         registry.add("minio.bucket", () -> BUCKET);

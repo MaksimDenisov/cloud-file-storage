@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class DownloadServiceTest {
+public abstract class DownloadServiceTest {
     @Mock
     private StorageMetadataAccessor minioMetadataAccessor;
 

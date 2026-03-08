@@ -24,6 +24,7 @@ import static ru.denisovmaksim.cloudfilestorage.storage.fixtures.MinioFixture.US
 @SpringJUnitConfig
 @Testcontainers
 @Import(StorageMetadataAccessor.class)
+
 class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
 
     @Autowired
@@ -39,12 +40,12 @@ class MinioMetadataAccessorTest extends AbstractMinioIntegrationTest {
     void shouldCreatePath() throws Exception {
         String path = "/folder/subfolder/";
         metadataAccessor.createPath(StorageFixture.USER_ID, path);
-        Optional<StorageObjectInfo> info = metadataAccessor.getOne(USER_ID,path);
+        Optional<StorageObjectInfo> info = metadataAccessor.getOne(USER_ID, path);
         assertThat(info.isPresent()).isTrue();
         StorageObjectInfoAssert.assertThat(info.get())
                 .isDirectory()
                 .hasName("subfolder")
-                .hasPath( "folder/subfolder/")
+                .hasPath("folder/subfolder/")
                 .hasSize(0);
     }
 

@@ -1,7 +1,6 @@
 package ru.denisovmaksim.cloudfilestorage.storage.assertion;
 
 import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.api.Assertions;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObject;
 
 import java.io.IOException;

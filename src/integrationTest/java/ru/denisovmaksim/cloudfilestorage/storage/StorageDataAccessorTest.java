@@ -34,7 +34,7 @@ import static ru.denisovmaksim.cloudfilestorage.service.fixture.StorageFixture.U
 class StorageDataAccessorTest extends AbstractMinioIntegrationTest {
 
     @Autowired
-    StorageDataAccessor storageDataAccessor;
+    private StorageDataAccessor storageDataAccessor;
 
     @BeforeEach
     void cleanUp() throws Exception {
