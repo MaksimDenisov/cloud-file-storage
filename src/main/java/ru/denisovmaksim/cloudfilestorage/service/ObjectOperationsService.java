@@ -18,7 +18,7 @@ import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 @AllArgsConstructor
 public class ObjectOperationsService {
 
-    private final StorageMetadataAccessor minioMetadataAccessor;
+    private final StorageMetadataAccessor storageMetadataAccessor;
 
     private final StorageDataAccessor storageDataAccessor;
 
@@ -28,7 +28,7 @@ public class ObjectOperationsService {
         Long authUserId = securityService.getAuthUserId();
         String newDirPath = PathUtil.ensureDirectoryPath(path);
         throwIfObjectExist(newDirPath);
-        minioMetadataAccessor.createPath(authUserId, newDirPath);
+        storageMetadataAccessor.createPath(authUserId, newDirPath);
     }
 
     public void renameFile(@ValidPath(PathType.FILEPATH) String filepath,
@@ -51,7 +51,7 @@ public class ObjectOperationsService {
 
         Long authUserId = securityService.getAuthUserId();
         if (storageDataAccessor.copyObjects(authUserId, directory, newPath) == 0) {
-            minioMetadataAccessor.createPath(authUserId, newPath);
+            storageMetadataAccessor.createPath(authUserId, newPath);
         }
         storageDataAccessor.deleteObjects(authUserId, PathUtil.ensureDirectoryPath(directory));
     }
@@ -63,8 +63,8 @@ public class ObjectOperationsService {
         Long authUserId = securityService.getAuthUserId();
         String parentPath = PathUtil.getParentPath(directory);
         storageDataAccessor.deleteObjects(authUserId, directory);
-        if (!minioMetadataAccessor.exist(authUserId, parentPath)) {
-            minioMetadataAccessor.createPath(authUserId, parentPath);
+        if (!storageMetadataAccessor.exist(authUserId, parentPath)) {
+            storageMetadataAccessor.createPath(authUserId, parentPath);
         }
     }
 
@@ -73,21 +73,21 @@ public class ObjectOperationsService {
         throwIfObjectNotExist(filePath);
         String parentDirectory = PathUtil.getParentPath(filePath);
         storageDataAccessor.deleteOneObject(authUserId, filePath);
-        if (!minioMetadataAccessor.exist(authUserId, parentDirectory)) {
-            minioMetadataAccessor.createPath(authUserId, parentDirectory);
+        if (!storageMetadataAccessor.exist(authUserId, parentDirectory)) {
+            storageMetadataAccessor.createPath(authUserId, parentDirectory);
         }
     }
 
     private void throwIfObjectExist(String path) {
         Long authUserId = securityService.getAuthUserId();
-        if (minioMetadataAccessor.exist(authUserId, path)) {
+        if (storageMetadataAccessor.exist(authUserId, path)) {
             throw new ObjectAlreadyExistException(String.format("Path %s already exist", path));
         }
     }
 
     private void throwIfObjectNotExist(String path) {
         Long authUserId = securityService.getAuthUserId();
-        if (!minioMetadataAccessor.exist(authUserId, path)) {
+        if (!storageMetadataAccessor.exist(authUserId, path)) {
             throw new NotFoundException(String.format("Path %s doesn't exist", path));
         }
     }

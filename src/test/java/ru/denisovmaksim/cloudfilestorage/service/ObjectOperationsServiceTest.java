@@ -13,14 +13,12 @@ import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public abstract class ObjectOperationsServiceTest {
+public class ObjectOperationsServiceTest {
 
     @Mock
     private StorageMetadataAccessor storageMetadataAccessor;
@@ -61,7 +59,6 @@ public abstract class ObjectOperationsServiceTest {
     }
 
 
-
     @Test
     @DisplayName("Rename file should copy and delete.")
     void renameFileShouldCopyAndDeleteWhenNewNotExists() {
@@ -77,10 +74,11 @@ public abstract class ObjectOperationsServiceTest {
     @DisplayName("If file last in folder and parent folder not exist should create it.")
     void deleteFileShouldDeleteAndCreateParentFolderIfMissing() {
         when(storageMetadataAccessor.exist(USER_ID, "dir/")).thenReturn(false);
+        when(storageMetadataAccessor.exist(USER_ID, "dir/file.txt")).thenReturn(true);
 
         objectOperationsService.deleteFile("dir/file.txt");
 
-        verify(storageDataAccessor).deleteObjects(USER_ID, "dir/file.txt");
+        verify(storageDataAccessor).deleteOneObject(USER_ID, "dir/file.txt");
         verify(storageMetadataAccessor).createPath(USER_ID, "dir/");
     }
 
@@ -90,14 +88,16 @@ public abstract class ObjectOperationsServiceTest {
     void renameFolderSuccess() {
         String currentPath = "docs/";
         String newFolderName = "newDocs";
-        String newPath = "newDocs/";
+        String newDirPath = "newDocs/";
+        String newFilePath = "newDocs";
 
-        when(storageMetadataAccessor.exist(USER_ID, newPath)).thenReturn(false);
+        when(storageMetadataAccessor.exist(USER_ID, newFilePath)).thenReturn(false);
+        when(storageMetadataAccessor.exist(USER_ID, newDirPath)).thenReturn(false);
         when(storageDataAccessor.copyObjects(any(), any(), any())).thenReturn(5);
 
         objectOperationsService.renameFolder(currentPath, newFolderName);
 
-        verify(storageDataAccessor).copyObjects(eq(USER_ID), eq(currentPath), anyString());
+        verify(storageDataAccessor).copyObjects(USER_ID, currentPath, newDirPath);
         verify(storageDataAccessor).deleteObjects(USER_ID, currentPath);
     }
 
@@ -108,6 +108,7 @@ public abstract class ObjectOperationsServiceTest {
         String newFolderName = "newFolder";
         String newPath = "newFolder/";
 
+        when(storageMetadataAccessor.exist(USER_ID, newFolderName)).thenReturn(false);
         when(storageMetadataAccessor.exist(USER_ID, newPath)).thenReturn(false);
 
         objectOperationsService.renameFolder(currentPath, newFolderName);
@@ -121,9 +122,14 @@ public abstract class ObjectOperationsServiceTest {
     void renameFolderShouldThrowsExceptionIfFolderAlreadyExists() {
         String currentPath = "docs/folder/";
         String newFolderName = "existingFolder";
-        String newPath = "docs/existingFolder/";
+        String newDirPath = "docs/existingFolder/";
+        String newFilePath = "docs/existingFolder";
 
-        when(storageMetadataAccessor.exist(USER_ID, newPath)).thenReturn(true);
+
+        when(storageMetadataAccessor.exist(USER_ID, newFilePath))
+                .thenReturn(false);
+        when(storageMetadataAccessor.exist(USER_ID, newDirPath))
+                .thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class, () ->
                 objectOperationsService.renameFolder(currentPath, newFolderName)
@@ -134,11 +140,30 @@ public abstract class ObjectOperationsServiceTest {
     }
 
     @Test
+    @DisplayName("Rename folder should throw exception if file with same name is exist.")
+    void renameFolderShouldThrowsExceptionIfFileWithSameAlreadyExists() {
+        String currentPath = "docs/folder/";
+        String newFolderName = "existingFolder";
+        String newFilePath = "docs/existingFolder";
+
+        when(storageMetadataAccessor.exist(USER_ID, newFilePath)).thenReturn(true);
+
+        assertThrows(ObjectAlreadyExistException.class, () ->
+                objectOperationsService.renameFolder(currentPath, newFolderName)
+        );
+
+        verify(storageDataAccessor, never()).copyObjects(any(), any(), any());
+        verify(storageDataAccessor, never()).deleteObjects(any(), any());
+    }
+
+
+    @Test
     @DisplayName("If folder last in folder and parent folder not exist should create it.")
     void deleteNotLastFolderParentPathNotCreate() {
         String path = "docs/folder/";
         String parentPath = "docs/";
 
+        when(storageMetadataAccessor.exist(USER_ID, path)).thenReturn(true);
         when(storageMetadataAccessor.exist(USER_ID, parentPath)).thenReturn(false);
 
         objectOperationsService.deleteFolder(path);
@@ -153,6 +178,7 @@ public abstract class ObjectOperationsServiceTest {
         String path = "photos/events/";
         String parentPath = "photos/";
 
+        when(storageMetadataAccessor.exist(USER_ID, path)).thenReturn(true);
         when(storageMetadataAccessor.exist(USER_ID, parentPath)).thenReturn(true);
 
         objectOperationsService.deleteFolder(path);
