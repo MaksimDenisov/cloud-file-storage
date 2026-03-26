@@ -14,10 +14,11 @@ import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public abstract class  SearchServiceTest {
+class SearchServiceTest {
 
     @Mock
     private StorageMetadataAccessor metadataAccessor;
@@ -31,34 +32,22 @@ public abstract class  SearchServiceTest {
     @Test
     @DisplayName("search() should return sorted DTOs based on query")
     void searchShouldReturnSortedDTOs() {
-        Long userId = 42L;
-        String query = "report";
-        String baseDir = "documents/reports/";
-        String parentDir1 = baseDir + "2025/";
-        String parentDir2 = baseDir + "2025/";
-
-        List<StorageObjectDTOResponse> expected = List.of(
-                new StorageObjectDTOResponse("documents/" + "reports/",
-                        "reports", FileType.FOLDER, 2L),
-                new StorageObjectDTOResponse(parentDir1 + "report1.txt",
-                        "report1.txt", FileType.UNKNOWN_FILE, 1000L),
-                new StorageObjectDTOResponse(parentDir2 + "report2.txt",
-                        "report2.txt", FileType.UNKNOWN_FILE, 2000L)
-        );
-
         List<StorageObjectInfo> mockInfos = List.of(
-                new StorageObjectInfo(parentDir1 + "report1.txt", "report1.txt", false, 1000L),
-                new StorageObjectInfo(parentDir2 + "report2.txt", "report2.txt", false, 2000L)
+                new StorageObjectInfo("documents/reports/2025/report1.txt", "report1.txt", false, 1000L),
+                new StorageObjectInfo("documents/reports/2026/report2.txt", "report2.txt", false, 2000L)
         );
 
-        when(securityService.getAuthUserId()).thenReturn(userId);
-        when(metadataAccessor.findObjectInfosBySubstring(userId, "", query)).thenReturn(mockInfos);
+        when(securityService.getAuthUserId()).thenReturn(1L);
+        when(metadataAccessor.findObjectInfosBySubstring(1L, "", "report")).thenReturn(mockInfos);
+        List<StorageObjectDTOResponse> actual = searchService.search("report");
 
-        List<StorageObjectDTOResponse> actual = searchService.search(query);
-        actual.forEach(System.out::println);
-        expected.forEach(System.out::println);
         assertThat(actual)
-                .usingRecursiveFieldByFieldElementComparator()
-                .isEqualTo(expected);
+                .extracting(StorageObjectDTOResponse::fullPath, StorageObjectDTOResponse::name,
+                        StorageObjectDTOResponse::type, StorageObjectDTOResponse::size)
+                .containsExactlyInAnyOrder(
+                        tuple("documents/reports/", "reports", FileType.FOLDER, 0L),
+                        tuple("documents/reports/2025/report1.txt", "report1.txt", FileType.UNKNOWN_FILE, 1000L),
+                        tuple("documents/reports/2026/report2.txt", "report2.txt", FileType.UNKNOWN_FILE, 2000L)
+                );
     }
 }

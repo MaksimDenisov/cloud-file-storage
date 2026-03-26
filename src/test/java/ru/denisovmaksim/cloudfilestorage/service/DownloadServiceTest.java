@@ -12,17 +12,19 @@ import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObject;
+import ru.denisovmaksim.cloudfilestorage.storage.StorageObjectInfo;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public abstract class DownloadServiceTest {
+class DownloadServiceTest {
     @Mock
-    private StorageMetadataAccessor minioMetadataAccessor;
+    private StorageMetadataAccessor storageMetadataAccessor;
 
     @Mock
     private StorageDataAccessor storageDataAccessor;
@@ -45,8 +47,11 @@ public abstract class DownloadServiceTest {
     void getFileShouldReturnStreamDTO() {
         InputStream stream = new ByteArrayInputStream("test".getBytes());
 
+        when(storageMetadataAccessor.getOne(USER_ID, "dir/file.txt"))
+                .thenReturn(Optional.of(new StorageObjectInfo("dir/file.txt",
+                        "file.txt", false, "test".length())));
         when(storageDataAccessor.getObject(USER_ID, "dir/file.txt"))
-                .thenReturn(new StorageObject("dir/file.txt",  stream));
+                .thenReturn(new StorageObject("dir/file.txt", stream));
 
         NamedStreamDTOResponse result = downloadService.getFileAsStream("dir/file.txt");
         assertEquals("file.txt", java.net.URLDecoder.decode(result.getName(), java.nio.charset.StandardCharsets.UTF_8));
