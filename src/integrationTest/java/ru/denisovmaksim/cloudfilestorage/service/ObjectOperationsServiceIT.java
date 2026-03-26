@@ -13,7 +13,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
-import ru.denisovmaksim.cloudfilestorage.exception.RootFolderModificationException;
+import ru.denisovmaksim.cloudfilestorage.exception.RootFolderException;
 import ru.denisovmaksim.cloudfilestorage.service.fixture.StorageFixture;
 import ru.denisovmaksim.cloudfilestorage.storage.AbstractMinioIntegrationTest;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
@@ -254,7 +254,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
         @DisplayName("throw exception if try rename root")
         void shouldThrowIfRenameRoot() {
             assertThatThrownBy(() -> objectOperationsService.renameFolder("", "root"))
-                    .isInstanceOf(RootFolderModificationException.class);
+                    .isInstanceOf(RootFolderException.class);
         }
     }
 
@@ -310,7 +310,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
         @DisplayName("throw exception if try delete root")
         void shouldThrowIfRoot() {
             assertThatThrownBy(() -> objectOperationsService.deleteFolder(""))
-                    .isInstanceOf(RootFolderModificationException.class);
+                    .isInstanceOf(RootFolderException.class);
         }
     }
 }

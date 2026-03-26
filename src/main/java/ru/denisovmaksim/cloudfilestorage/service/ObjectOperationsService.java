@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
-import ru.denisovmaksim.cloudfilestorage.exception.RootFolderModificationException;
+import ru.denisovmaksim.cloudfilestorage.exception.RootFolderException;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
@@ -94,7 +94,7 @@ public class ObjectOperationsService {
 
     private void throwIfRootModification(String path) {
         if (PathUtil.isRoot(path)) {
-            throw new RootFolderModificationException("The root folder cannot be modified");
+            throw new RootFolderException("The root folder cannot be modified");
         }
     }
 }

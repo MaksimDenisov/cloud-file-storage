@@ -16,7 +16,7 @@ import ru.denisovmaksim.cloudfilestorage.storage.FileStorageException;
 import ru.denisovmaksim.cloudfilestorage.exception.ImageProcessingException;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
-import ru.denisovmaksim.cloudfilestorage.exception.RootFolderModificationException;
+import ru.denisovmaksim.cloudfilestorage.exception.RootFolderException;
 import ru.denisovmaksim.cloudfilestorage.exception.UserAlreadyExistException;
 
 import java.util.stream.Collectors;
@@ -102,8 +102,8 @@ public class GlobalControllerAdvice {
         return REDIRECT_TO_ROOT;
     }
 
-    @ExceptionHandler(RootFolderModificationException.class)
-    public String handleUserAlreadyExist(RootFolderModificationException e, RedirectAttributes attributes) {
+    @ExceptionHandler(RootFolderException.class)
+    public String handleUserAlreadyExist(RootFolderException e, RedirectAttributes attributes) {
         log.error("Root folder modification: {}", e.getMessage());
         setDangerMessage("The root folder cannot be modified", attributes);
         return "redirect:" + UserController.SIGN_UP;
