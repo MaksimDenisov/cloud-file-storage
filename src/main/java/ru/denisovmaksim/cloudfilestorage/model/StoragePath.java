@@ -71,8 +71,12 @@ sealed class StoragePath permits DirPath, FilePath {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         StoragePath that = (StoragePath) o;
         return Objects.equals(value, that.value);
     }

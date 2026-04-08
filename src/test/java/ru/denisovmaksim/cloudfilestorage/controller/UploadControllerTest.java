@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ru.denisovmaksim.cloudfilestorage.dto.request.UploadFileDTORequest;
+import ru.denisovmaksim.cloudfilestorage.model.DirPath;
 import ru.denisovmaksim.cloudfilestorage.service.UploadService;
 
 import java.util.List;
@@ -53,7 +53,7 @@ public class UploadControllerTest {
         String result = uploadController.uploadFile(path, file, redirectAttributes);
 
         assertEquals("redirect:/", result);
-        Mockito.verify(uploadService).uploadFile(eq(path), any(UploadFileDTORequest.class));
+        Mockito.verify(uploadService).uploadFile(eq(DirPath.of(path)), eq("name.txt"), any());
     }
 
     @Test
@@ -70,6 +70,6 @@ public class UploadControllerTest {
         String result = uploadController.uploadFolder(path, files, redirectAttributes);
 
         assertEquals("redirect:/", result);
-        Mockito.verify(uploadService).uploadFolder(path, files);
+        Mockito.verify(uploadService).uploadFolder(DirPath.of(path), files);
     }
 }

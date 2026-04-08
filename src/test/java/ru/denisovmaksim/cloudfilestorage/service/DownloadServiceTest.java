@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
+import ru.denisovmaksim.cloudfilestorage.model.FilePath;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObject;
@@ -53,7 +54,7 @@ class DownloadServiceTest {
         when(storageDataAccessor.getObject(USER_ID, "dir/file.txt"))
                 .thenReturn(new StorageObject("dir/file.txt", stream));
 
-        NamedStreamDTOResponse result = downloadService.getFileAsStream("dir/file.txt");
+        NamedStreamDTOResponse result = downloadService.getFileAsStream(FilePath.of("dir/file.txt"));
         assertEquals("file.txt", java.net.URLDecoder.decode(result.getName(), java.nio.charset.StandardCharsets.UTF_8));
     }
 }

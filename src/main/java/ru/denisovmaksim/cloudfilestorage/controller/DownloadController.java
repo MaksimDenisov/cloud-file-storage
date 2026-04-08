@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
+import ru.denisovmaksim.cloudfilestorage.model.DirPath;
+import ru.denisovmaksim.cloudfilestorage.model.FilePath;
 import ru.denisovmaksim.cloudfilestorage.service.DownloadService;
 
 import java.io.InputStream;
@@ -28,7 +30,7 @@ public class DownloadController {
     public ResponseEntity<InputStreamResource> downloadZipFolder(@RequestParam() String path) {
         try {
             log.info("Download zip folder from path {}", path);
-            return createStreamResponse(downloadService.getZipFolderAsStream(path));
+            return createStreamResponse(downloadService.getZipFolderAsStream(DirPath.of(path)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -37,7 +39,7 @@ public class DownloadController {
     @GetMapping("/download")
     public ResponseEntity<InputStreamResource> downloadFile(@RequestParam() String path) {
         try {
-            return createStreamResponse(downloadService.getFileAsStream(path));
+            return createStreamResponse(downloadService.getFileAsStream(FilePath.of(path)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

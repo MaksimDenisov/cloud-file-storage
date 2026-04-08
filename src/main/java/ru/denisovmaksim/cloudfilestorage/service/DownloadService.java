@@ -5,13 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
+import ru.denisovmaksim.cloudfilestorage.model.DirPath;
+import ru.denisovmaksim.cloudfilestorage.model.FilePath;
 import ru.denisovmaksim.cloudfilestorage.service.processing.ZipArchiver;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageObject;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
-import ru.denisovmaksim.cloudfilestorage.validation.PathType;
-import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,24 +32,24 @@ public class DownloadService {
 
     private final ZipArchiver zipArchiver;
 
-    public NamedStreamDTOResponse getFileAsStream(@ValidPath(PathType.FILEPATH) String filepath) {
-        long size = metadataAccessor.getOne(securityService.getAuthUserId(), filepath)
-                .orElseThrow(() -> new NotFoundException(filepath))
+    public NamedStreamDTOResponse getFileAsStream(FilePath filepath) {
+        long size = metadataAccessor.getOne(securityService.getAuthUserId(), filepath.value())
+                .orElseThrow(() -> new NotFoundException(filepath.value()))
                 .size();
-        StorageObject storageObject = dataAccessor.getObject(securityService.getAuthUserId(), filepath);
-        String baseName = PathUtil.getBaseName(filepath);
+        StorageObject storageObject = dataAccessor.getObject(securityService.getAuthUserId(), filepath.value());
+        String baseName = PathUtil.getBaseName(filepath.value());
         String encodedFileName = URLEncoder.encode(baseName, StandardCharsets.UTF_8)
                 .replace("+", "%20");
         return new NamedStreamDTOResponse(encodedFileName, size, storageObject.stream());
     }
 
-    public NamedStreamDTOResponse getZipFolderAsStream(@ValidPath(PathType.DIR) String path) {
-        String filename = PathUtil.getBaseName(path) + ".zip";
+    public NamedStreamDTOResponse getZipFolderAsStream(DirPath dirPath) {
+        String filename = dirPath.name() + ".zip";
         String encodedFileName = URLEncoder.encode(filename, StandardCharsets.UTF_8)
                 .replace("+", "%20");
-        List<StorageObject> fileObjects = dataAccessor.getObjects(securityService.getAuthUserId(), path);
-        ByteArrayOutputStream byteArrayOutputStream = zipArchiver.getByteArrayOutputStream(fileObjects, path);
-        return new NamedStreamDTOResponse(encodedFileName, byteArrayOutputStream.size(),
-                new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
+        List<StorageObject> fileObjects = dataAccessor.getObjects(securityService.getAuthUserId(), dirPath.value());
+        ByteArrayOutputStream outputStream = zipArchiver.getByteArrayOutputStream(fileObjects, dirPath.value());
+        return new NamedStreamDTOResponse(encodedFileName, outputStream.size(),
+                new ByteArrayInputStream(outputStream.toByteArray()));
     }
 }

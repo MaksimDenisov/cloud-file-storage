@@ -14,6 +14,8 @@ import ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.exception.RootFolderException;
+import ru.denisovmaksim.cloudfilestorage.model.DirPath;
+import ru.denisovmaksim.cloudfilestorage.model.FilePath;
 import ru.denisovmaksim.cloudfilestorage.service.fixture.StorageFixture;
 import ru.denisovmaksim.cloudfilestorage.storage.AbstractMinioIntegrationTest;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
@@ -56,7 +58,8 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
         @Test
         @DisplayName("successfully")
         void shouldCreateFolder() {
-            objectOperationsService.createFolder("folder");
+            DirPath path = DirPath.of("folder");
+            objectOperationsService.createFolder(path);
 
             List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
             assertThat(actual)
@@ -69,9 +72,10 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
         @Test
         @DisplayName("throw exception if it exist")
         void shouldNotCreateFolderIfFolderExist() {
+            DirPath path = DirPath.of("folder");
             storageFixture.folder("folder/");
 
-            assertThatThrownBy(() -> objectOperationsService.createFolder("folder"))
+            assertThatThrownBy(() -> objectOperationsService.createFolder(path))
                     .isInstanceOf(ObjectAlreadyExistException.class);
         }
     }
@@ -84,7 +88,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
         void shouldRenameFile() {
             storageFixture.file("", "file", "Content");
 
-            objectOperationsService.renameFile("file", "new-file");
+            objectOperationsService.renameFile(FilePath.of("file"), "new-file");
 
             List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
             assertThat(actual)
@@ -102,7 +106,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
         void shouldRenameFileWithSamePrefixLonger() {
             storageFixture.file("", "file", "Content");
 
-            objectOperationsService.renameFile("file", "file.txt");
+            objectOperationsService.renameFile(FilePath.of("file"), "file.txt");
 
             List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
             assertThat(actual)
@@ -120,7 +124,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
         void shouldRenameFileWithSamePrefixShorter() {
             storageFixture.file("", "file.txt", "Content");
 
-            objectOperationsService.renameFile("file.txt", "file");
+            objectOperationsService.renameFile(FilePath.of("file.txt"), "file");
 
             List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
             assertThat(actual)
@@ -139,7 +143,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
             storageFixture.file("", "file.txt", "Content");
             storageFixture.file("", "file1.txt", "Content");
 
-            assertThatThrownBy(() -> objectOperationsService.renameFile("file.txt", "file1.txt"))
+            assertThatThrownBy(() -> objectOperationsService.renameFile(FilePath.of("file.txt"), "file1.txt"))
                     .isInstanceOf(ObjectAlreadyExistException.class);
         }
     }
@@ -153,7 +157,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
             storageFixture.folder("folder/");
             storageFixture.file("folder/", "file.txt", "Content");
 
-            objectOperationsService.renameFolder("folder", "renamed-folder");
+            objectOperationsService.renameFolder(DirPath.of("folder"), "renamed-folder");
 
             List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
             assertThat(actual)
@@ -180,7 +184,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
             storageFixture.folder("folder/");
             storageFixture.file("folder/", "file.txt", "Content");
 
-            objectOperationsService.renameFolder("folder", "folder2");
+            objectOperationsService.renameFolder(DirPath.of("folder"), "folder2");
 
             List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
             assertThat(actual)
@@ -207,7 +211,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
             storageFixture.folder("folder-old/");
             storageFixture.file("folder-old/", "file.txt", "Content");
 
-            objectOperationsService.renameFolder("folder-old", "folder");
+            objectOperationsService.renameFolder(DirPath.of("folder-old"), "folder");
 
             List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
             assertThat(actual)
@@ -235,7 +239,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
             storageFixture.folder("folder/");
             storageFixture.folder("new-folder/");
 
-            assertThatThrownBy(() -> objectOperationsService.renameFolder("folder", "new-folder"))
+            assertThatThrownBy(() -> objectOperationsService.renameFolder(DirPath.of("folder"), "new-folder"))
                     .isInstanceOf(ObjectAlreadyExistException.class);
         }
 
@@ -246,14 +250,15 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
             storageFixture.folder("folder/");
             storageFixture.file("", "file.txt", "Content");
 
-            assertThatThrownBy(() -> objectOperationsService.renameFolder("folder", "file.txt"))
+            assertThatThrownBy(
+                    () -> objectOperationsService.renameFolder(DirPath.of("folder"), "file.txt"))
                     .isInstanceOf(ObjectAlreadyExistException.class);
         }
 
         @Test
         @DisplayName("throw exception if try rename root")
         void shouldThrowIfRenameRoot() {
-            assertThatThrownBy(() -> objectOperationsService.renameFolder("", "root"))
+            assertThatThrownBy(() -> objectOperationsService.renameFolder(DirPath.of(""), "root"))
                     .isInstanceOf(RootFolderException.class);
         }
     }
@@ -266,7 +271,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
         void shouldDeleteFile() {
             storageFixture.file("", "file.txt", "Content");
 
-            objectOperationsService.deleteFile("file.txt");
+            objectOperationsService.deleteFile(FilePath.of("file.txt"));
 
             List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
             assertThat(actual).isEmpty();
@@ -275,7 +280,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
         @Test
         @DisplayName("throw exception if not exist")
         void shouldThrowIfNotExist() {
-            assertThatThrownBy(() -> objectOperationsService.deleteFile("file.txt"))
+            assertThatThrownBy(() -> objectOperationsService.deleteFile(FilePath.of("file.txt")))
                     .isInstanceOf(NotFoundException.class);
         }
     }
@@ -290,7 +295,7 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
             storageFixture.folder("folder/");
             storageFixture.file("folder/", "file.txt", "Content");
 
-            objectOperationsService.deleteFolder("folder");
+            objectOperationsService.deleteFolder(DirPath.of("folder"));
 
             List<StorageObjectDTOResponse> actual = explorerService.getFolder("/");
             assertThat(actual).isEmpty();
@@ -302,14 +307,14 @@ public class ObjectOperationsServiceIT extends AbstractMinioIntegrationTest {
         @Test
         @DisplayName("throw exception if not exist")
         void shouldThrowIfNotExist() {
-            assertThatThrownBy(() -> objectOperationsService.deleteFolder("folder"))
+            assertThatThrownBy(() -> objectOperationsService.deleteFolder(DirPath.of("folder")))
                     .isInstanceOf(NotFoundException.class);
         }
 
         @Test
         @DisplayName("throw exception if try delete root")
         void shouldThrowIfRoot() {
-            assertThatThrownBy(() -> objectOperationsService.deleteFolder(""))
+            assertThatThrownBy(() -> objectOperationsService.deleteFolder(DirPath.of("")))
                     .isInstanceOf(RootFolderException.class);
         }
     }

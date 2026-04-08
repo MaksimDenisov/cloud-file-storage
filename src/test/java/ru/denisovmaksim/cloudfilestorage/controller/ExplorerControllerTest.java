@@ -8,6 +8,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ui.Model;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ru.denisovmaksim.cloudfilestorage.model.DirPath;
+import ru.denisovmaksim.cloudfilestorage.model.FilePath;
 import ru.denisovmaksim.cloudfilestorage.model.FileType;
 import ru.denisovmaksim.cloudfilestorage.dto.response.StorageObjectDTOResponse;
 import ru.denisovmaksim.cloudfilestorage.mapper.PathLinksDTOMapper;
@@ -42,7 +44,7 @@ class ExplorerControllerTest {
         String result = explorerController.addFolder(folderName, path, redirectAttributes);
 
         assertEquals("redirect:/", result);
-        Mockito.verify(objectOperationsService).createFolder("/test/new-folder/");
+        Mockito.verify(objectOperationsService).createFolder(DirPath.of("/test/new-folder/"));
         Mockito.verify(redirectAttributes).addAttribute("path", path);
     }
 
@@ -78,7 +80,7 @@ class ExplorerControllerTest {
         String result = explorerController.renameFolder(currentPath, newName, redirectAttributes);
 
         assertEquals("redirect:/", result);
-        Mockito.verify(objectOperationsService).renameFolder(currentPath, newName);
+        Mockito.verify(objectOperationsService).renameFolder(DirPath.of(currentPath), newName);
         Mockito.verify(redirectAttributes).addAttribute("path", parentPath);
     }
 
@@ -93,7 +95,7 @@ class ExplorerControllerTest {
         String result = explorerController.deleteFolder(folderPath, redirectAttributes);
 
         assertEquals("redirect:/", result);
-        Mockito.verify(objectOperationsService).deleteFolder(folderPath);
+        Mockito.verify(objectOperationsService).deleteFolder(DirPath.of(folderPath));
         Mockito.verify(redirectAttributes).addAttribute("path", redirectPath);
     }
 
@@ -108,7 +110,7 @@ class ExplorerControllerTest {
         String result = explorerController.renameFile(filepath, newName, redirectAttributes);
 
         assertEquals("redirect:/", result);
-        Mockito.verify(objectOperationsService).renameFile(filepath, newName);
+        Mockito.verify(objectOperationsService).renameFile(FilePath.of(filepath), newName);
         Mockito.verify(redirectAttributes).addAttribute("path", "/parent/");
     }
 
@@ -122,6 +124,6 @@ class ExplorerControllerTest {
         String result = explorerController.deleteFile(filePath, redirectAttributes);
 
         assertEquals("redirect:/", result);
-        Mockito.verify(objectOperationsService).deleteFile(filePath);
+        Mockito.verify(objectOperationsService).deleteFile(FilePath.of(filePath));
     }
 }

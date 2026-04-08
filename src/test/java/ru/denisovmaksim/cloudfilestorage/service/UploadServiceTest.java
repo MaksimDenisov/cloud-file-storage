@@ -8,8 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
-import ru.denisovmaksim.cloudfilestorage.dto.request.UploadFileDTORequest;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
+import ru.denisovmaksim.cloudfilestorage.model.DirPath;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 
@@ -49,8 +49,8 @@ class UploadServiceTest {
     void uploadFileShouldSaveWhenNotExists() {
         MultipartFile file = mock(MultipartFile.class);
         when(storageMetadataAccessor.exist(USER_ID, "dir/file.txt")).thenReturn(false);
-        UploadFileDTORequest dto = new UploadFileDTORequest("file.txt", file);
-        uploadService.uploadFile("dir/", dto);
+
+        uploadService.uploadFile(DirPath.of("dir/"), "file.txt", file);
 
         verify(storageDataAccessor).saveObject(USER_ID, "dir/", file);
     }
@@ -59,12 +59,11 @@ class UploadServiceTest {
     @DisplayName("Upload file should save it to storage.")
     void uploadFileShouldThrowWhenExists() {
         MultipartFile file = mock(MultipartFile.class);
-        UploadFileDTORequest dto = new UploadFileDTORequest("file.txt", file);
 
         when(storageMetadataAccessor.exist(eq(USER_ID), any())).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class,
-                () -> uploadService.uploadFile("dir/", dto));
+                () -> uploadService.uploadFile(DirPath.of("dir/"), "file.txt", file));
     }
 
     @Test
@@ -76,8 +75,8 @@ class UploadServiceTest {
 
         when(storageMetadataAccessor.exist(USER_ID, "folder")).thenReturn(false);
 
-        uploadService.uploadFolder("", files);
+        uploadService.uploadFolder(DirPath.of(""), files);
 
-        verify(storageDataAccessor).saveObject(USER_ID, "", file);
+        verify(storageDataAccessor).saveObject(USER_ID, "/", file);
     }
 }

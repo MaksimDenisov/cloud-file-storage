@@ -6,11 +6,10 @@ import org.springframework.validation.annotation.Validated;
 import ru.denisovmaksim.cloudfilestorage.exception.NotFoundException;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
 import ru.denisovmaksim.cloudfilestorage.exception.RootFolderException;
+import ru.denisovmaksim.cloudfilestorage.model.DirPath;
+import ru.denisovmaksim.cloudfilestorage.model.FilePath;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
-import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
-import ru.denisovmaksim.cloudfilestorage.validation.PathType;
-import ru.denisovmaksim.cloudfilestorage.validation.ValidPath;
 
 
 @Service
@@ -24,57 +23,51 @@ public class ObjectOperationsService {
 
     private final SecurityService securityService;
 
-    public void createFolder(@ValidPath(PathType.DIR) String path) {
+    public void createFolder(DirPath path) {
         Long authUserId = securityService.getAuthUserId();
-        String newDirPath = PathUtil.ensureDirectoryPath(path);
+        String newDirPath = path.value();
         throwIfObjectExist(newDirPath);
         storageMetadataAccessor.createPath(authUserId, newDirPath);
     }
 
-    public void renameFile(@ValidPath(PathType.FILEPATH) String filepath,
-                           @ValidPath(PathType.NAME) String newFileName) {
+    public void renameFile(FilePath filePath, String newFileName) {
         Long authUserId = securityService.getAuthUserId();
-        String parentDirectory = PathUtil.getParentPath(filepath);
-        String dstPath = parentDirectory + newFileName;
-        throwIfObjectExist(dstPath);
-        storageDataAccessor.copyOneObject(authUserId, filepath, dstPath);
-        storageDataAccessor.deleteOneObject(authUserId, filepath);
+        FilePath newFilePath = filePath.renameTo(newFileName);
+        throwIfObjectExist(newFilePath.value());
+        storageDataAccessor.copyOneObject(authUserId, filePath.value(), newFilePath.value());
+        storageDataAccessor.deleteOneObject(authUserId, filePath.value());
     }
 
-    public void renameFolder(@ValidPath(PathType.DIR) String directory,
-                             @ValidPath(PathType.NAME) String newFolderName) {
-        throwIfRootModification(directory);
-        String newPath = PathUtil.getParentPath(directory) + newFolderName;
-        throwIfObjectExist(newPath); // file
-        newPath = PathUtil.ensureDirectoryPath(newPath);
-        throwIfObjectExist(newPath);
+    public void renameFolder(DirPath dirPath, String newFolderName) {
+        throwIfRootModification(dirPath);
+        FilePath newFilePath = dirPath.parent().resolveAsFile(newFolderName);
+        DirPath newDirPath = dirPath.renameTo(newFolderName);
+        throwIfObjectExist(newFilePath.value()); // folder with same name can't exist
+        throwIfObjectExist(newDirPath.value());
 
         Long authUserId = securityService.getAuthUserId();
-        if (storageDataAccessor.copyObjects(authUserId, directory, newPath) == 0) {
-            storageMetadataAccessor.createPath(authUserId, newPath);
+        if (storageDataAccessor.copyObjects(authUserId, dirPath.value(), newDirPath.value()) == 0) {
+            storageMetadataAccessor.createPath(authUserId, newDirPath.value());
         }
-        storageDataAccessor.deleteObjects(authUserId, PathUtil.ensureDirectoryPath(directory));
+        storageDataAccessor.deleteObjects(authUserId, dirPath.value());
     }
 
-    public void deleteFolder(@ValidPath(PathType.DIR) String directory) {
-        directory = PathUtil.ensureDirectoryPath(directory);
-        throwIfRootModification(directory);
-        throwIfObjectNotExist(directory);
+    public void deleteFolder(DirPath dirPath) {
+        throwIfRootModification(dirPath);
+        throwIfObjectNotExist(dirPath.value());
         Long authUserId = securityService.getAuthUserId();
-        String parentPath = PathUtil.getParentPath(directory);
-        storageDataAccessor.deleteObjects(authUserId, directory);
-        if (!storageMetadataAccessor.exist(authUserId, parentPath)) {
-            storageMetadataAccessor.createPath(authUserId, parentPath);
+        storageDataAccessor.deleteObjects(authUserId, dirPath.value());
+        if (!storageMetadataAccessor.exist(authUserId, dirPath.parent().value())) {
+            storageMetadataAccessor.createPath(authUserId, dirPath.parent().value());
         }
     }
 
-    public void deleteFile(@ValidPath(PathType.FILEPATH) String filePath) {
+    public void deleteFile(FilePath filePath) {
         Long authUserId = securityService.getAuthUserId();
-        throwIfObjectNotExist(filePath);
-        String parentDirectory = PathUtil.getParentPath(filePath);
-        storageDataAccessor.deleteOneObject(authUserId, filePath);
-        if (!storageMetadataAccessor.exist(authUserId, parentDirectory)) {
-            storageMetadataAccessor.createPath(authUserId, parentDirectory);
+        throwIfObjectNotExist(filePath.value());
+        storageDataAccessor.deleteOneObject(authUserId, filePath.value());
+        if (!storageMetadataAccessor.exist(authUserId, filePath.parent().value())) {
+            storageMetadataAccessor.createPath(authUserId, filePath.parent().value());
         }
     }
 
@@ -92,8 +85,8 @@ public class ObjectOperationsService {
         }
     }
 
-    private void throwIfRootModification(String path) {
-        if (PathUtil.isRoot(path)) {
+    private void throwIfRootModification(DirPath dirPath) {
+        if (dirPath.isRoot()) {
             throw new RootFolderException("The root folder cannot be modified");
         }
     }

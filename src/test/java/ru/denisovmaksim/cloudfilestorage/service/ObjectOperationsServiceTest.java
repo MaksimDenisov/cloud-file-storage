@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.denisovmaksim.cloudfilestorage.exception.ObjectAlreadyExistException;
+import ru.denisovmaksim.cloudfilestorage.model.DirPath;
+import ru.denisovmaksim.cloudfilestorage.model.FilePath;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageDataAccessor;
 import ru.denisovmaksim.cloudfilestorage.storage.StorageMetadataAccessor;
 
@@ -43,7 +45,7 @@ public class ObjectOperationsServiceTest {
     void createDirectory() {
         when(storageMetadataAccessor.exist(USER_ID, "dir/")).thenReturn(false);
 
-        objectOperationsService.createFolder("dir/");
+        objectOperationsService.createFolder(DirPath.of("dir/"));
 
         verify(storageMetadataAccessor).createPath(USER_ID, "dir/");
     }
@@ -54,7 +56,7 @@ public class ObjectOperationsServiceTest {
         when(storageMetadataAccessor.exist(USER_ID, "dir/")).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class, () ->
-                objectOperationsService.createFolder("dir/")
+                objectOperationsService.createFolder(DirPath.of("dir/"))
         );
     }
 
@@ -64,7 +66,7 @@ public class ObjectOperationsServiceTest {
     void renameFileShouldCopyAndDeleteWhenNewNotExists() {
         when(storageMetadataAccessor.exist(USER_ID, "dir/new.txt")).thenReturn(false);
 
-        objectOperationsService.renameFile("dir/old.txt", "new.txt");
+        objectOperationsService.renameFile(FilePath.of("dir/old.txt"), "new.txt");
 
         verify(storageDataAccessor).copyOneObject(USER_ID, "dir/old.txt", "dir/new.txt");
         verify(storageDataAccessor).deleteOneObject(USER_ID, "dir/old.txt");
@@ -76,7 +78,7 @@ public class ObjectOperationsServiceTest {
         when(storageMetadataAccessor.exist(USER_ID, "dir/")).thenReturn(false);
         when(storageMetadataAccessor.exist(USER_ID, "dir/file.txt")).thenReturn(true);
 
-        objectOperationsService.deleteFile("dir/file.txt");
+        objectOperationsService.deleteFile(FilePath.of("dir/file.txt"));
 
         verify(storageDataAccessor).deleteOneObject(USER_ID, "dir/file.txt");
         verify(storageMetadataAccessor).createPath(USER_ID, "dir/");
@@ -95,7 +97,7 @@ public class ObjectOperationsServiceTest {
         when(storageMetadataAccessor.exist(USER_ID, newDirPath)).thenReturn(false);
         when(storageDataAccessor.copyObjects(any(), any(), any())).thenReturn(5);
 
-        objectOperationsService.renameFolder(currentPath, newFolderName);
+        objectOperationsService.renameFolder(DirPath.of(currentPath), newFolderName);
 
         verify(storageDataAccessor).copyObjects(USER_ID, currentPath, newDirPath);
         verify(storageDataAccessor).deleteObjects(USER_ID, currentPath);
@@ -111,7 +113,7 @@ public class ObjectOperationsServiceTest {
         when(storageMetadataAccessor.exist(USER_ID, newFolderName)).thenReturn(false);
         when(storageMetadataAccessor.exist(USER_ID, newPath)).thenReturn(false);
 
-        objectOperationsService.renameFolder(currentPath, newFolderName);
+        objectOperationsService.renameFolder(DirPath.of(currentPath), newFolderName);
 
         verify(storageMetadataAccessor).createPath(USER_ID, newPath);
         verify(storageDataAccessor).deleteObjects(USER_ID, currentPath);
@@ -132,7 +134,7 @@ public class ObjectOperationsServiceTest {
                 .thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class, () ->
-                objectOperationsService.renameFolder(currentPath, newFolderName)
+                objectOperationsService.renameFolder(DirPath.of(currentPath), newFolderName)
         );
 
         verify(storageDataAccessor, never()).copyObjects(any(), any(), any());
@@ -149,7 +151,7 @@ public class ObjectOperationsServiceTest {
         when(storageMetadataAccessor.exist(USER_ID, newFilePath)).thenReturn(true);
 
         assertThrows(ObjectAlreadyExistException.class, () ->
-                objectOperationsService.renameFolder(currentPath, newFolderName)
+                objectOperationsService.renameFolder(DirPath.of(currentPath), newFolderName)
         );
 
         verify(storageDataAccessor, never()).copyObjects(any(), any(), any());
@@ -166,7 +168,7 @@ public class ObjectOperationsServiceTest {
         when(storageMetadataAccessor.exist(USER_ID, path)).thenReturn(true);
         when(storageMetadataAccessor.exist(USER_ID, parentPath)).thenReturn(false);
 
-        objectOperationsService.deleteFolder(path);
+        objectOperationsService.deleteFolder(DirPath.of(path));
 
         verify(storageDataAccessor).deleteObjects(USER_ID, path);
         verify(storageMetadataAccessor).createPath(USER_ID, parentPath);
@@ -181,7 +183,7 @@ public class ObjectOperationsServiceTest {
         when(storageMetadataAccessor.exist(USER_ID, path)).thenReturn(true);
         when(storageMetadataAccessor.exist(USER_ID, parentPath)).thenReturn(true);
 
-        objectOperationsService.deleteFolder(path);
+        objectOperationsService.deleteFolder(DirPath.of(path));
 
         verify(storageDataAccessor).deleteObjects(USER_ID, path);
         verify(storageMetadataAccessor, never()).createPath(any(), any());

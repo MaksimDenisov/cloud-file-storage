@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.denisovmaksim.cloudfilestorage.mapper.PathLinksDTOMapper;
+import ru.denisovmaksim.cloudfilestorage.model.DirPath;
+import ru.denisovmaksim.cloudfilestorage.model.FilePath;
 import ru.denisovmaksim.cloudfilestorage.service.ExplorerService;
 import ru.denisovmaksim.cloudfilestorage.service.ObjectOperationsService;
 import ru.denisovmaksim.cloudfilestorage.util.PathUtil;
@@ -31,7 +33,9 @@ public class ExplorerController {
         if (!path.isEmpty()) {
             redirectAttributes.addAttribute("path", path);
         }
-        objectOperationsService.createFolder(PathUtil.ensureDirectoryPath(path + folderName));
+        DirPath dirPath = DirPath.of(path)
+                .resolveAsDir(folderName);
+        objectOperationsService.createFolder(dirPath);
         return REDIRECT_TO_ROOT;
     }
 
@@ -46,7 +50,9 @@ public class ExplorerController {
     @GetMapping("/open-in-folder")
     public String getObjectsInParentFolder(Model model,
                                            @RequestParam(required = false, defaultValue = "") String path) {
-        path = PathUtil.getParentPath(path);
+        path = DirPath.of(path)
+                .parent()
+                .value();
         model.addAttribute("breadcrumbs", PathLinksDTOMapper.toChainLinksFromPath(path));
         model.addAttribute("storageObjects", explorerService.getFolder(path));
         model.addAttribute("currentPath", path);
@@ -62,7 +68,7 @@ public class ExplorerController {
         if (!parentPath.isEmpty()) {
             redirectAttributes.addAttribute("path", parentPath);
         }
-        objectOperationsService.renameFolder(folderPath, newFolderName);
+        objectOperationsService.renameFolder(DirPath.of(folderPath), newFolderName);
         return REDIRECT_TO_ROOT;
     }
 
@@ -74,7 +80,7 @@ public class ExplorerController {
         if (!parentPath.isEmpty()) {
             redirectAttributes.addAttribute("path", parentPath);
         }
-        objectOperationsService.deleteFolder(folderPath);
+        objectOperationsService.deleteFolder(DirPath.of(folderPath));
         return REDIRECT_TO_ROOT;
     }
 
@@ -85,16 +91,16 @@ public class ExplorerController {
         String parentPath = PathUtil.getParentPath(path);
         log.info("Rename file from {} to {}", path, parentPath + newFileName);
         redirectAttributes.addAttribute("path", parentPath);
-        objectOperationsService.renameFile(path, newFileName);
+        objectOperationsService.renameFile(FilePath.of(path), newFileName);
         return REDIRECT_TO_ROOT;
     }
 
     @PostMapping("/delete-file")
-    public String deleteFile(@ModelAttribute("filepath") String filepath, RedirectAttributes redirectAttributes) {
-        log.info("Delete file with path {}", filepath);
-        String redirectPath = PathUtil.getParentPath(filepath);
-        redirectAttributes.addAttribute("path", redirectPath);
-        objectOperationsService.deleteFile(filepath);
+    public String deleteFile(@ModelAttribute("filepath") String path, RedirectAttributes redirectAttributes) {
+        log.info("Delete file with path {}", path);
+        FilePath filePath = FilePath.of(path);
+        redirectAttributes.addAttribute("path", filePath.parent().value());
+        objectOperationsService.deleteFile(filePath);
         return REDIRECT_TO_ROOT;
     }
 }

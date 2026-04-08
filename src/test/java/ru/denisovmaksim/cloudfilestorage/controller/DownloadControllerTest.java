@@ -11,6 +11,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
+import ru.denisovmaksim.cloudfilestorage.model.DirPath;
+import ru.denisovmaksim.cloudfilestorage.model.FilePath;
 import ru.denisovmaksim.cloudfilestorage.service.DownloadService;
 
 import java.io.ByteArrayInputStream;
@@ -35,7 +37,8 @@ class DownloadControllerTest {
         InputStream stream = new ByteArrayInputStream("data".getBytes());
         NamedStreamDTOResponse dto = new NamedStreamDTOResponse(fileName, 0, stream);
 
-        Mockito.when(downloadService.getZipFolderAsStream(path)).thenReturn(dto);
+        Mockito.when(downloadService.getZipFolderAsStream(DirPath.of(path)))
+                .thenReturn(dto);
 
         ResponseEntity<InputStreamResource> response = downloadController.downloadZipFolder(path);
 
@@ -51,7 +54,8 @@ class DownloadControllerTest {
         InputStream stream = new ByteArrayInputStream("file-content".getBytes());
         NamedStreamDTOResponse dto = new NamedStreamDTOResponse(fileName, 0, stream);
 
-        Mockito.when(downloadService.getFileAsStream(path)).thenReturn(dto);
+        Mockito.when(downloadService.getFileAsStream(FilePath.of(path)))
+                .thenReturn(dto);
 
         ResponseEntity<InputStreamResource> response = downloadController.downloadFile(path);
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.denisovmaksim.cloudfilestorage.dto.response.NamedStreamDTOResponse;
+import ru.denisovmaksim.cloudfilestorage.model.FilePath;
 import ru.denisovmaksim.cloudfilestorage.model.FileType;
 import ru.denisovmaksim.cloudfilestorage.service.PreviewService;
 import ru.denisovmaksim.cloudfilestorage.util.FileTypeResolver;
@@ -40,7 +41,7 @@ public class PreviewController {
 
     @GetMapping("/image")
     public ResponseEntity<Resource> getPreviewImage(@RequestParam() String filepath) {
-        NamedStreamDTOResponse dto = previewService.getImage(filepath);
+        NamedStreamDTOResponse dto = previewService.getImage(FilePath.of(filepath));
         InputStream stream = dto.getStream();
 
         String contentType =  FilesUtil.detectMimeType(filepath);

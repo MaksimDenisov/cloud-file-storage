@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import ru.denisovmaksim.cloudfilestorage.dto.request.UploadFileDTORequest;
+import ru.denisovmaksim.cloudfilestorage.model.DirPath;
 import ru.denisovmaksim.cloudfilestorage.service.UploadService;
 
 import java.util.List;
@@ -23,11 +23,11 @@ public class UploadController {
     private UploadService uploadService;
 
     @PostMapping("/upload-file")
-    public String uploadFile(@ModelAttribute("path") String path,
+    public String uploadFile(@ModelAttribute("path") String parentPath,
                              @RequestParam("file") MultipartFile multipartFile,
                              RedirectAttributes attributes) {
-        if (!path.isEmpty()) {
-            attributes.addAttribute("path", path);
+        if (!parentPath.isEmpty()) {
+            attributes.addAttribute("path", parentPath);
         }
         if (multipartFile.isEmpty()) {
             attributes.addFlashAttribute("flashType", "danger");
@@ -36,8 +36,7 @@ public class UploadController {
         }
         log.info("Upload file with name {}", multipartFile.getOriginalFilename());
         String filename = (multipartFile.getOriginalFilename() == null) ? "file" : multipartFile.getOriginalFilename();
-        UploadFileDTORequest fileDTO = new UploadFileDTORequest(filename, multipartFile);
-        uploadService.uploadFile(path, fileDTO);
+        uploadService.uploadFile(DirPath.of(parentPath), filename, multipartFile);
         return REDIRECT_TO_ROOT;
     }
 
@@ -52,7 +51,7 @@ public class UploadController {
         for (MultipartFile file : files) {
             log.info("Upload file: " + file.getOriginalFilename());
         }
-        uploadService.uploadFolder(path, files);
+        uploadService.uploadFolder(DirPath.of(path), files);
         return REDIRECT_TO_ROOT;
     }
 }
